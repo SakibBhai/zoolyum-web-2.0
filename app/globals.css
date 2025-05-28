@@ -1,0 +1,296 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 16 100% 50%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 16 100% 50%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 0 0% 8.6%;
+    --foreground: 0 0% 91.4%;
+    --card: 0 0% 8.6%;
+    --card-foreground: 0 0% 91.4%;
+    --popover: 0 0% 8.6%;
+    --popover-foreground: 0 0% 91.4%;
+    --primary: 16 100% 50%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 91.4%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 91.4%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 91.4%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 16 100% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    cursor: none;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Hide default cursor when custom cursor is active */
+  @media (pointer: fine) {
+    * {
+      cursor: none !important;
+    }
+  }
+
+  /* But show default cursor on mobile/touch devices */
+  @media (pointer: coarse) {
+    * {
+      cursor: auto !important;
+    }
+
+    .custom-cursor {
+      display: none !important;
+    }
+  }
+
+  /* Animation for elements entering viewport */
+  .animate-on-scroll {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+
+  .animate-on-scroll.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Hover effects for interactive elements */
+  a,
+  button,
+  [role="button"],
+  [data-interactive="true"] {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  /* Text selection styling */
+  ::selection {
+    background-color: rgba(255, 80, 1, 0.3);
+    color: #e9e7e2;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #161616;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #ff5001;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #ff6a30;
+  }
+
+  /* 3D card optimizations */
+  .card-3d {
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    will-change: transform;
+  }
+
+  .card-3d * {
+    transform-style: preserve-3d;
+  }
+
+  /* Force hardware acceleration for smoother animations */
+  .transform-gpu {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000;
+    will-change: transform;
+  }
+}
+
+/* Magnetic element styles */
+.magnetic-element {
+  transform-style: preserve-3d;
+  transform: perspective(1000px);
+}
+
+.magnetic-content {
+  transform-style: preserve-3d;
+}
+
+/* Text reveal animation */
+.reveal-text {
+  display: inline-block;
+  overflow: hidden;
+}
+
+.reveal-text span {
+  display: inline-block;
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.reveal-text.is-visible span {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* Gradient text effect */
+.gradient-text {
+  background: linear-gradient(90deg, #ff5001, #ff8f66);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  display: inline-block;
+}
+
+/* Enhanced gradient headline */
+.gradient-headline {
+  background: linear-gradient(90deg, #ff5001, #ff8f66, #ff5001);
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: gradientFlow 8s ease infinite;
+}
+
+@keyframes gradientFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Shimmer effect */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, rgba(255, 80, 1, 0), rgba(255, 80, 1, 0.2), rgba(255, 80, 1, 0));
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  /* Reduce animation intensity on mobile */
+  .transform-gpu {
+    will-change: auto; /* Reduce GPU memory usage on mobile */
+  }
+
+  /* Optimize animations for touch devices */
+  @media (pointer: coarse) {
+    /* Disable hover effects that might cause performance issues */
+    .group:hover .group-hover\:scale-110 {
+      transform: none;
+    }
+
+    /* Reduce animation durations for better performance */
+    .transition-all {
+      transition-duration: 0.2s;
+    }
+
+    /* Disable certain animations on low-end devices */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  }
+
+  /* Adjust text sizes for better readability on small screens */
+  h1,
+  h2,
+  h3 {
+    word-break: break-word;
+    hyphens: auto;
+  }
+}
+
+/* Enhanced headline styles */
+.headline-highlight {
+  position: relative;
+  display: inline-block;
+  z-index: 1;
+}
+
+.headline-highlight::after {
+  content: "";
+  position: absolute;
+  bottom: 0.1em;
+  left: -0.1em;
+  right: -0.1em;
+  height: 0.3em;
+  background-color: rgba(255, 80, 1, 0.3);
+  z-index: -1;
+  transform: skew(-3deg);
+}
+
+.headline-underline {
+  position: relative;
+  display: inline-block;
+}
+
+.headline-underline::after {
+  content: "";
+  position: absolute;
+  bottom: -0.2em;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: #ff5001;
+}
+
+.headline-accent {
+  color: #ff5001;
+}
