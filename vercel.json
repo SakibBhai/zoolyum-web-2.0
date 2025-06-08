@@ -1,5 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "installCommand": "pnpm install",
-  "buildCommand": "corepack enable && pnpm run build"
+  "buildCommand": "corepack enable && pnpm run build",
+  "env": {
+    "ENABLE_EXPERIMENTAL_COREPACK": "1",
+    "DATABASE_URL": "postgresql://neondb_owner:npg_rDwthKzdj8b1@ep-old-breeze-a8aftq0x-pooler.eastus2.azure.neon.tech/neondb?sslmode=require"
+  }
 }
