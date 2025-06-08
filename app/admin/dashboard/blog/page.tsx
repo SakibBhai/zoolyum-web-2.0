@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { fetchBlogPosts, deleteBlogPost } from "@/lib/blog-operations"
+import { getBlogPosts, deleteBlogPost } from "@/lib/blog-operations"
 import { PageTransition } from "@/components/page-transition"
 import { Plus, Edit, Trash2, Eye, Search } from "lucide-react"
 
 export default function BlogManagementPage() {
-  const [posts, setPosts] = useState([])
+  const [posts, setPosts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null)
@@ -18,7 +18,7 @@ export default function BlogManagementPage() {
     const loadPosts = async () => {
       try {
         setIsLoading(true)
-        const data = await fetchBlogPosts()
+        const data = await getBlogPosts()
         setPosts(data)
       } catch (error) {
         console.error("Error loading posts:", error)
@@ -52,7 +52,7 @@ export default function BlogManagementPage() {
     }
 
     try {
-      await deleteBlogPost(id)
+      await deleteBlogPost(id.toString())
       setPosts(posts.filter((post: any) => post.id !== id))
       setDeleteConfirm(null)
     } catch (error) {

@@ -1,17 +1,14 @@
 "use client"
 
-import { type ReactNode, useState } from "react"
+import { type ReactNode, useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { useAuth } from "@/contexts/auth-context"
-import { LayoutDashboard, FileText, Briefcase, MessageSquare, Settings, LogOut, Menu, X, User } from "lucide-react"
-import { signOut } from "next-auth/react"
-import { useSession } from "next-auth/react"
+import { LayoutDashboard, FileText, Briefcase, MessageSquare, Settings, LogOut, Menu, X, User, Loader2 } from "lucide-react"
+import { signOut, useSession } from "next-auth/react"
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
-  const { signOut, adminUser, isLoading } = useAuth()
   const router = useRouter()
   const { data: session, status } = useSession()
 
@@ -37,6 +34,44 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     await signOut({ callbackUrl: "/admin/login" })
   }
 
+  const navItems = [
+    {
+      name: "Dashboard",
+      href: "/admin/dashboard",
+      icon: LayoutDashboard
+    },
+    {
+      name: "Blog Posts",
+      href: "/admin/dashboard/blog",
+      icon: FileText
+    },
+    {
+      name: "Projects",
+      href: "/admin/dashboard/projects",
+      icon: Briefcase
+    },
+    {
+      name: "Services",
+      href: "/admin/dashboard/services",
+      icon: FileText
+    },
+    {
+      name: "Team",
+      href: "/admin/dashboard/team",
+      icon: User
+    },
+    {
+      name: "Testimonials",
+      href: "/admin/dashboard/testimonials",
+      icon: MessageSquare
+    },
+    {
+      name: "Settings",
+      href: "/admin/dashboard/settings",
+      icon: Settings
+    }
+  ]
+
   return (
     <div className="min-h-screen bg-[#161616] text-[#E9E7E2] flex">
       {/* Mobile sidebar toggle */}
@@ -59,15 +94,15 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         </div>
 
         {/* Admin user info */}
-        {adminUser && (
+        {session.user && (
           <div className="p-4 border-b border-[#333333]">
             <div className="flex items-center">
               <div className="w-10 h-10 rounded-full bg-[#252525] flex items-center justify-center text-[#FF5001]">
                 <User className="h-6 w-6" />
               </div>
               <div className="ml-3">
-                <p className="font-medium">{adminUser.name}</p>
-                <p className="text-xs text-[#E9E7E2]/50">{adminUser.role}</p>
+                <p className="font-medium">{session.user.name}</p>
+                <p className="text-xs text-[#E9E7E2]/50">{session.user.email}</p>
               </div>
             </div>
           </div>

@@ -5,7 +5,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { fetchBlogPost, updateBlogPost } from "@/lib/blog-operations"
+import { getBlogPostBySlug, updateBlogPost } from "@/lib/blog-operations"
 import { PageTransition } from "@/components/page-transition"
 import { Save, X, Loader2 } from "lucide-react"
 import { ImageUploader } from "@/components/admin/image-uploader"
@@ -22,7 +22,7 @@ export default function EditBlogPostPage({ params }: { params: { slug: string } 
     excerpt: "",
     content: "",
     image_url: "",
-    tags: "", // Ensure tags is a string
+    tags: "", // Ensure tags is a string for form input
     status: "draft",
   })
   const [isLoading, setIsLoading] = useState(true)
@@ -34,22 +34,27 @@ export default function EditBlogPostPage({ params }: { params: { slug: string } 
     const loadPost = async () => {
       try {
         setIsLoading(true)
-        const post = await fetchBlogPost(params.slug)
+        const post = await getBlogPostBySlug(params.slug)
 
         if (!post) {
           throw new Error("Blog post not found")
         }
 
         // Format tags if they're an array
-        let formattedTags = post.tags
+        let formattedTags = post.tags || ""
         if (Array.isArray(post.tags)) {
           formattedTags = post.tags.join(", ")
         }
 
         setFormData({
-          ...post,
           id: String(post.id), // Convert id to string
-          tags: formattedTags, // Ensure tags is a string
+          title: post.title,
+          slug: post.slug,
+          excerpt: post.excerpt || "",
+          content: post.content,
+          image_url: post.imageUrl || "",
+          tags: typeof formattedTags === 'string' ? formattedTags : '', // Ensure tags is always a string
+          status: post.published ? "published" : "draft"
         })
       } catch (err: any) {
         setError(err.message || "Failed to load blog post")
@@ -101,7 +106,7 @@ export default function EditBlogPostPage({ params }: { params: { slug: string } 
       const dataToUpdate = {
         ...formData,
         id: String(formData.id), // Ensure id is string
-        tags: formData.tags.split(',').map(tag => tag.trim()),
+        tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : [],
       };
 
       await updateBlogPost(dataToUpdate)

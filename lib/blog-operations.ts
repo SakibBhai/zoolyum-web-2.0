@@ -11,6 +11,7 @@ export interface BlogPost {
   updatedAt: Date;
   author?: string;
   tags?: string[];
+  imageUrl?: string;
 }
 
 export interface CreateBlogPostData {
@@ -28,7 +29,7 @@ export interface UpdateBlogPostData extends Partial<CreateBlogPostData> {
 }
 
 // Fetch all blog posts
-export async function fetchBlogPosts(): Promise<BlogPost[]> {
+export async function getBlogPosts(): Promise<BlogPost[]> {
   try {
     // TODO: Implement actual database fetch
     // For now, return empty array to prevent build errors
@@ -40,7 +41,7 @@ export async function fetchBlogPosts(): Promise<BlogPost[]> {
 }
 
 // Fetch a single blog post by slug
-export async function fetchBlogPost(slug: string): Promise<BlogPost | null> {
+export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
   try {
     // TODO: Implement actual database fetch
     // For now, return null to prevent build errors

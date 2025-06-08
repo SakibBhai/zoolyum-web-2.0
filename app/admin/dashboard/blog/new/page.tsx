@@ -2,20 +2,22 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { createBlogPost } from "@/lib/blog-operations"
+import { createBlogPost } from "../../../../../lib/blog-operations"
 import { PageTransition } from "@/components/page-transition"
-import { Save, X, InfoIcon } from "lucide-react"
+import { Save, X, InfoIcon, Loader2 } from "lucide-react"
 import { ImageUploader } from "@/components/admin/image-uploader"
 import { RichTextEditor } from "@/components/admin/rich-text-editor"
 import { useToast } from "@/hooks/use-toast"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 export default function NewBlogPostPage() {
-  const { user } = useAuth()
+  const { data: session, status } = useSession()
   const { toast } = useToast()
+  const router = useRouter()
+  
   const [formData, setFormData] = useState({
     title: "",
     slug: "",
@@ -27,7 +29,25 @@ export default function NewBlogPostPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
+
+  useEffect(() => {
+    if (status === "loading") return
+    if (!session) {
+      router.push("/admin/login")
+    }
+  }, [session, status, router])
+
+  if (status === "loading") {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin" />
+      </div>
+    )
+  }
+
+  if (!session) {
+    return null
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -78,16 +98,19 @@ export default function NewBlogPostPage() {
     setError(null)
 
     try {
-      if (!user) {
+      if (!session) {
         throw new Error("You must be logged in to create a post")
       }
 
       const postData = {
         ...formData,
-        author_id: user.id,
+        tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : [],
       }
 
-      await createBlogPost(postData)
+      await createBlogPost({
+        ...postData,
+        published: postData.status === 'published'
+      })
       toast({
         title: "Success",
         description: "Blog post created successfully",
@@ -252,34 +275,5 @@ export default function NewBlogPostPage() {
         </form>
       </div>
     </PageTransition>
-  )
-}
-
-const { data: session, status } = useSession()
-
-  useEffect(() => {
-    if (status === "loading") return
-    if (!session) {
-      router.push("/admin/login")
-    }
-  }, [session, status, router])
-
-  if (status === "loading") {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin" />
-      </div>
-    )
-  }
-
-  if (!session) {
-    return null
-  }
-
-  return (
-    <div className="container mx-auto py-10">
-      <h1 className="mb-8 text-3xl font-bold">Create New Blog Post</h1>
-      <BlogForm />
-    </div>
   )
 }
