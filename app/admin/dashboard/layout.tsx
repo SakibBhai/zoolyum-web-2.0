@@ -5,32 +5,36 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"
 import { LayoutDashboard, FileText, Briefcase, MessageSquare, Settings, LogOut, Menu, X, User } from "lucide-react"
+import { signOut } from "next-auth/react"
+import { useSession } from "next-auth/react"
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
   const { signOut, adminUser, isLoading } = useAuth()
   const router = useRouter()
+  const { data: session, status } = useSession()
 
-  const handleSignOut = async () => {
-    await signOut()
-    router.push("/admin/login")
-  }
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/admin/login")
+    }
+  }, [status, router])
 
-  const navItems = [
-    { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-    { name: "Blog Posts", href: "/admin/dashboard/blog", icon: FileText },
-    { name: "Projects", href: "/admin/dashboard/projects", icon: Briefcase },
-    { name: "Testimonials", href: "/admin/dashboard/testimonials", icon: MessageSquare },
-    { name: "Settings", href: "/admin/dashboard/settings", icon: Settings },
-  ]
-
-  if (isLoading) {
+  if (status === "loading") {
     return (
-      <div className="min-h-screen bg-[#161616] text-[#E9E7E2] flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-[#FF5001] border-t-transparent rounded-full animate-spin"></div>
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin" />
       </div>
     )
+  }
+
+  if (!session || !session.user) {
+    return null // Or a loading spinner, or redirect
+  }
+
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: "/admin/login" })
   }
 
   return (

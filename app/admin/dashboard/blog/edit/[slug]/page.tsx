@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/contexts/auth-context"
+import { useSession } from "next-auth/react"
 import { fetchBlogPost, updateBlogPost } from "@/lib/blog-operations"
 import { PageTransition } from "@/components/page-transition"
 import { Save, X, Loader2 } from "lucide-react"
@@ -257,5 +257,38 @@ export default function EditBlogPostPage({ params }: { params: { slug: string } 
         </form>
       </div>
     </PageTransition>
+  )
+}
+
+const { data: session, status } = useSession()
+
+  useEffect(() => {
+    if (status === "loading") return
+    if (!session) {
+      router.push("/admin/login")
+    }
+  }, [session, status, router])
+
+  if (status === "loading") {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin" />
+      </div>
+    )
+  }
+
+  if (!session) {
+    return null
+  }
+
+  return (
+    <div className="container mx-auto py-10">
+      <h1 className="mb-8 text-3xl font-bold">Edit Blog Post</h1>
+      {blogPost ? (
+        <BlogForm initialData={blogPost} />
+      ) : (
+        <p>Loading blog post...</p>
+      )}
+    </div>
   )
 }
