@@ -4,6 +4,6 @@
   "buildCommand": "prisma generate && corepack enable && pnpm run build",
   "env": {
     "ENABLE_EXPERIMENTAL_COREPACK": "1",
-    "DATABASE_URL": "@database_url"
+    "DATABASE_URL": "DATABASE_URL"
   }
 }
