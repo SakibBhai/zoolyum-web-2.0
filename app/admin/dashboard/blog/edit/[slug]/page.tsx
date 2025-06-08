@@ -16,13 +16,13 @@ export default function EditBlogPostPage({ params }: { params: { slug: string } 
   const { data: session } = useSession()
   const { toast } = useToast()
   const [formData, setFormData] = useState({
-    id: 0,
+    id: "", // Change id to string
     title: "",
     slug: "",
     excerpt: "",
     content: "",
     image_url: "",
-    tags: "",
+    tags: "", // Ensure tags is a string
     status: "draft",
   })
   const [isLoading, setIsLoading] = useState(true)
@@ -48,7 +48,8 @@ export default function EditBlogPostPage({ params }: { params: { slug: string } 
 
         setFormData({
           ...post,
-          tags: formattedTags,
+          id: String(post.id), // Convert id to string
+          tags: formattedTags, // Ensure tags is a string
         })
       } catch (err: any) {
         setError(err.message || "Failed to load blog post")
@@ -99,6 +100,7 @@ export default function EditBlogPostPage({ params }: { params: { slug: string } 
 
       const dataToUpdate = {
         ...formData,
+        id: String(formData.id), // Ensure id is string
         tags: formData.tags.split(',').map(tag => tag.trim()),
       };
 
