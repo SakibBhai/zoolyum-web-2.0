@@ -5,7 +5,7 @@ import { authOptions } from '@/lib/auth'
 
 export async function GET() {
   try {
-    const projects = await prisma.project.findMany({
+    const posts = await prisma.blogPost.findMany({
       orderBy: { updatedAt: 'desc' },
       include: {
         author: {
@@ -17,11 +17,11 @@ export async function GET() {
       },
     })
 
-    return NextResponse.json(projects)
+    return NextResponse.json(posts)
   } catch (error) {
-    console.error('Error fetching projects:', error)
+    console.error('Error fetching blog posts:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch projects' },
+      { error: 'Failed to fetch blog posts' },
       { status: 500 }
     )
   }
@@ -52,13 +52,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const project = await prisma.project.create({
+    const post = await prisma.blogPost.create({
       data: {
         title: data.title,
         slug: data.slug,
-        description: data.description,
+        excerpt: data.excerpt,
         content: data.content || '',
-        category: data.category,
         imageUrl: data.imageUrl || '',
         published: data.published || false,
         featured: data.featured || false,
@@ -66,11 +65,11 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    return NextResponse.json(project)
+    return NextResponse.json(post)
   } catch (error) {
-    console.error('Error creating project:', error)
+    console.error('Error creating blog post:', error)
     return NextResponse.json(
-      { error: 'Failed to create project' },
+      { error: 'Failed to create blog post' },
       { status: 500 }
     )
   }

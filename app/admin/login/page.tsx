@@ -1,109 +1,129 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { useAuth } from "@/contexts/auth-context"
-import { PageTransition } from "@/components/page-transition"
-import { AlertCircle } from "lucide-react"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { signIn, useSession } from "next-auth/react";
+import { PageTransition } from "@/components/page-transition";
+import { AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function AdminLoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const { signIn } = useAuth()
-  const router = useRouter()
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const { data: session, status } = useSession();
+
+  // Redirect to dashboard if already authenticated
+  useEffect(() => {
+    if (status === "authenticated" && session?.user?.role === "ADMIN") {
+      router.push("/admin/dashboard");
+    }
+  }, [status, session, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError(null)
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
 
     try {
-      const { error } = await signIn(email, password)
+      console.log("Attempting to sign in with:", { email });
+      
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
 
-      if (error) {
-        setError(error.message)
+      console.log("Sign in result:", result);
+
+      if (result?.error) {
+        setError(result.error);
       } else {
-        router.push("/admin/dashboard")
+        // Add a small delay to ensure the session is properly set
+        setTimeout(() => {
+          router.push("/admin/dashboard");
+          router.refresh();
+        }, 500);
       }
     } catch (err) {
-      setError("An unexpected error occurred")
-      console.error(err)
+      console.error("Login error:", err);
+      setError("An unexpected error occurred");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
+  };
+
+  // Show loading state while checking session
+  if (status === "loading") {
+    return (
+      <PageTransition>
+        <div className="min-h-screen bg-[#121212] text-[#E9E7E2] flex items-center justify-center p-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FF5001]"></div>
+        </div>
+      </PageTransition>
+    );
   }
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-[#161616] text-[#E9E7E2] flex items-center justify-center">
-        <div className="w-full max-w-md p-8 bg-[#1A1A1A] rounded-2xl border border-[#333333]">
+      <div className="min-h-screen bg-[#121212] text-[#E9E7E2] flex items-center justify-center p-4">
+        <div className="w-full max-w-md p-8 bg-[#1A1A1A] rounded-lg border border-[#333333]">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2">Admin Login</h1>
-            <p className="text-[#E9E7E2]/70">Sign in to access the admin dashboard</p>
+            <h1 className="text-2xl font-bold text-[#FF5001]">Zoolyum CMS</h1>
+            <p className="mt-2 text-[#E9E7E2]/70">Sign in to your admin account</p>
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-900/20 border border-red-900/50 rounded-lg flex items-center text-red-400">
-              <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0" />
-              <span>{error}</span>
+            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-md flex items-center gap-2 text-red-500">
+              <AlertCircle className="h-4 w-4" />
+              <p className="text-sm">{error}</p>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium mb-2">
+            <div className="space-y-2">
+              <label htmlFor="email" className="block text-sm font-medium">
                 Email
               </label>
-              <input
+              <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2]"
                 placeholder="admin@example.com"
                 required
+                autoComplete="email"
+                className="w-full"
               />
             </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium mb-2">
+            <div className="space-y-2">
+              <label htmlFor="password" className="block text-sm font-medium">
                 Password
               </label>
-              <input
+              <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2]"
                 placeholder="••••••••"
                 required
+                autoComplete="current-password"
+                className="w-full"
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full px-6 py-4 bg-[#FF5001] text-[#161616] font-bold rounded-lg hover:bg-[#FF5001]/90 transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Signing in..." : "Sign In"}
-            </button>
-
-            <div className="text-center mt-4">
-              <p className="text-sm text-[#E9E7E2]/70">
-                Don't have an account?{" "}
-                <Link href="/admin/signup" className="text-[#FF5001] hover:underline">
-                  Sign up
-                </Link>
-              </p>
-            </div>
+            </Button>
           </form>
         </div>
       </div>
     </PageTransition>
-  )
+  );
 }

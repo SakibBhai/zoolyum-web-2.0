@@ -1,95 +1,72 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { getBrowserClient } from "@/lib/supabase"
-import { PageTransition } from "@/components/page-transition"
-import { AlertCircle } from "lucide-react"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { PageTransition } from "@/components/page-transition";
+import { AlertCircle } from "lucide-react";
+import { prisma } from "@/lib/db";
 
 export default function AdminSignupPage() {
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [isFirstAdmin, setIsFirstAdmin] = useState(true) // Assume it's the first admin until we check
-  const router = useRouter()
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFirstAdmin, setIsFirstAdmin] = useState(true); // Assume it's the first admin until we check
+  const router = useRouter();
 
   // Check if there are any existing admins
-  const checkExistingAdmins = async () => {
-    try {
-      const supabase = getBrowserClient()
-      const { count, error } = await supabase.from("admin_users").select("*", { count: "exact", head: true })
-
-      if (error) {
-        console.error("Error checking admin users:", error)
-        return
-      }
-
-      setIsFirstAdmin(count === 0)
-    } catch (err) {
-      console.error("Error checking admin users:", err)
-    }
-  }
-
-  // Check on component mount
   useEffect(() => {
-    checkExistingAdmins()
-  }, [])
+    const checkExistingAdmins = async () => {
+      try {
+        const response = await fetch("/api/admin/check");
+        const data = await response.json();
+        setIsFirstAdmin(data.isFirstAdmin);
+      } catch (err) {
+        console.error("Error checking admin users:", err);
+      }
+    };
+
+    checkExistingAdmins();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError(null)
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
 
     try {
-      const supabase = getBrowserClient()
-
-      // 1. Sign up the user with Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-      })
-
-      if (authError) {
-        throw authError
-      }
-
-      if (!authData.user) {
-        throw new Error("Failed to create user")
-      }
-
-      // 2. Call our API route to insert the admin user
+      // Call our API route to create the user
       const response = await fetch("/api/admin/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userId: authData.user.id,
           email,
           name,
+          password,
           isFirstAdmin,
         }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to create admin user")
+        throw new Error(data.error || "Failed to create admin user");
       }
 
-      // 3. Redirect to login page
-      router.push("/admin/login")
+      // Redirect to login page
+      router.push("/admin/login");
     } catch (err: any) {
-      setError(err.message || "An unexpected error occurred")
-      console.error(err)
+      setError(err.message || "An unexpected error occurred");
+      console.error(err);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <PageTransition>
@@ -168,5 +145,5 @@ export default function AdminSignupPage() {
         </div>
       </div>
     </PageTransition>
-  )
+  );
 }

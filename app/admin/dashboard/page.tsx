@@ -1,11 +1,12 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { getBrowserClient } from "@/lib/supabase"
 import { PageTransition } from "@/components/page-transition"
 import { FileText, Briefcase, MessageSquare, Users } from "lucide-react"
+import { useSession } from "next-auth/react"
 
 export default function DashboardPage() {
+  const { data: session, status } = useSession()
   const [stats, setStats] = useState({
     posts: 0,
     projects: 0,
@@ -13,38 +14,88 @@ export default function DashboardPage() {
     visitors: 0,
   })
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const supabase = getBrowserClient()
-
-        // These would be actual queries to your Supabase tables
-        // For now, we'll use placeholder data
-
-        // const { count: postsCount } = await supabase
-        //   .from('posts')
-        //   .select('*', { count: 'exact', head: true })
-
-        // Simulating data fetch
-        setTimeout(() => {
+    // Only fetch stats if the user is authenticated
+    if (status === "authenticated") {
+      const fetchStats = async () => {
+        try {
+          // Clear any previous errors
+          setError(null)
+          setIsLoading(true)
+          
+          // Fetch stats from API endpoints
+          const [postsRes, projectsRes, testimonialsRes] = await Promise.all([
+            fetch('/api/blog-posts'),
+            fetch('/api/projects'),
+            fetch('/api/testimonials')
+          ])
+          
+          if (!postsRes.ok || !projectsRes.ok || !testimonialsRes.ok) {
+            throw new Error('Failed to fetch data from API')
+          }
+          
+          const [posts, projects, testimonials] = await Promise.all([
+            postsRes.json(),
+            projectsRes.json(),
+            testimonialsRes.json()
+          ])
+          
+          // Set the stats based on the fetched data
           setStats({
-            posts: 6,
-            projects: 8,
-            testimonials: 12,
-            visitors: 1024,
+            posts: posts.length || 0,
+            projects: projects.length || 0,
+            testimonials: testimonials.length || 0,
+            visitors: 1024, // This would come from an analytics service in a real app
           })
+          
           setIsLoading(false)
-        }, 1000)
-      } catch (error) {
-        console.error("Error fetching stats:", error)
-        setIsLoading(false)
+        } catch (err) {
+          console.error("Error fetching stats:", err)
+          setError("Failed to load dashboard data. Please try refreshing the page.")
+          setIsLoading(false)
+        }
       }
+
+      fetchStats()
+    } else if (status === "unauthenticated") {
+      // If user is not authenticated, set error
+      setError("You must be logged in to view this page")
+      setIsLoading(false)
     }
+  }, [status])
 
-    fetchStats()
-  }, [])
+  // Show loading state while session is loading
+  if (status === "loading") {
+    return (
+      <PageTransition>
+        <div className="flex items-center justify-center h-[80vh]">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FF5001]"></div>
+        </div>
+      </PageTransition>
+    )
+  }
 
+  // Show error message if there was a problem
+  if (error) {
+    return (
+      <PageTransition>
+        <div className="p-6 bg-red-500/10 border border-red-500/30 rounded-md">
+          <h2 className="text-xl font-bold mb-2">Error</h2>
+          <p>{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-4 px-4 py-2 bg-[#FF5001] text-white rounded-md hover:bg-[#FF5001]/90"
+          >
+            Retry
+          </button>
+        </div>
+      </PageTransition>
+    )
+  }
+
+  // Show the dashboard content
   return (
     <PageTransition>
       <div>
@@ -86,7 +137,7 @@ export default function DashboardPage() {
   )
 }
 
-function StatCard({ title, value, icon, isLoading }) {
+function StatCard({ title, value, icon, isLoading }: { title: string; value: number; icon: React.ReactNode; isLoading: boolean }) {
   return (
     <div className="bg-[#1A1A1A] p-6 rounded-xl border border-[#333333]">
       <div className="flex items-center justify-between mb-4">
@@ -102,7 +153,7 @@ function StatCard({ title, value, icon, isLoading }) {
   )
 }
 
-function RecentActivityCard({ isLoading }) {
+function RecentActivityCard({ isLoading }: { isLoading: boolean }) {
   const activities = [
     { id: 1, action: "New blog post published", time: "2 hours ago" },
     { id: 2, action: 'Project "Nexus Rebrand" updated', time: "1 day ago" },
@@ -144,15 +195,15 @@ function RecentActivityCard({ isLoading }) {
 
 function QuickActionsCard() {
   const actions = [
-    { id: 1, name: "Create Blog Post", href: "/admin/dashboard/blog/new", color: "bg-blue-500/10 text-blue-400" },
-    { id: 2, name: "Add New Project", href: "/admin/dashboard/projects/new", color: "bg-green-500/10 text-green-400" },
+    { id: 1, name: "Create Blog Post", href: "/admin/blog-posts/new", color: "bg-blue-500/10 text-blue-400" },
+    { id: 2, name: "Add New Project", href: "/admin/projects/new", color: "bg-green-500/10 text-green-400" },
     {
       id: 3,
       name: "Add Testimonial",
-      href: "/admin/dashboard/testimonials/new",
+      href: "/admin/testimonials/new",
       color: "bg-purple-500/10 text-purple-400",
     },
-    { id: 4, name: "Update Profile", href: "/admin/dashboard/settings", color: "bg-yellow-500/10 text-yellow-400" },
+    { id: 4, name: "Update Profile", href: "/admin/settings", color: "bg-yellow-500/10 text-yellow-400" },
   ]
 
   return (

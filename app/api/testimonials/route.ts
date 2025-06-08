@@ -5,23 +5,15 @@ import { authOptions } from '@/lib/auth'
 
 export async function GET() {
   try {
-    const projects = await prisma.project.findMany({
-      orderBy: { updatedAt: 'desc' },
-      include: {
-        author: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
+    const testimonials = await prisma.testimonial.findMany({
+      orderBy: { order: 'asc' },
     })
 
-    return NextResponse.json(projects)
+    return NextResponse.json(testimonials)
   } catch (error) {
-    console.error('Error fetching projects:', error)
+    console.error('Error fetching testimonials:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch projects' },
+      { error: 'Failed to fetch testimonials' },
       { status: 500 }
     )
   }
@@ -52,25 +44,31 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const project = await prisma.project.create({
+    // Find the highest order value to place new testimonial at the end
+    const highestOrder = await prisma.testimonial.findFirst({
+      orderBy: { order: 'desc' },
+      select: { order: true },
+    })
+    
+    const nextOrder = highestOrder ? highestOrder.order + 1 : 1
+
+    const testimonial = await prisma.testimonial.create({
       data: {
-        title: data.title,
-        slug: data.slug,
-        description: data.description,
-        content: data.content || '',
-        category: data.category,
+        name: data.name,
+        company: data.company,
+        content: data.content,
+        rating: data.rating || 5,
         imageUrl: data.imageUrl || '',
-        published: data.published || false,
         featured: data.featured || false,
-        authorId: user.id,
+        order: data.order || nextOrder,
       },
     })
 
-    return NextResponse.json(project)
+    return NextResponse.json(testimonial)
   } catch (error) {
-    console.error('Error creating project:', error)
+    console.error('Error creating testimonial:', error)
     return NextResponse.json(
-      { error: 'Failed to create project' },
+      { error: 'Failed to create testimonial' },
       { status: 500 }
     )
   }

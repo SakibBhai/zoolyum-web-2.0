@@ -6,7 +6,7 @@ import { PageTransition } from "@/components/page-transition"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { Mail, MapPin, Phone, Clock, Send, Calendar } from "lucide-react"
-import { Card3D } from "@/components/card-3d"
+import { Card } from "@/components/ui/card"
 import { ScrollReveal } from "@/components/scroll-animations/scroll-reveal"
 import { StaggerReveal } from "@/components/scroll-animations/stagger-reveal"
 import { PageHeadline } from "@/components/page-headline"
@@ -30,8 +30,7 @@ export default function ContactPage() {
             <div className="grid md:grid-cols-2 gap-12 mt-12">
               {/* Contact Form */}
               <ScrollReveal animation="fade-slide" direction="left" delay={0.2}>
-                <Card3D depth={10} glareIntensity={0.1}>
-                  <div className="bg-[#1A1A1A] p-8 rounded-2xl">
+                <Card className="bg-[#1A1A1A] p-8 rounded-2xl">
                     <h2 className="text-2xl font-bold mb-6">Send a Message</h2>
                     <form className="space-y-6">
                       <div className="grid md:grid-cols-2 gap-6">
@@ -88,8 +87,7 @@ export default function ContactPage() {
                         Send Message
                       </button>
                     </form>
-                  </div>
-                </Card3D>
+                </Card>
               </ScrollReveal>
 
               {/* Contact Information */}
@@ -165,8 +163,7 @@ export default function ContactPage() {
                 staggerDelay={0.1}
                 mobileStaggerDelay={0.05}
               >
-                <Card3D depth={10} glareIntensity={0.1}>
-                  <div className="bg-[#1A1A1A] p-6 rounded-xl h-full flex flex-col">
+                <Card className="bg-[#1A1A1A] p-6 rounded-xl h-full flex flex-col">
                     <div className="flex items-center mb-4">
                       <Calendar className="h-6 w-6 text-[#FF5001] mr-3" />
                       <h3 className="font-bold">Brand Strategy</h3>
@@ -177,11 +174,9 @@ export default function ContactPage() {
                     <button className="w-full px-4 py-3 bg-[#252525] hover:bg-[#333333] text-[#E9E7E2] font-medium rounded-lg transition-colors">
                       Book Consultation
                     </button>
-                  </div>
-                </Card3D>
+                </Card>
 
-                <Card3D depth={10} glareIntensity={0.1}>
-                  <div className="bg-[#1A1A1A] p-6 rounded-xl h-full flex flex-col">
+                <Card className="bg-[#1A1A1A] p-6 rounded-xl h-full flex flex-col">
                     <div className="flex items-center mb-4">
                       <Calendar className="h-6 w-6 text-[#FF5001] mr-3" />
                       <h3 className="font-bold">Digital Strategy</h3>
@@ -193,11 +188,9 @@ export default function ContactPage() {
                     <button className="w-full px-4 py-3 bg-[#252525] hover:bg-[#333333] text-[#E9E7E2] font-medium rounded-lg transition-colors">
                       Book Consultation
                     </button>
-                  </div>
-                </Card3D>
+                </Card>
 
-                <Card3D depth={10} glareIntensity={0.1}>
-                  <div className="bg-[#1A1A1A] p-6 rounded-xl h-full flex flex-col">
+                <Card className="bg-[#1A1A1A] p-6 rounded-xl h-full flex flex-col">
                     <div className="flex items-center mb-4">
                       <Calendar className="h-6 w-6 text-[#FF5001] mr-3" />
                       <h3 className="font-bold">Creative Direction</h3>
@@ -209,8 +202,7 @@ export default function ContactPage() {
                     <button className="w-full px-4 py-3 bg-[#252525] hover:bg-[#333333] text-[#E9E7E2] font-medium rounded-lg transition-colors">
                       Book Consultation
                     </button>
-                  </div>
-                </Card3D>
+                </Card>
               </StaggerReveal>
             </section>
 
@@ -253,8 +245,7 @@ function ContactInfoCard({ icon, title, content, link }: ContactInfoCardProps) {
   )
 
   return (
-    <Card3D depth={5} glareIntensity={0.05}>
-      <div className="bg-[#1A1A1A] p-6 rounded-xl border border-[#333333]">
+    <Card className="bg-[#1A1A1A] p-6 rounded-xl border border-[#333333]">
         <div className="flex items-start">
           <div className="mr-4">{icon}</div>
           <div>
@@ -262,8 +253,7 @@ function ContactInfoCard({ icon, title, content, link }: ContactInfoCardProps) {
             {ContentElement}
           </div>
         </div>
-      </div>
-    </Card3D>
+    </Card>
   )
 }
 

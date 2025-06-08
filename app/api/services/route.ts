@@ -5,23 +5,15 @@ import { authOptions } from '@/lib/auth'
 
 export async function GET() {
   try {
-    const projects = await prisma.project.findMany({
+    const services = await prisma.service.findMany({
       orderBy: { updatedAt: 'desc' },
-      include: {
-        author: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
     })
 
-    return NextResponse.json(projects)
+    return NextResponse.json(services)
   } catch (error) {
-    console.error('Error fetching projects:', error)
+    console.error('Error fetching services:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch projects' },
+      { error: 'Failed to fetch services' },
       { status: 500 }
     )
   }
@@ -52,25 +44,23 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const project = await prisma.project.create({
+    const service = await prisma.service.create({
       data: {
         title: data.title,
         slug: data.slug,
         description: data.description,
         content: data.content || '',
-        category: data.category,
         imageUrl: data.imageUrl || '',
         published: data.published || false,
         featured: data.featured || false,
-        authorId: user.id,
       },
     })
 
-    return NextResponse.json(project)
+    return NextResponse.json(service)
   } catch (error) {
-    console.error('Error creating project:', error)
+    console.error('Error creating service:', error)
     return NextResponse.json(
-      { error: 'Failed to create project' },
+      { error: 'Failed to create service' },
       { status: 500 }
     )
   }

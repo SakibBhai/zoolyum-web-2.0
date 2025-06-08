@@ -5,23 +5,15 @@ import { authOptions } from '@/lib/auth'
 
 export async function GET() {
   try {
-    const projects = await prisma.project.findMany({
-      orderBy: { updatedAt: 'desc' },
-      include: {
-        author: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
+    const teamMembers = await prisma.teamMember.findMany({
+      orderBy: { order: 'asc' },
     })
 
-    return NextResponse.json(projects)
+    return NextResponse.json(teamMembers)
   } catch (error) {
-    console.error('Error fetching projects:', error)
+    console.error('Error fetching team members:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch projects' },
+      { error: 'Failed to fetch team members' },
       { status: 500 }
     )
   }
@@ -52,25 +44,31 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const project = await prisma.project.create({
+    // Find the highest order value to place new member at the end
+    const highestOrder = await prisma.teamMember.findFirst({
+      orderBy: { order: 'desc' },
+      select: { order: true },
+    })
+    
+    const nextOrder = highestOrder ? highestOrder.order + 1 : 1
+
+    const teamMember = await prisma.teamMember.create({
       data: {
-        title: data.title,
-        slug: data.slug,
-        description: data.description,
-        content: data.content || '',
-        category: data.category,
+        name: data.name,
+        role: data.role,
+        bio: data.bio || '',
         imageUrl: data.imageUrl || '',
-        published: data.published || false,
-        featured: data.featured || false,
-        authorId: user.id,
+        active: data.active || true,
+        order: data.order || nextOrder,
+        socialLinks: data.socialLinks || {},
       },
     })
 
-    return NextResponse.json(project)
+    return NextResponse.json(teamMember)
   } catch (error) {
-    console.error('Error creating project:', error)
+    console.error('Error creating team member:', error)
     return NextResponse.json(
-      { error: 'Failed to create project' },
+      { error: 'Failed to create team member' },
       { status: 500 }
     )
   }

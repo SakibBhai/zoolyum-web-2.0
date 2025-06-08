@@ -1,8 +1,13 @@
 "use client"
 
-import { AnimatePresence } from "framer-motion"
 import type { ReactNode } from "react"
+import { EnhancedCursor } from "@/components/enhanced-cursor"
 
 export function Providers({ children }: { children: ReactNode }) {
-  return <AnimatePresence mode="wait">{children}</AnimatePresence>
+  return (
+    <>
+      <EnhancedCursor />
+      {children}
+    </>
+  )
 }
