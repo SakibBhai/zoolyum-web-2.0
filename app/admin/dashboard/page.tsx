@@ -1,135 +1,113 @@
-"use client"
-
-import { useEffect, useState } from "react"
+import { Suspense } from "react"
 import { PageTransition } from "@/components/page-transition"
 import { FileText, Briefcase, MessageSquare, Users } from "lucide-react"
-import { useSession } from "next-auth/react"
+import { prisma } from "@/lib/db"
+import { DashboardStatsSkeleton } from "@/components/admin/dashboard-stats-skeleton"
+import { RecentActivitySkeleton } from "@/components/admin/recent-activity-skeleton"
 
-export default function DashboardPage() {
-  const { data: session, status } = useSession()
-  const [stats, setStats] = useState({
-    posts: 0,
-    projects: 0,
-    testimonials: 0,
-    visitors: 0,
-  })
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+// Async component for fetching dashboard stats
+async function DashboardStats() {
+  const [postsCount, projectsCount, testimonialsCount] = await Promise.all([
+    prisma.blogPost.count(),
+    prisma.project.count(),
+    prisma.testimonial.count()
+  ])
 
-  useEffect(() => {
-    // Only fetch stats if the user is authenticated
-    if (status === "authenticated") {
-      const fetchStats = async () => {
-        try {
-          // Clear any previous errors
-          setError(null)
-          setIsLoading(true)
-          
-          // Fetch stats from API endpoints
-          const [postsRes, projectsRes, testimonialsRes] = await Promise.all([
-            fetch('/api/blog-posts'),
-            fetch('/api/projects'),
-            fetch('/api/testimonials')
-          ])
-          
-          if (!postsRes.ok || !projectsRes.ok || !testimonialsRes.ok) {
-            throw new Error('Failed to fetch data from API')
-          }
-          
-          const [posts, projects, testimonials] = await Promise.all([
-            postsRes.json(),
-            projectsRes.json(),
-            testimonialsRes.json()
-          ])
-          
-          // Set the stats based on the fetched data
-          setStats({
-            posts: posts.length || 0,
-            projects: projects.length || 0,
-            testimonials: testimonials.length || 0,
-            visitors: 1024, // This would come from an analytics service in a real app
-          })
-          
-          setIsLoading(false)
-        } catch (err) {
-          console.error("Error fetching stats:", err)
-          setError("Failed to load dashboard data. Please try refreshing the page.")
-          setIsLoading(false)
+  const stats = {
+    posts: postsCount,
+    projects: projectsCount,
+    testimonials: testimonialsCount,
+    visitors: 1024, // This would come from an analytics service in a real app
+  }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <StatCard
+        title="Blog Posts"
+        value={stats.posts}
+        icon={<FileText className="h-6 w-6" />}
+      />
+      <StatCard
+        title="Projects"
+        value={stats.projects}
+        icon={<Briefcase className="h-6 w-6" />}
+      />
+      <StatCard
+        title="Testimonials"
+        value={stats.testimonials}
+        icon={<MessageSquare className="h-6 w-6" />}
+      />
+      <StatCard
+        title="Visitors"
+        value={stats.visitors}
+        icon={<Users className="h-6 w-6" />}
+      />
+    </div>
+  )
+}
+
+// Async component for recent activity
+async function RecentActivity() {
+  const recentPosts = await prisma.blogPost.findMany({
+    take: 5,
+    orderBy: { updatedAt: 'desc' },
+    select: {
+      id: true,
+      title: true,
+      updatedAt: true,
+      author: {
+        select: {
+          name: true
         }
       }
-
-      fetchStats()
-    } else if (status === "unauthenticated") {
-      // If user is not authenticated, set error
-      setError("You must be logged in to view this page")
-      setIsLoading(false)
     }
-  }, [status])
+  })
 
-  // Show loading state while session is loading
-  if (status === "loading") {
-    return (
-      <PageTransition>
-        <div className="flex items-center justify-center h-[80vh]">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FF5001]"></div>
-        </div>
-      </PageTransition>
-    )
-  }
+  return (
+    <div className="bg-[#1A1A1A] p-6 rounded-xl border border-[#333333]">
+      <h3 className="text-lg font-semibold mb-4 text-[#E9E7E2]">Recent Activity</h3>
+      <div className="space-y-3">
+        {recentPosts.map((post) => (
+          <div key={post.id} className="flex items-center space-x-3 p-3 rounded-lg bg-[#252525]">
+            <div className="w-2 h-2 bg-[#FF5001] rounded-full"></div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-[#E9E7E2]">{post.title}</p>
+              <p className="text-xs text-[#E9E7E2]/60">
+                Updated by {post.author?.name || 'Unknown'} • {new Date(post.updatedAt).toLocaleDateString()}
+              </p>
+            </div>
+          </div>
+        ))}
+        {recentPosts.length === 0 && (
+          <p className="text-[#E9E7E2]/60 text-center py-4">No recent activity</p>
+        )}
+      </div>
+    </div>
+  )
+}
 
-  // Show error message if there was a problem
-  if (error) {
-    return (
-      <PageTransition>
-        <div className="p-6 bg-red-500/10 border border-red-500/30 rounded-md">
-          <h2 className="text-xl font-bold mb-2">Error</h2>
-          <p>{error}</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="mt-4 px-4 py-2 bg-[#FF5001] text-white rounded-md hover:bg-[#FF5001]/90"
-          >
-            Retry
-          </button>
-        </div>
-      </PageTransition>
-    )
-  }
-
-  // Show the dashboard content
+export default function DashboardPage() {
   return (
     <PageTransition>
-      <div>
-        <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <StatCard
-            title="Blog Posts"
-            value={stats.posts}
-            icon={<FileText className="h-6 w-6" />}
-            isLoading={isLoading}
-          />
-          <StatCard
-            title="Projects"
-            value={stats.projects}
-            icon={<Briefcase className="h-6 w-6" />}
-            isLoading={isLoading}
-          />
-          <StatCard
-            title="Testimonials"
-            value={stats.testimonials}
-            icon={<MessageSquare className="h-6 w-6" />}
-            isLoading={isLoading}
-          />
-          <StatCard
-            title="Visitors"
-            value={stats.visitors}
-            icon={<Users className="h-6 w-6" />}
-            isLoading={isLoading}
-          />
+      <div className="space-y-8">
+        {/* Header renders immediately */}
+        <div>
+          <h1 className="text-2xl font-bold text-[#E9E7E2]">Dashboard</h1>
+          <p className="text-[#E9E7E2]/60 mt-1">Welcome back! Here's what's happening with your content.</p>
         </div>
 
+        {/* Stats with Suspense boundary */}
+        <Suspense fallback={<DashboardStatsSkeleton />}>
+          <DashboardStats />
+        </Suspense>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <RecentActivityCard isLoading={isLoading} />
+          {/* Recent Activity with Suspense */}
+          <Suspense fallback={<RecentActivitySkeleton />}>
+            <RecentActivity />
+          </Suspense>
+          
+          {/* Quick Actions renders immediately */}
           <QuickActionsCard />
         </div>
       </div>
@@ -137,61 +115,19 @@ export default function DashboardPage() {
   )
 }
 
-function StatCard({ title, value, icon, isLoading }: { title: string; value: number; icon: React.ReactNode; isLoading: boolean }) {
+function StatCard({ title, value, icon }: { title: string; value: number; icon: React.ReactNode }) {
   return (
     <div className="bg-[#1A1A1A] p-6 rounded-xl border border-[#333333]">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-medium text-[#E9E7E2]/70">{title}</h3>
         <div className="p-2 bg-[#252525] rounded-lg text-[#FF5001]">{icon}</div>
       </div>
-      {isLoading ? (
-        <div className="h-8 w-20 bg-[#252525] rounded animate-pulse"></div>
-      ) : (
-        <p className="text-3xl font-bold">{value}</p>
-      )}
+      <p className="text-3xl font-bold text-[#E9E7E2]">{value}</p>
     </div>
   )
 }
 
-function RecentActivityCard({ isLoading }: { isLoading: boolean }) {
-  const activities = [
-    { id: 1, action: "New blog post published", time: "2 hours ago" },
-    { id: 2, action: 'Project "Nexus Rebrand" updated', time: "1 day ago" },
-    { id: 3, action: "New testimonial added", time: "3 days ago" },
-    { id: 4, action: "Website settings updated", time: "1 week ago" },
-  ]
 
-  return (
-    <div className="bg-[#1A1A1A] p-6 rounded-xl border border-[#333333]">
-      <h3 className="text-xl font-bold mb-4">Recent Activity</h3>
-      {isLoading ? (
-        <div className="space-y-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="flex items-center space-x-4">
-              <div className="h-10 w-10 bg-[#252525] rounded-full animate-pulse"></div>
-              <div className="flex-1 space-y-2">
-                <div className="h-4 bg-[#252525] rounded w-3/4 animate-pulse"></div>
-                <div className="h-3 bg-[#252525] rounded w-1/4 animate-pulse"></div>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <ul className="space-y-4">
-          {activities.map((activity) => (
-            <li key={activity.id} className="flex items-start">
-              <div className="w-2 h-2 mt-2 rounded-full bg-[#FF5001] mr-3"></div>
-              <div>
-                <p className="text-[#E9E7E2]">{activity.action}</p>
-                <p className="text-sm text-[#E9E7E2]/50">{activity.time}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  )
-}
 
 function QuickActionsCard() {
   const actions = [

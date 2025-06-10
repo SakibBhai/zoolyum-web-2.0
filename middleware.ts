@@ -4,10 +4,17 @@ import { NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const response = NextResponse.next();
+
+  // Add security headers
+  response.headers.set('X-Frame-Options', 'DENY');
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  response.headers.set('X-XSS-Protection', '1; mode=block');
 
   // Allow access to login and signup pages for everyone
   if (pathname === "/admin/login" || pathname === "/admin/signup") {
-    return NextResponse.next();
+    return response;
   }
 
   // Check if the path is for any admin route
@@ -22,9 +29,14 @@ export async function middleware(request: NextRequest) {
       const url = new URL("/admin/login", request.url);
       return NextResponse.redirect(url);
     }
+
+    // Add additional security headers for admin routes
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
   }
 
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {

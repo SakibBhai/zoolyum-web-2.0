@@ -51,6 +51,9 @@ export function Header() {
           <NavLink href="/contact" isActive={isActive("/contact")}>
             Contact
           </NavLink>
+          <NavLink href="/admin/login" isActive={isActive("/admin/login")}>
+            Admin
+          </NavLink>
         </nav>
 
         <EnhancedButton

@@ -2,6 +2,7 @@
 
 export interface UploadResult {
   url?: string;
+  key?: string;
   error?: string;
   bucketMissing?: boolean;
 }
@@ -12,7 +13,7 @@ export interface DeleteResult {
 }
 
 /**
- * Upload an image file to storage
+ * Upload an image file to Cloudflare R2 storage
  * @param file - The file to upload
  * @param folder - Optional folder name (defaults to 'uploads')
  * @returns Promise with upload result
@@ -22,32 +23,45 @@ export async function uploadImage(
   folder: string = 'uploads'
 ): Promise<UploadResult> {
   try {
-    // For now, return a placeholder implementation
-    // This should be replaced with actual storage implementation (Supabase, AWS S3, etc.)
-    
-    // Simulate upload delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Check if storage is configured (placeholder check)
-    const storageConfigured = process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    
-    if (!storageConfigured) {
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+    if (!validTypes.includes(file.type)) {
       return {
-        error: 'Storage not configured. Please set up Supabase storage or use external URLs.',
-        bucketMissing: true
+        error: 'Invalid file type. Only JPEG, PNG, WebP, and GIF are allowed.'
       };
     }
-    
-    // Placeholder: In a real implementation, you would:
-    // 1. Create a unique filename
-    // 2. Upload to your storage service (Supabase, AWS S3, etc.)
-    // 3. Return the public URL
-    
-    const filename = `${folder}/${Date.now()}-${file.name}`;
-    const mockUrl = `https://placeholder.example.com/${filename}`;
-    
+
+    // Validate file size (5MB max)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      return {
+        error: 'File size must be less than 5MB'
+      };
+    }
+
+    // Create form data
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', folder);
+
+    // Upload to API
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      return {
+        error: result.error || 'Failed to upload image',
+        bucketMissing: result.bucketMissing
+      };
+    }
+
     return {
-      url: mockUrl
+      url: result.url,
+      key: result.key
     };
     
   } catch (error) {
@@ -59,34 +73,29 @@ export async function uploadImage(
 }
 
 /**
- * Delete an image from storage
+ * Delete an image from Cloudflare R2 storage
  * @param url - The URL of the image to delete
  * @returns Promise with delete result
  */
 export async function deleteImage(url: string): Promise<DeleteResult> {
   try {
-    // For now, return a placeholder implementation
-    // This should be replaced with actual storage implementation
-    
-    // Simulate delete delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Check if storage is configured (placeholder check)
-    const storageConfigured = process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    
-    if (!storageConfigured) {
+    // Call delete API
+    const response = await fetch('/api/upload/delete', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ url }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
       return {
-        error: 'Storage not configured. Cannot delete image.'
+        error: result.error || 'Failed to delete image'
       };
     }
-    
-    // Placeholder: In a real implementation, you would:
-    // 1. Extract the file path from the URL
-    // 2. Delete from your storage service
-    // 3. Return success/error status
-    
-    console.log('Deleting image:', url);
-    
+
     return {
       success: true
     };
