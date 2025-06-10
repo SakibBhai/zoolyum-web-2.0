@@ -3,8 +3,9 @@
 import { type ReactNode, useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { LayoutDashboard, FileText, Briefcase, MessageSquare, Settings, LogOut, Menu, X, User, Loader2 } from "lucide-react"
+import { LayoutDashboard, FileText, Briefcase, MessageSquare, Settings, LogOut, Menu, X, User } from "lucide-react"
 import { signOut, useSession } from "next-auth/react"
+import { AdminLoading } from "@/components/admin/admin-loading"
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -19,11 +20,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   }, [status, router])
 
   if (status === "loading") {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin" />
-      </div>
-    )
+    return <AdminLoading />
   }
 
   if (!session || !session.user) {
@@ -142,8 +139,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 md:ml-64">
-        <main className="p-6 md:p-8">{children}</main>
+      <div className="flex-1">
+        <main className="p-4 md:p-6 max-w-7xl mx-auto">{children}</main>
       </div>
 
       {/* Mobile overlay */}

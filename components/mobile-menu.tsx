@@ -60,6 +60,9 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           <MobileMenuItem href="/contact" onClick={onClose}>
             Contact
           </MobileMenuItem>
+          <MobileMenuItem href="/admin/login" onClick={onClose}>
+            Admin
+          </MobileMenuItem>
         </ul>
       </nav>
 
