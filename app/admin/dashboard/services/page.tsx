@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { DataTable } from '@/components/admin/data-table'
+import { DataTable } from '@/components/ui/data-table'
 import { ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@/components/ui/badge'
 import { MoreHorizontal, Plus, Eye, Edit, Trash2, Star, Loader2 } from 'lucide-react'
@@ -28,7 +28,7 @@ import Link from 'next/link'
 import { toast } from '@/components/ui/use-toast'
 import { fetchServices, deleteService, type Service } from '@/lib/service-operations'
 
-export default function ServicesPage() {
+export default function DashboardServicesPage() {
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -85,6 +85,7 @@ export default function ServicesPage() {
       setIsDeleting(false)
     }
   }
+
   const columns: ColumnDef<Service>[] = [
     {
       accessorKey: 'title',

@@ -87,7 +87,10 @@ model TeamMember {
   position    String?
   bio         String?
   imageUrl    String?
-  socialLinks Json?
+  linkedinUrl String?
+  twitterUrl  String?
+  email       String?
+  status      String   @default("draft")
   order       Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

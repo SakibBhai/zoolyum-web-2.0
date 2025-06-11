@@ -1,8 +1,8 @@
-import Link from 'next/link';
 import { prisma } from '@/lib/db';
 import { DataTable } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
 import { Plus, Eye, Pencil, Trash } from 'lucide-react';
+import Link from 'next/link';
 
 export default async function TestimonialsPage() {
   const testimonials = await prisma.testimonial.findMany({
@@ -61,11 +61,9 @@ export default async function TestimonialsPage() {
                       <Pencil className="h-4 w-4" />
                     </Button>
                   </Link>
-                  <Link href={`/admin/testimonials/${id}/delete`}>
-                    <Button variant="ghost" size="icon">
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </Link>
+                  <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                    <Trash className="h-4 w-4" />
+                  </Button>
                 </div>
               );
             }

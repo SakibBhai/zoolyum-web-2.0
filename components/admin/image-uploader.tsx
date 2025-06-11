@@ -126,7 +126,7 @@ export function ImageUploader({
           toast({
             title: "Storage not available",
             description: "Please use the external URL option instead.",
-            variant: "warning",
+            variant: "default",
           })
         } else {
           toast({
@@ -234,10 +234,10 @@ export function ImageUploader({
 
   return (
     <div className={`space-y-2 ${className}`}>
-      <Label htmlFor={`image-upload-${label.replace(/\s+/g, "-").toLowerCase()}`}>{label}</Label>
+      <Label htmlFor={`image-upload-${label?.replace(/\s+/g, "-").toLowerCase() || 'image'}`}>{label}</Label>
 
       {bucketError && (
-        <Alert variant="warning" className="mb-4">
+        <Alert variant="default" className="mb-4">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Storage Not Available</AlertTitle>
           <AlertDescription>

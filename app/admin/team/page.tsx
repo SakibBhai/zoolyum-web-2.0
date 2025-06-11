@@ -1,8 +1,8 @@
-import Link from 'next/link';
 import { prisma } from '@/lib/db';
-import { DataTable } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
-import { Plus, Eye, Pencil, Trash } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import Link from 'next/link';
+import { TeamTable } from './team-table';
 
 export default async function TeamMembersPage() {
   const teamMembers = await prisma.teamMember.findMany({
@@ -10,9 +10,9 @@ export default async function TeamMembersPage() {
     select: {
       id: true,
       name: true,
-      role: true,
+      position: true,
       imageUrl: true,
-      active: true,
+      status: true,
       order: true,
       updatedAt: true,
     }
@@ -30,46 +30,12 @@ export default async function TeamMembersPage() {
         </Link>
       </div>
       
-      <DataTable
-        data={teamMembers.map(member => ({
+      <TeamTable
+        teamMembers={teamMembers.map(member => ({
           ...member,
           updatedAt: new Date(member.updatedAt).toLocaleDateString(),
-          status: member.active ? 'Active' : 'Inactive',
-          actions: member.id
+          statusDisplay: member.status === 'published' ? 'Published' : 'Draft'
         }))}
-        columns={[
-          { header: 'Name', accessorKey: 'name' },
-          { header: 'Role', accessorKey: 'role' },
-          { header: 'Status', accessorKey: 'status' },
-          { header: 'Order', accessorKey: 'order' },
-          { header: 'Updated', accessorKey: 'updatedAt' },
-          { 
-            header: 'Actions', 
-            accessorKey: 'actions',
-            cell: ({ row }) => {
-              const id = row.original.id;
-              return (
-                <div className="flex items-center gap-2">
-                  <Link href={`/admin/team/${id}`}>
-                    <Button variant="ghost" size="icon">
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                  <Link href={`/admin/team/${id}/edit`}>
-                    <Button variant="ghost" size="icon">
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                  <Link href={`/admin/team/${id}/delete`}>
-                    <Button variant="ghost" size="icon">
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                </div>
-              );
-            }
-          }
-        ]}
       />
     </div>
   );

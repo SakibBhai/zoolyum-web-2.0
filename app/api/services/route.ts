@@ -32,15 +32,23 @@ export async function POST(request: NextRequest) {
 
     const data = await request.json()
     
-    // Get the user ID from the session
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email as string },
+    // Validate required fields
+    if (!data.title || !data.slug) {
+      return NextResponse.json(
+        { error: 'Title and slug are required' },
+        { status: 400 }
+      )
+    }
+
+    // Check if slug is unique
+    const existingService = await prisma.service.findUnique({
+      where: { slug: data.slug }
     })
 
-    if (!user) {
+    if (existingService) {
       return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
+        { error: 'A service with this slug already exists' },
+        { status: 400 }
       )
     }
 
@@ -48,11 +56,12 @@ export async function POST(request: NextRequest) {
       data: {
         title: data.title,
         slug: data.slug,
-        description: data.description,
+        description: data.description || '',
         content: data.content || '',
         imageUrl: data.imageUrl || '',
-        published: data.published || false,
+        icon: data.icon || '',
         featured: data.featured || false,
+        order: data.order || 0,
       },
     })
 
