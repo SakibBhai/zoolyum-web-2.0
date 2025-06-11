@@ -3,6 +3,6 @@
   "installCommand": "pnpm install",
   "buildCommand": "prisma generate && corepack enable && pnpm run build",
   "env": {
-    "ENABLE_EXPERIMENTAL_COREPACK": "1"
+    "COREPACK_ENABLE_STRICT": "1"
   }
 }
