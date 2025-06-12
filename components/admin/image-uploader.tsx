@@ -14,7 +14,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface ImageUploaderProps {
-  label: string
+  label?: string
   initialImageUrl?: string
   onImageChange: (url: string | null) => void
   className?: string
@@ -234,7 +234,7 @@ export function ImageUploader({
 
   return (
     <div className={`space-y-2 ${className}`}>
-      <Label htmlFor={`image-upload-${label?.replace(/\s+/g, "-").toLowerCase() || 'image'}`}>{label}</Label>
+      {label && <Label htmlFor={`image-upload-${label.replace(/\s+/g, "-").toLowerCase()}`}>{label}</Label>}
 
       {bucketError && (
         <Alert variant="default" className="mb-4">
@@ -310,7 +310,7 @@ export function ImageUploader({
                 </p>
               </div>
               <Input
-                id={`image-upload-${label.replace(/\s+/g, "-").toLowerCase()}`}
+                id={`image-upload-${(label || 'image').replace(/\s+/g, "-").toLowerCase()}`}
                 type="file"
                 accept="image/jpeg,image/png,image/webp,image/gif"
                 className="hidden"

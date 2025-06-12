@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate folder name (security)
-    const sanitizedFolder = folder.replace(/[^a-zA-Z0-9-_]/g, '')
+    const sanitizedFolder = (folder || 'uploads').replace(/[^a-zA-Z0-9-_]/g, '')
     if (sanitizedFolder !== folder) {
       return NextResponse.json(
         { error: 'Invalid folder name' },

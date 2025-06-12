@@ -156,6 +156,7 @@ export async function deleteService(id: string): Promise<void> {
  * Generate a URL-friendly slug from a title
  */
 export function generateSlug(title: string): string {
+  if (!title) return '';
   return title
     .toLowerCase()
     .replace(/[^a-z0-9 -]/g, '') // Remove special characters

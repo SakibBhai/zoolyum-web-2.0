@@ -25,6 +25,7 @@ model User {
   role          Role      @default(USER)
   projects      Project[]
   blogPosts     BlogPost[]
+  campaigns     Campaign[]
 }
 
 enum Role {
@@ -108,4 +109,56 @@ model Testimonial {
   order     Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Campaign {
+  id              String           @id @default(cuid())
+  title           String
+  slug            String           @unique
+  shortDescription String?
+  content         String?
+  startDate       DateTime?
+  endDate         DateTime?
+  status          CampaignStatus   @default(DRAFT)
+  imageUrls       String[]
+  videoUrls       String[]
+  enableForm      Boolean          @default(false)
+  formFields      Json?            // Store form configuration as JSON
+  successMessage  String?
+  redirectUrl     String?
+  views           Int              @default(0)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  author          User             @relation(fields: [authorId], references: [id])
+  authorId        String
+  ctas            CampaignCTA[]
+  submissions     CampaignSubmission[]
+}
+
+model CampaignCTA {
+  id         String   @id @default(cuid())
+  label      String
+  url        String
+  order      Int      @default(0)
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  campaignId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model CampaignSubmission {
+  id         String   @id @default(cuid())
+  data       Json     // Store form submission data as JSON
+  ipAddress  String?
+  userAgent  String?
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  campaignId String
+  createdAt  DateTime @default(now())
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  ARCHIVED
 }

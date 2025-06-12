@@ -1,23 +1,51 @@
-import { prisma } from '@/lib/db';
+'use client'
+
 import { DataTable } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
 import { Plus, Eye, Pencil, Trash } from 'lucide-react';
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 
-export default async function TestimonialsPage() {
-  const testimonials = await prisma.testimonial.findMany({
-    orderBy: { order: 'asc' },
-    select: {
-      id: true,
-      name: true,
-      company: true,
-      rating: true,
-      featured: true,
-      order: true,
-      updatedAt: true,
-    }
-  });
+type Testimonial = {
+  id: string;
+  name: string;
+  company: string | null;
+  rating: number;
+  featured: boolean;
+  order: number;
+  updatedAt: Date;
+};
+
+export default function TestimonialsPage() {
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        const response = await fetch('/api/testimonials');
+        const data = await response.json();
+        setTestimonials(data);
+      } catch (error) {
+        console.error('Error fetching testimonials:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTestimonials();
+  }, []);
   
+  if (loading) {
+    return (
+      <div className="container mx-auto py-10">
+        <div className="flex justify-center items-center h-64">
+          <div className="text-lg">Loading testimonials...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">

@@ -9,7 +9,8 @@ import {
   Users, 
   MessageSquare,
   Settings,
-  LogOut
+  LogOut,
+  Megaphone
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 
@@ -46,6 +47,11 @@ export function AdminSidebar() {
       name: "Testimonials",
       href: "/admin/testimonials",
       icon: <MessageSquare className="h-5 w-5" />
+    },
+    {
+      name: "Campaigns",
+      href: "/admin/campaigns",
+      icon: <Megaphone className="h-5 w-5" />
     },
     {
       name: "Settings",

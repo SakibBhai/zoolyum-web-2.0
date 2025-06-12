@@ -1,8 +1,11 @@
+'use client'
+
 import Link from 'next/link';
 import { prisma } from '@/lib/db';
 import { DataTable } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
 import { Plus, Eye, Pencil, Trash } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 // Define the Project type to match the database schema
 type Project = {
@@ -30,25 +33,36 @@ type ProjectRow = {
   actions: string;
 };
 
-export default async function ProjectsPage() {
-  const projects = await prisma.project.findMany({
-    orderBy: { updatedAt: 'desc' },
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      category: true,
-      published: true,
-      featured: true,
-      updatedAt: true,
-      author: {
-        select: {
-          name: true
-        }
+export default function ProjectsPage() {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch('/api/projects');
+        const data = await response.json();
+        setProjects(data);
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+      } finally {
+        setLoading(false);
       }
-    }
-  });
+    };
+
+    fetchProjects();
+  }, []);
   
+  if (loading) {
+    return (
+      <div className="container mx-auto py-10">
+        <div className="flex justify-center items-center h-64">
+          <div className="text-lg">Loading projects...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">

@@ -58,6 +58,7 @@ export default function NewServicePage() {
 
   // Auto-generate slug from title
   const handleTitleChange = (title: string) => {
+    if (!title) return;
     const slug = generateSlug(title)
     form.setValue('slug', slug)
   }
@@ -198,8 +199,8 @@ export default function NewServicePage() {
                       <FormLabel>Service Image</FormLabel>
                       <FormControl>
                         <ImageUploader
-                          value={field.value || ''}
-                          onChange={field.onChange}
+                          initialImageUrl={field.value || ''}
+                          onImageChange={field.onChange}
                           folder="services"
                         />
                       </FormControl>

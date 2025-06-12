@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { DataTable } from '@/components/admin/data-table'
+import { DataTable } from '@/components/ui/data-table'
 import { ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@/components/ui/badge'
 import { MoreHorizontal, Plus, Eye, Edit, Trash2, Star, Loader2 } from 'lucide-react'

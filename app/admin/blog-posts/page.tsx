@@ -1,29 +1,37 @@
+'use client'
+
 import Link from 'next/link';
-import { Suspense } from 'react';
-import { prisma } from '@/lib/db';
+import { Suspense, useState, useEffect } from 'react';
 import { DataTable } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
 import { Plus, Eye, Pencil, Trash } from 'lucide-react';
 import { BlogPostsSkeleton } from '@/components/admin/blog-posts-skeleton';
 
-// Async component for fetching blog posts data
-async function BlogPostsTable() {
-  const posts = await prisma.blogPost.findMany({
-    orderBy: { updatedAt: 'desc' },
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      published: true,
-      featured: true,
-      updatedAt: true,
-      author: {
-        select: {
-          name: true
-        }
+// Client component for fetching blog posts data
+function BlogPostsTable() {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await fetch('/api/blog-posts');
+        const data = await response.json();
+        setPosts(data);
+      } catch (error) {
+        console.error('Error fetching blog posts:', error);
+      } finally {
+        setLoading(false);
       }
-    }
-  });
+    };
+
+    fetchPosts();
+  }, []);
+
+  if (loading) {
+    return <BlogPostsSkeleton />;
+  }
+
 
   return (
     <DataTable
