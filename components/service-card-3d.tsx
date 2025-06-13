@@ -1,6 +1,6 @@
 "use client"
 
-import { Card3D } from "./card-3d"
+import Link from "next/link"
 import {
   ArrowRight,
   KeyIcon as Strategy,
@@ -46,19 +46,27 @@ export function ServiceCard3D({ title, description, icon }: ServiceCardProps) {
     }
   }
 
+  // Create a URL-friendly slug from the title
+  const createSlug = (title: string) => {
+    return title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+  }
+
+  const serviceSlug = createSlug(title)
+
   return (
-    <Card3D depth={15} glareIntensity={0.2} cursorText="Service">
-      <div className="h-full flex flex-col bg-[#1A1A1A] rounded-xl p-6 transform-gpu transition-all duration-300">
-        <div className="w-12 h-12 bg-[#FF5001]/10 rounded-full flex items-center justify-center mb-4">{getIcon()}</div>
-        <h3 className="text-xl font-bold mb-3 group-hover:text-[#FF5001] transition-colors">{title}</h3>
-        <p className="text-[#E9E7E2]/70 flex-grow">{description}</p>
-        <div className="mt-6 pt-4 border-t border-[#333333]">
-          <span className="text-[#FF5001] font-medium inline-flex items-center group/link">
-            Learn More
-            <ArrowRight className="ml-2 w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
-          </span>
-        </div>
+    <div className="h-full flex flex-col bg-[#1A1A1A] rounded-xl p-6 hover:bg-[#212121] transition-all duration-300 group">
+      <div className="w-12 h-12 bg-[#FF5001]/10 rounded-full flex items-center justify-center mb-4">{getIcon()}</div>
+      <h3 className="text-xl font-bold mb-3 group-hover:text-[#FF5001] transition-colors">{title}</h3>
+      <p className="text-[#E9E7E2]/70 flex-grow">{description}</p>
+      <div className="mt-6 pt-4 border-t border-[#333333]">
+        <Link 
+          href={`/services/${serviceSlug}`}
+          className="text-[#FF5001] font-medium inline-flex items-center group/link hover:text-[#FF5001]/80 transition-colors"
+        >
+          Learn More
+          <ArrowRight className="ml-2 w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
+        </Link>
       </div>
-    </Card3D>
+    </div>
   )
 }

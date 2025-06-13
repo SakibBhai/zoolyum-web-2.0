@@ -162,3 +162,98 @@ enum CampaignStatus {
   PUBLISHED
   ARCHIVED
 }
+
+model Contact {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String?
+  message   String
+  status    String   @default("new") // new, read, replied, archived
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ContactSettings {
+  id                String   @id @default(cuid())
+  // Contact Information
+  email             String?
+  phone             String?
+  address           String?
+  workingHours      String?
+  
+  // Social Media
+  twitterUrl        String?
+  linkedinUrl       String?
+  instagramUrl      String?
+  behanceUrl        String?
+  
+  // Form Settings
+  enablePhoneField  Boolean  @default(true)
+  requirePhoneField Boolean  @default(false)
+  autoReplyEnabled  Boolean  @default(false)
+  autoReplyMessage  String?
+  
+  // Notification Settings
+  notificationEmail String?
+  emailNotifications Boolean @default(true)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model FooterSettings {
+  id                    String   @id @default(cuid())
+  // Footer Content
+  footerContent         String?  // Rich text content
+  copyright             String?
+  disclaimer            String?
+  aboutTagline          String?
+  
+  // Quick Links
+  quickLinks            Json?    // Array of {label, url, openInNewTab}
+  
+  // Social Media
+  showSocialMedia       Boolean  @default(true)
+  facebookUrl           String?
+  instagramUrl          String?
+  linkedinUrl           String?
+  youtubeUrl            String?
+  twitterUrl            String?
+  whatsappUrl           String?
+  customSocialIcon      String?  // Custom icon URL
+  customSocialUrl       String?
+  
+  // Footer Logo
+  showLogo              Boolean  @default(true)
+  logoUrl               String?
+  
+  // Language Selector
+  showLanguageSelector  Boolean  @default(false)
+  supportedLanguages    String[] // Array of language codes
+  
+  // Newsletter
+  showNewsletter        Boolean  @default(false)
+  newsletterPlaceholder String?
+  mailServiceConfig     Json?    // Mail service integration config
+  
+  // Styling
+  backgroundColor       String?  @default("#1A1A1A")
+  textColor             String?  @default("#E9E7E2")
+  columnLayout          Int      @default(3) // 1-4 columns
+  customCSS             String?
+  
+  // Legal Links
+  showLegalLinks        Boolean  @default(true)
+  privacyPolicyUrl      String?
+  termsConditionsUrl    String?
+  cookiePolicyUrl       String?
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@map("footer_settings")
+}

@@ -1,18 +1,113 @@
 "use client"
 
-import type React from "react"
+'use client'
 
+import type React from "react"
+import { useState, useEffect } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
 import { PageTransition } from "@/components/page-transition"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { Mail, MapPin, Phone, Clock, Send, Calendar } from "lucide-react"
+import { Mail, MapPin, Phone, Clock, Send, Calendar, CheckCircle, AlertCircle } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { ScrollReveal } from "@/components/scroll-animations/scroll-reveal"
 import { StaggerReveal } from "@/components/scroll-animations/stagger-reveal"
 import { PageHeadline } from "@/components/page-headline"
 import { TextReveal } from "@/components/scroll-animations/text-reveal"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+
+// Form validation schema
+const contactFormSchema = z.object({
+  name: z.string().min(1, "Name is required").min(2, "Name must be at least 2 characters"),
+  email: z.string().min(1, "Email is required").email("Invalid email address"),
+  phone: z.string().optional(),
+  subject: z.string().optional(),
+  message: z.string().min(1, "Message is required").min(10, "Message must be at least 10 characters")
+})
+
+type ContactFormData = z.infer<typeof contactFormSchema>
+
+interface ContactSettings {
+  email?: string
+  phone?: string
+  address?: string
+  workingHours?: string
+  twitterUrl?: string
+  linkedinUrl?: string
+  instagramUrl?: string
+  behanceUrl?: string
+  enablePhoneField: boolean
+  requirePhoneField: boolean
+}
 
 export default function ContactPage() {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [submitMessage, setSubmitMessage] = useState('')
+  const [contactSettings, setContactSettings] = useState<ContactSettings | null>(null)
+  
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset
+  } = useForm<ContactFormData>({
+    resolver: zodResolver(contactFormSchema)
+  })
+
+  // Fetch contact settings on component mount
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch('/api/contacts/settings')
+        if (response.ok) {
+          const settings = await response.json()
+          setContactSettings(settings)
+        }
+      } catch (error) {
+        console.error('Error fetching contact settings:', error)
+      }
+    }
+    
+    fetchSettings()
+  }, [])
+
+  const onSubmit = async (data: ContactFormData) => {
+    setIsSubmitting(true)
+    setSubmitStatus('idle')
+    
+    try {
+      const response = await fetch('/api/contacts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+      
+      if (response.ok) {
+        setSubmitStatus('success')
+        setSubmitMessage('Thank you for your message! We\'ll get back to you soon.')
+        reset()
+      } else {
+        const errorData = await response.json()
+        setSubmitStatus('error')
+        setSubmitMessage(errorData.error || 'Failed to send message. Please try again.')
+      }
+    } catch (error) {
+      setSubmitStatus('error')
+      setSubmitMessage('Network error. Please check your connection and try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <PageTransition>
       <div className="min-h-screen bg-[#161616] text-[#E9E7E2]">
@@ -32,60 +127,125 @@ export default function ContactPage() {
               <ScrollReveal animation="fade-slide" direction="left" delay={0.2}>
                 <Card className="bg-[#1A1A1A] p-8 rounded-2xl">
                     <h2 className="text-2xl font-bold mb-6">Send a Message</h2>
-                    <form className="space-y-6">
+                    
+                    {/* Submit Status Alert */}
+                    {submitStatus !== 'idle' && (
+                      <Alert className={`mb-6 ${submitStatus === 'success' ? 'border-green-500 bg-green-500/10' : 'border-red-500 bg-red-500/10'}`}>
+                        {submitStatus === 'success' ? (
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <AlertCircle className="h-4 w-4 text-red-500" />
+                        )}
+                        <AlertDescription className={submitStatus === 'success' ? 'text-green-400' : 'text-red-400'}>
+                          {submitMessage}
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                    
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                       <div className="grid md:grid-cols-2 gap-6">
                         <div>
-                          <label htmlFor="name" className="block text-sm font-medium mb-2">
-                            Name
-                          </label>
-                          <input
+                          <Label htmlFor="name" className="block text-sm font-medium mb-2">
+                            Name *
+                          </Label>
+                          <Input
+                            {...register('name')}
                             type="text"
                             id="name"
                             className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2]"
                             placeholder="Your name"
                           />
+                          {errors.name && (
+                            <p className="text-red-400 text-sm mt-1">{errors.name.message}</p>
+                          )}
                         </div>
                         <div>
-                          <label htmlFor="email" className="block text-sm font-medium mb-2">
-                            Email
-                          </label>
-                          <input
+                          <Label htmlFor="email" className="block text-sm font-medium mb-2">
+                            Email *
+                          </Label>
+                          <Input
+                            {...register('email')}
                             type="email"
                             id="email"
                             className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2]"
                             placeholder="Your email"
                           />
+                          {errors.email && (
+                            <p className="text-red-400 text-sm mt-1">{errors.email.message}</p>
+                          )}
                         </div>
                       </div>
-                      <div>
-                        <label htmlFor="subject" className="block text-sm font-medium mb-2">
-                          Subject
-                        </label>
-                        <input
-                          type="text"
-                          id="subject"
-                          className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2]"
-                          placeholder="Subject of your message"
-                        />
+                      
+                      <div className="grid md:grid-cols-2 gap-6">
+                        {/* Phone Field - conditionally rendered based on settings */}
+                        {(!contactSettings || contactSettings.enablePhoneField) && (
+                          <div>
+                            <Label htmlFor="phone" className="block text-sm font-medium mb-2">
+                              Phone {contactSettings?.requirePhoneField ? '*' : ''}
+                            </Label>
+                            <Input
+                              {...register('phone')}
+                              type="tel"
+                              id="phone"
+                              className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2]"
+                              placeholder="Your phone number"
+                            />
+                            {errors.phone && (
+                              <p className="text-red-400 text-sm mt-1">{errors.phone.message}</p>
+                            )}
+                          </div>
+                        )}
+                        
+                        <div>
+                          <Label htmlFor="subject" className="block text-sm font-medium mb-2">
+                            Subject
+                          </Label>
+                          <Input
+                            {...register('subject')}
+                            type="text"
+                            id="subject"
+                            className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2]"
+                            placeholder="Subject of your message"
+                          />
+                          {errors.subject && (
+                            <p className="text-red-400 text-sm mt-1">{errors.subject.message}</p>
+                          )}
+                        </div>
                       </div>
+                      
                       <div>
-                        <label htmlFor="message" className="block text-sm font-medium mb-2">
-                          Message
-                        </label>
-                        <textarea
+                        <Label htmlFor="message" className="block text-sm font-medium mb-2">
+                          Message *
+                        </Label>
+                        <Textarea
+                          {...register('message')}
                           id="message"
                           rows={5}
-                          className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2]"
+                          className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2] resize-none"
                           placeholder="Tell us about your project"
-                        ></textarea>
+                        />
+                        {errors.message && (
+                          <p className="text-red-400 text-sm mt-1">{errors.message.message}</p>
+                        )}
                       </div>
-                      <button
+                      
+                      <Button
                         type="submit"
-                        className="w-full px-6 py-4 bg-[#FF5001] text-[#161616] font-bold rounded-lg hover:bg-[#FF5001]/90 transition-all duration-300 flex items-center justify-center"
+                        disabled={isSubmitting}
+                        className="w-full px-6 py-4 bg-[#FF5001] text-[#161616] font-bold rounded-lg hover:bg-[#FF5001]/90 transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <Send className="mr-2 h-5 w-5" />
-                        Send Message
-                      </button>
+                        {isSubmitting ? (
+                          <>
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#161616] mr-2"></div>
+                            Sending...
+                          </>
+                        ) : (
+                          <>
+                            <Send className="mr-2 h-5 w-5" />
+                            Send Message
+                          </>
+                        )}
+                      </Button>
                     </form>
                 </Card>
               </ScrollReveal>
@@ -106,37 +266,49 @@ export default function ContactPage() {
                   <ContactInfoCard
                     icon={<Mail className="h-6 w-6 text-[#FF5001]" />}
                     title="Email"
-                    content="hello@zoolyum.com"
-                    link="mailto:hello@zoolyum.com"
+                    content={contactSettings?.email || "hello@zoolyum.com"}
+                    link={`mailto:${contactSettings?.email || "hello@zoolyum.com"}`}
                   />
 
                   <ContactInfoCard
                     icon={<Phone className="h-6 w-6 text-[#FF5001]" />}
                     title="Phone"
-                    content="+1 (555) 123-4567"
-                    link="tel:+15551234567"
+                    content={contactSettings?.phone || "+1 (555) 123-4567"}
+                    link={`tel:${(contactSettings?.phone || "+1 (555) 123-4567").replace(/\s/g, '')}`}
                   />
 
                   <ContactInfoCard
                     icon={<MapPin className="h-6 w-6 text-[#FF5001]" />}
                     title="Office"
-                    content="123 Creative Street, Design District, San Francisco, CA 94103"
+                    content={contactSettings?.address || "123 Creative Street, Design District, San Francisco, CA 94103"}
                   />
 
                   <ContactInfoCard
                     icon={<Clock className="h-6 w-6 text-[#FF5001]" />}
                     title="Working Hours"
-                    content="Monday - Friday: 9:00 AM - 6:00 PM"
+                    content={contactSettings?.workingHours || "Monday - Friday: 9:00 AM - 6:00 PM"}
                   />
                 </StaggerReveal>
 
                 <ScrollReveal className="pt-8 border-t border-[#333333] mt-8" delay={0.6}>
                   <h3 className="text-xl font-bold mb-4">Connect on Social Media</h3>
                   <div className="flex space-x-4">
-                    <SocialButton name="twitter" />
-                    <SocialButton name="linkedin" />
-                    <SocialButton name="instagram" />
-                    <SocialButton name="behance" />
+                    <SocialButton 
+                      name="twitter" 
+                      url={contactSettings?.twitterUrl || "https://twitter.com"} 
+                    />
+                    <SocialButton 
+                      name="linkedin" 
+                      url={contactSettings?.linkedinUrl || "https://linkedin.com"} 
+                    />
+                    <SocialButton 
+                      name="instagram" 
+                      url={contactSettings?.instagramUrl || "https://instagram.com"} 
+                    />
+                    <SocialButton 
+                      name="behance" 
+                      url={contactSettings?.behanceUrl || "https://behance.com"} 
+                    />
                   </div>
                 </ScrollReveal>
               </div>
@@ -257,10 +429,10 @@ function ContactInfoCard({ icon, title, content, link }: ContactInfoCardProps) {
   )
 }
 
-function SocialButton({ name }: { name: string }) {
+function SocialButton({ name, url }: { name: string; url?: string }) {
   return (
     <a
-      href={`https://${name}.com`}
+      href={url || `https://${name}.com`}
       target="_blank"
       rel="noopener noreferrer"
       className="w-12 h-12 rounded-full bg-[#252525] flex items-center justify-center hover:bg-[#FF5001] transition-colors duration-300"

@@ -15,6 +15,7 @@ export interface BlogPost {
 }
 
 export interface CreateBlogPostData {
+  imageUrl: any;
   title: string;
   content: string;
   excerpt?: string;
@@ -55,15 +56,26 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> 
 // Create a new blog post
 export async function createBlogPost(data: CreateBlogPostData): Promise<BlogPost> {
   try {
-    // TODO: Implement actual database creation
-    // For now, return a mock object to prevent build errors
-    const mockPost: BlogPost = {
-      id: Date.now().toString(),
-      ...data,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    return mockPost;
+    const response = await fetch('/api/blog-posts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        title: data.title,
+        slug: data.slug,
+        excerpt: data.excerpt,
+        content: data.content,
+        imageUrl: data.imageUrl,
+        published: data.published,
+        tags: data.tags
+      }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create blog post');
+    }
+    const post = await response.json();
+    return post;
   } catch (error) {
     console.error('Error creating blog post:', error);
     throw new Error('Failed to create blog post');
