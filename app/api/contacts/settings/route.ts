@@ -15,10 +15,10 @@ export async function GET() {
         phone: '+1 (555) 123-4567',
         address: '123 Creative Street, Design District, San Francisco, CA 94103',
         workingHours: 'Monday - Friday: 9:00 AM - 6:00 PM',
-        twitterUrl: 'https://twitter.com',
-        linkedinUrl: 'https://linkedin.com',
-        instagramUrl: 'https://instagram.com',
-        behanceUrl: 'https://behance.com',
+        twitterUrl: null,
+        linkedinUrl: null,
+        instagramUrl: null,
+        behanceUrl: null,
         enablePhoneField: true,
         requirePhoneField: false,
         autoReplyEnabled: false,
@@ -48,40 +48,7 @@ export async function PUT(request: NextRequest) {
     }
     
     const body = await request.json()
-    const {
-      email,
-      phone,
-      address,
-      workingHours,
-      twitterUrl,
-      linkedinUrl,
-      instagramUrl,
-      behanceUrl,
-      enablePhoneField,
-      requirePhoneField,
-      autoReplyEnabled,
-      autoReplyMessage,
-      notificationEmail,
-      emailNotifications
-    } = body
-    
-    // Update the settings
-    const updatedSettings = await updateContactSettings({
-      email: email?.trim(),
-      phone: phone?.trim(),
-      address: address?.trim(),
-      workingHours: workingHours?.trim(),
-      twitterUrl: twitterUrl?.trim(),
-      linkedinUrl: linkedinUrl?.trim(),
-      instagramUrl: instagramUrl?.trim(),
-      behanceUrl: behanceUrl?.trim(),
-      enablePhoneField,
-      requirePhoneField,
-      autoReplyEnabled,
-      autoReplyMessage: autoReplyMessage?.trim(),
-      notificationEmail: notificationEmail?.trim(),
-      emailNotifications
-    })
+    const updatedSettings = await updateContactSettings(body)
     
     return NextResponse.json(updatedSettings)
   } catch (error) {

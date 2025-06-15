@@ -1,8 +1,5 @@
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { PrismaAdapter } from '@auth/prisma-adapter'
-import { prisma } from '@/lib/db'
-import { compare } from 'bcryptjs'
 
 // Extend the built-in session types
 declare module 'next-auth' {
@@ -25,7 +22,6 @@ declare module 'next-auth' {
 }
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
   session: {
     strategy: 'jwt',
     maxAge: 24 * 60 * 60, // 24 hours
@@ -49,35 +45,21 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          const user = await prisma.user.findUnique({
-            where: {
-              email: credentials.email,
-            },
-          })
+          // Simple hardcoded admin authentication (replace with your preferred auth method)
+          const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com'
+          const adminPassword = process.env.ADMIN_PASSWORD || 'admin123'
 
-          if (!user) {
-            console.error(`No user found with email: ${credentials.email}`);
+          if (credentials.email !== adminEmail || credentials.password !== adminPassword) {
+            console.error(`Invalid credentials for: ${credentials.email}`);
             throw new Error('Invalid email or password');
           }
 
-          if (user.role !== 'ADMIN') {
-            console.error(`User ${credentials.email} is not an admin`);
-            throw new Error('You do not have permission to access the admin panel');
-          }
-
-          const isPasswordValid = await compare(credentials.password, user.password)
-
-          if (!isPasswordValid) {
-            console.error(`Invalid password for user: ${credentials.email}`);
-            throw new Error('Invalid email or password');
-          }
-
-          console.log(`User authenticated successfully: ${user.email} (${user.role})`);
+          console.log(`Admin authenticated successfully: ${credentials.email}`);
           return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role,
+            id: '1',
+            email: credentials.email,
+            name: 'Admin',
+            role: 'ADMIN',
           }
         } catch (error) {
           console.error('Authentication error:', error);

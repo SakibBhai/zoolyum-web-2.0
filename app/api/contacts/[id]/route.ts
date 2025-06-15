@@ -3,10 +3,16 @@ import { fetchContact, updateContact, deleteContact } from '@/lib/contact-operat
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
+interface RouteParams {
+  params: {
+    id: string
+  }
+}
+
 // GET /api/contacts/[id] - Fetch single contact (Admin only)
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: RouteParams
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -18,7 +24,10 @@ export async function GET(
     const contact = await fetchContact(params.id)
     
     if (!contact) {
-      return NextResponse.json({ error: 'Contact not found' }, { status: 404 })
+      return NextResponse.json(
+        { error: 'Contact not found' },
+        { status: 404 }
+      )
     }
     
     return NextResponse.json(contact)
@@ -34,7 +43,7 @@ export async function GET(
 // PUT /api/contacts/[id] - Update contact (Admin only)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: RouteParams
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -46,23 +55,33 @@ export async function PUT(
     const body = await request.json()
     const { name, email, phone, subject, message, status } = body
     
-    // Check if contact exists
-    const existingContact = await fetchContact(params.id)
-    if (!existingContact) {
-      return NextResponse.json({ error: 'Contact not found' }, { status: 404 })
+    // Prepare update data (only include provided fields)
+    const updateData: any = {}
+    if (name !== undefined) updateData.name = name.trim()
+    if (email !== undefined) updateData.email = email.trim()
+    if (phone !== undefined) updateData.phone = phone?.trim() || null
+    if (subject !== undefined) updateData.subject = subject?.trim() || null
+    if (message !== undefined) updateData.message = message.trim()
+    if (status !== undefined) {
+      if (!['NEW', 'READ', 'REPLIED', 'ARCHIVED'].includes(status)) {
+        return NextResponse.json(
+          { error: 'Invalid status value' },
+          { status: 400 }
+        )
+      }
+      updateData.status = status
     }
     
-    // Update the contact
-    const updatedContact = await updateContact(params.id, {
-      name: name?.trim(),
-      email: email?.trim(),
-      phone: phone?.trim() || null,
-      subject: subject?.trim() || null,
-      message: message?.trim(),
-      status: status?.trim()
-    })
+    const contact = await updateContact(params.id, updateData)
     
-    return NextResponse.json(updatedContact)
+    if (!contact) {
+      return NextResponse.json(
+        { error: 'Contact not found' },
+        { status: 404 }
+      )
+    }
+    
+    return NextResponse.json(contact)
   } catch (error) {
     console.error('Error updating contact:', error)
     return NextResponse.json(
@@ -75,7 +94,7 @@ export async function PUT(
 // DELETE /api/contacts/[id] - Delete contact (Admin only)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: RouteParams
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -84,16 +103,19 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
-    // Check if contact exists
-    const existingContact = await fetchContact(params.id)
-    if (!existingContact) {
-      return NextResponse.json({ error: 'Contact not found' }, { status: 404 })
+    const deleted = await deleteContact(params.id)
+    
+    if (!deleted) {
+      return NextResponse.json(
+        { error: 'Contact not found' },
+        { status: 404 }
+      )
     }
     
-    // Delete the contact
-    await deleteContact(params.id)
-    
-    return NextResponse.json({ message: 'Contact deleted successfully' })
+    return NextResponse.json(
+      { message: 'Contact deleted successfully' },
+      { status: 200 }
+    )
   } catch (error) {
     console.error('Error deleting contact:', error)
     return NextResponse.json(
