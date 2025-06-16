@@ -519,7 +519,7 @@ function AgencyNameAnimation() {
 }
 
 // Portfolio Item Component
-function PortfolioItem({ title, category, image }) {
+function PortfolioItem({ title, category, image }: { title: string; category: string; image: string }) {
   return (
     <div className="group relative overflow-hidden rounded-xl">
       <div className="aspect-[4/3] bg-[#212121] overflow-hidden">
