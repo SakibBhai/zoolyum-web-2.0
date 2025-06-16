@@ -5,24 +5,17 @@
   "packageManager": "pnpm@10.12.1",
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate",
-    "db:seed": "tsx prisma/seed.ts"
-  },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "setup-db": "node scripts/setup-database.js"
   },
   "dependencies": {
-    "@auth/prisma-adapter": "^2.9.1",
     "@aws-sdk/client-s3": "^3.826.0",
     "@aws-sdk/s3-request-presigner": "^3.826.0",
     "@emotion/is-prop-valid": "latest",
     "@hookform/resolvers": "^3.9.1",
     "@modelcontextprotocol/sdk": "^1.12.1",
-    "@next-auth/prisma-adapter": "^1.0.7",
-    "@prisma/client": "^6.9.0",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
     "@radix-ui/react-aspect-ratio": "1.1.1",
@@ -53,6 +46,7 @@
     "@tanstack/react-table": "^8.21.3",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.9",
+    "@types/pg": "^8.15.4",
     "@types/uuid": "^10.0.0",
     "@vercel/analytics": "^1.5.0",
     "@vercel/mcp-adapter": "^0.10.0",
@@ -63,16 +57,16 @@
     "cmdk": "1.0.4",
     "date-fns": "^3.0.0",
     "embla-carousel-react": "8.5.1",
-    "framer-motion": "latest",
+    "framer-motion": "^12.18.1",
     "input-otp": "1.4.1",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.454.0",
     "next": "15.2.4",
     "next-auth": "^4.24.11",
     "next-themes": "^0.4.4",
-    "prisma": "^6.9.0",
+    "pg": "^8.16.0",
     "react": "^19",
-    "react-day-picker": "8.10.1",
+    "react-day-picker": "^9.0.0",
     "react-dom": "^19",
     "react-hook-form": "^7.54.1",
     "react-resizable-panels": "^2.1.7",
@@ -81,7 +75,7 @@
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^11.1.0",
-    "vaul": "^0.9.6",
+    "vaul": "^1.0.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {

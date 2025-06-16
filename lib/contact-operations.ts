@@ -1,244 +1,69 @@
-import { prisma } from '@/lib/db'
+import { query } from './postgres'
 
+// Types
 export interface Contact {
   id: string
   name: string
   email: string
-  phone?: string | null
-  subject?: string | null
+  phone?: string
+  subject?: string
   message: string
-  status: string
-  ipAddress?: string | null
-  userAgent?: string | null
+  status: 'NEW' | 'READ' | 'REPLIED' | 'ARCHIVED'
+  ipAddress?: string
+  userAgent?: string
   createdAt: Date
   updatedAt: Date
 }
 
-export interface CreateContactData {
-  name: string
-  email: string
-  phone?: string
-  subject?: string
-  message: string
-  ipAddress?: string
-  userAgent?: string
-}
-
-export interface UpdateContactData {
-  name?: string
-  email?: string
-  phone?: string
-  subject?: string
-  message?: string
-  status?: string
-}
-
 export interface ContactSettings {
   id: string
-  email?: string | null
-  phone?: string | null
-  address?: string | null
-  workingHours?: string | null
-  twitterUrl?: string | null
-  linkedinUrl?: string | null
-  instagramUrl?: string | null
-  behanceUrl?: string | null
+  email: string
+  phone: string
+  address: string
+  workingHours: string
+  twitterUrl?: string
+  linkedinUrl?: string
+  instagramUrl?: string
+  behanceUrl?: string
   enablePhoneField: boolean
   requirePhoneField: boolean
   autoReplyEnabled: boolean
-  autoReplyMessage?: string | null
-  notificationEmail?: string | null
+  autoReplyMessage?: string
+  notificationEmail?: string
   emailNotifications: boolean
   createdAt: Date
   updatedAt: Date
 }
 
-export interface UpdateContactSettingsData {
-  email?: string
-  phone?: string
-  address?: string
-  workingHours?: string
-  twitterUrl?: string
-  linkedinUrl?: string
-  instagramUrl?: string
-  behanceUrl?: string
-  enablePhoneField?: boolean
-  requirePhoneField?: boolean
-  autoReplyEnabled?: boolean
-  autoReplyMessage?: string
-  notificationEmail?: string
-  emailNotifications?: boolean
+export interface ContactStats {
+  total: number
+  new: number
+  read: number
+  replied: number
+  archived: number
+  thisMonth: number
+  lastMonth: number
+  growth: number
 }
 
-// Contact CRUD Operations
-export async function fetchContacts(): Promise<Contact[]> {
-  try {
-    const contacts = await prisma.contact.findMany({
-      orderBy: {
-        createdAt: 'desc'
-      }
-    })
-    return contacts
-  } catch (error) {
-    console.error('Error fetching contacts:', error)
-    throw new Error('Failed to fetch contacts')
-  }
-}
-
-export async function fetchContact(id: string): Promise<Contact | null> {
-  try {
-    const contact = await prisma.contact.findUnique({
-      where: { id }
-    })
-    return contact
-  } catch (error) {
-    console.error('Error fetching contact:', error)
-    throw new Error('Failed to fetch contact')
-  }
-}
-
-export async function createContact(data: CreateContactData): Promise<Contact> {
-  try {
-    const contact = await prisma.contact.create({
-      data: {
-        name: data.name,
-        email: data.email,
-        phone: data.phone || null,
-        subject: data.subject || null,
-        message: data.message,
-        ipAddress: data.ipAddress || null,
-        userAgent: data.userAgent || null,
-        status: 'new'
-      }
-    })
-    return contact
-  } catch (error) {
-    console.error('Error creating contact:', error)
-    throw new Error('Failed to create contact')
-  }
-}
-
-export async function updateContact(id: string, data: UpdateContactData): Promise<Contact> {
-  try {
-    const contact = await prisma.contact.update({
-      where: { id },
-      data: {
-        ...(data.name && { name: data.name }),
-        ...(data.email && { email: data.email }),
-        ...(data.phone !== undefined && { phone: data.phone || null }),
-        ...(data.subject !== undefined && { subject: data.subject || null }),
-        ...(data.message && { message: data.message }),
-        ...(data.status && { status: data.status })
-      }
-    })
-    return contact
-  } catch (error) {
-    console.error('Error updating contact:', error)
-    throw new Error('Failed to update contact')
-  }
-}
-
-export async function deleteContact(id: string): Promise<void> {
-  try {
-    await prisma.contact.delete({
-      where: { id }
-    })
-  } catch (error) {
-    console.error('Error deleting contact:', error)
-    throw new Error('Failed to delete contact')
-  }
-}
-
-// Contact Settings Operations
-export async function fetchContactSettings(): Promise<ContactSettings | null> {
-  try {
-    const settings = await prisma.contactSettings.findFirst()
-    return settings
-  } catch (error) {
-    console.error('Error fetching contact settings:', error)
-    throw new Error('Failed to fetch contact settings')
-  }
-}
-
-export async function updateContactSettings(data: UpdateContactSettingsData): Promise<ContactSettings> {
-  try {
-    // First, try to find existing settings
-    const existingSettings = await prisma.contactSettings.findFirst()
-    
-    if (existingSettings) {
-      // Update existing settings
-      const settings = await prisma.contactSettings.update({
-        where: { id: existingSettings.id },
-        data: {
-          ...(data.email !== undefined && { email: data.email || null }),
-          ...(data.phone !== undefined && { phone: data.phone || null }),
-          ...(data.address !== undefined && { address: data.address || null }),
-          ...(data.workingHours !== undefined && { workingHours: data.workingHours || null }),
-          ...(data.twitterUrl !== undefined && { twitterUrl: data.twitterUrl || null }),
-          ...(data.linkedinUrl !== undefined && { linkedinUrl: data.linkedinUrl || null }),
-          ...(data.instagramUrl !== undefined && { instagramUrl: data.instagramUrl || null }),
-          ...(data.behanceUrl !== undefined && { behanceUrl: data.behanceUrl || null }),
-          ...(data.enablePhoneField !== undefined && { enablePhoneField: data.enablePhoneField }),
-          ...(data.requirePhoneField !== undefined && { requirePhoneField: data.requirePhoneField }),
-          ...(data.autoReplyEnabled !== undefined && { autoReplyEnabled: data.autoReplyEnabled }),
-          ...(data.autoReplyMessage !== undefined && { autoReplyMessage: data.autoReplyMessage || null }),
-          ...(data.notificationEmail !== undefined && { notificationEmail: data.notificationEmail || null }),
-          ...(data.emailNotifications !== undefined && { emailNotifications: data.emailNotifications })
-        }
-      })
-      return settings
-    } else {
-      // Create new settings
-      const settings = await prisma.contactSettings.create({
-        data: {
-          email: data.email || null,
-          phone: data.phone || null,
-          address: data.address || null,
-          workingHours: data.workingHours || null,
-          twitterUrl: data.twitterUrl || null,
-          linkedinUrl: data.linkedinUrl || null,
-          instagramUrl: data.instagramUrl || null,
-          behanceUrl: data.behanceUrl || null,
-          enablePhoneField: data.enablePhoneField ?? true,
-          requirePhoneField: data.requirePhoneField ?? false,
-          autoReplyEnabled: data.autoReplyEnabled ?? false,
-          autoReplyMessage: data.autoReplyMessage || null,
-          notificationEmail: data.notificationEmail || null,
-          emailNotifications: data.emailNotifications ?? true
-        }
-      })
-      return settings
-    }
-  } catch (error) {
-    console.error('Error updating contact settings:', error)
-    throw new Error('Failed to update contact settings')
-  }
-}
-
-// Validation functions
-export function validateContactData(data: CreateContactData): { isValid: boolean; errors: string[] } {
+// Validation
+export function validateContactData(data: any) {
   const errors: string[] = []
   
-  if (!data.name || data.name.trim().length === 0) {
-    errors.push('Name is required')
+  if (!data.name || data.name.trim().length < 2) {
+    errors.push('Name must be at least 2 characters long')
   }
   
-  if (!data.email || data.email.trim().length === 0) {
-    errors.push('Email is required')
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-    errors.push('Invalid email format')
+  if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+    errors.push('Valid email address is required')
   }
   
-  if (!data.message || data.message.trim().length === 0) {
-    errors.push('Message is required')
+  if (!data.message || data.message.trim().length < 10) {
+    errors.push('Message must be at least 10 characters long')
   }
   
-  if (data.phone && data.phone.trim().length > 0) {
-    // Basic phone validation - allows various formats
-    const phoneRegex = /^[\+]?[1-9][\d\s\-\(\)]{7,15}$/
-    if (!phoneRegex.test(data.phone.replace(/\s/g, ''))) {
-      errors.push('Invalid phone number format')
-    }
+  if (data.phone && !/^[\+]?[1-9][\d\s\-\(\)]{7,}$/.test(data.phone)) {
+    errors.push('Invalid phone number format')
   }
   
   return {
@@ -247,25 +72,226 @@ export function validateContactData(data: CreateContactData): { isValid: boolean
   }
 }
 
-// Statistics
-export async function getContactStats() {
-  try {
-    const [total, newContacts, readContacts, repliedContacts] = await Promise.all([
-      prisma.contact.count(),
-      prisma.contact.count({ where: { status: 'new' } }),
-      prisma.contact.count({ where: { status: 'read' } }),
-      prisma.contact.count({ where: { status: 'replied' } })
-    ])
-    
-    return {
-      total,
-      new: newContacts,
-      read: readContacts,
-      replied: repliedContacts,
-      archived: total - newContacts - readContacts - repliedContacts
+// Contact CRUD operations
+export async function createContact(data: Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>): Promise<Contact> {
+  const result = await query(
+    `INSERT INTO contacts (name, email, phone, subject, message, status, ip_address, user_agent, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
+     RETURNING *`,
+    [data.name, data.email, data.phone, data.subject, data.message, data.status || 'NEW', data.ipAddress, data.userAgent]
+  )
+  
+  return mapContactFromDb(result.rows[0])
+}
+
+export async function fetchContacts(limit = 50, offset = 0): Promise<Contact[]> {
+  const result = await query(
+    `SELECT * FROM contacts ORDER BY created_at DESC LIMIT $1 OFFSET $2`,
+    [limit, offset]
+  )
+  
+  return result.rows.map(mapContactFromDb)
+}
+
+export async function fetchContact(id: string): Promise<Contact | null> {
+  const result = await query(
+    `SELECT * FROM contacts WHERE id = $1`,
+    [id]
+  )
+  
+  return result.rows.length > 0 ? mapContactFromDb(result.rows[0]) : null
+}
+
+export async function updateContact(id: string, data: Partial<Contact>): Promise<Contact | null> {
+  const fields = []
+  const values = []
+  let paramCount = 1
+  
+  Object.entries(data).forEach(([key, value]) => {
+    if (value !== undefined && key !== 'id' && key !== 'createdAt') {
+      const dbKey = key === 'ipAddress' ? 'ip_address' : key === 'userAgent' ? 'user_agent' : key === 'updatedAt' ? 'updated_at' : key
+      fields.push(`${dbKey} = $${paramCount}`)
+      values.push(value)
+      paramCount++
     }
-  } catch (error) {
-    console.error('Error fetching contact stats:', error)
-    throw new Error('Failed to fetch contact statistics')
+  })
+  
+  if (fields.length === 0) return null
+  
+  fields.push(`updated_at = NOW()`)
+  values.push(id)
+  
+  const result = await query(
+    `UPDATE contacts SET ${fields.join(', ')} WHERE id = $${paramCount} RETURNING *`,
+    values
+  )
+  
+  return result.rows.length > 0 ? mapContactFromDb(result.rows[0]) : null
+}
+
+export async function deleteContact(id: string): Promise<boolean> {
+  const result = await query(
+    `DELETE FROM contacts WHERE id = $1`,
+    [id]
+  )
+  
+  return result.rowCount > 0
+}
+
+// Contact Settings operations
+export async function fetchContactSettings(): Promise<ContactSettings | null> {
+  const result = await query(
+    `SELECT * FROM contact_settings ORDER BY created_at DESC LIMIT 1`
+  )
+  
+  return result.rows.length > 0 ? mapContactSettingsFromDb(result.rows[0]) : null
+}
+
+export async function updateContactSettings(data: Partial<ContactSettings>): Promise<ContactSettings> {
+  // First try to update existing settings
+  const existing = await fetchContactSettings()
+  
+  if (existing) {
+    const fields = []
+    const values = []
+    let paramCount = 1
+    
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== undefined && key !== 'id' && key !== 'createdAt') {
+        const dbKey = key === 'twitterUrl' ? 'twitter_url' : 
+                     key === 'linkedinUrl' ? 'linkedin_url' : 
+                     key === 'instagramUrl' ? 'instagram_url' : 
+                     key === 'behanceUrl' ? 'behance_url' : 
+                     key === 'enablePhoneField' ? 'enable_phone_field' : 
+                     key === 'requirePhoneField' ? 'require_phone_field' : 
+                     key === 'autoReplyEnabled' ? 'auto_reply_enabled' : 
+                     key === 'autoReplyMessage' ? 'auto_reply_message' : 
+                     key === 'notificationEmail' ? 'notification_email' : 
+                     key === 'emailNotifications' ? 'email_notifications' : 
+                     key === 'workingHours' ? 'working_hours' : 
+                     key === 'updatedAt' ? 'updated_at' : key
+        fields.push(`${dbKey} = $${paramCount}`)
+        values.push(value)
+        paramCount++
+      }
+    })
+    
+    fields.push(`updated_at = NOW()`)
+    values.push(existing.id)
+    
+    const result = await query(
+      `UPDATE contact_settings SET ${fields.join(', ')} WHERE id = $${paramCount} RETURNING *`,
+      values
+    )
+    
+    return mapContactSettingsFromDb(result.rows[0])
+  } else {
+    // Create new settings
+    const result = await query(
+      `INSERT INTO contact_settings (
+        email, phone, address, working_hours, twitter_url, linkedin_url, 
+        instagram_url, behance_url, enable_phone_field, require_phone_field, 
+        auto_reply_enabled, auto_reply_message, notification_email, 
+        email_notifications, created_at, updated_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
+      RETURNING *`,
+      [
+        data.email || 'hello@zoolyum.com',
+        data.phone || '+1 (555) 123-4567',
+        data.address || '123 Creative Street, Design District, San Francisco, CA 94103',
+        data.workingHours || 'Monday - Friday: 9:00 AM - 6:00 PM',
+        data.twitterUrl,
+        data.linkedinUrl,
+        data.instagramUrl,
+        data.behanceUrl,
+        data.enablePhoneField ?? true,
+        data.requirePhoneField ?? false,
+        data.autoReplyEnabled ?? false,
+        data.autoReplyMessage,
+        data.notificationEmail,
+        data.emailNotifications ?? true
+      ]
+    )
+    
+    return mapContactSettingsFromDb(result.rows[0])
+  }
+}
+
+// Contact Stats
+export async function getContactStats(): Promise<ContactStats> {
+  const [totalResult, statusResult, monthlyResult] = await Promise.all([
+    query(`SELECT COUNT(*) as total FROM contacts`),
+    query(`
+      SELECT status, COUNT(*) as count 
+      FROM contacts 
+      GROUP BY status
+    `),
+    query(`
+      SELECT 
+        COUNT(CASE WHEN created_at >= date_trunc('month', CURRENT_DATE) THEN 1 END) as this_month,
+        COUNT(CASE WHEN created_at >= date_trunc('month', CURRENT_DATE - INTERVAL '1 month') 
+                   AND created_at < date_trunc('month', CURRENT_DATE) THEN 1 END) as last_month
+      FROM contacts
+    `)
+  ])
+  
+  const total = parseInt(totalResult.rows[0].total)
+  const statusCounts = statusResult.rows.reduce((acc: any, row: any) => {
+    acc[row.status.toLowerCase()] = parseInt(row.count)
+    return acc
+  }, {})
+  
+  const thisMonth = parseInt(monthlyResult.rows[0].this_month)
+  const lastMonth = parseInt(monthlyResult.rows[0].last_month)
+  const growth = lastMonth > 0 ? ((thisMonth - lastMonth) / lastMonth) * 100 : 0
+  
+  return {
+    total,
+    new: statusCounts.new || 0,
+    read: statusCounts.read || 0,
+    replied: statusCounts.replied || 0,
+    archived: statusCounts.archived || 0,
+    thisMonth,
+    lastMonth,
+    growth: Math.round(growth * 100) / 100
+  }
+}
+
+// Helper functions to map database rows to TypeScript objects
+function mapContactFromDb(row: any): Contact {
+  return {
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    phone: row.phone,
+    subject: row.subject,
+    message: row.message,
+    status: row.status,
+    ipAddress: row.ip_address,
+    userAgent: row.user_agent,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  }
+}
+
+function mapContactSettingsFromDb(row: any): ContactSettings {
+  return {
+    id: row.id,
+    email: row.email,
+    phone: row.phone,
+    address: row.address,
+    workingHours: row.working_hours,
+    twitterUrl: row.twitter_url,
+    linkedinUrl: row.linkedin_url,
+    instagramUrl: row.instagram_url,
+    behanceUrl: row.behance_url,
+    enablePhoneField: row.enable_phone_field,
+    requirePhoneField: row.require_phone_field,
+    autoReplyEnabled: row.auto_reply_enabled,
+    autoReplyMessage: row.auto_reply_message,
+    notificationEmail: row.notification_email,
+    emailNotifications: row.email_notifications,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
   }
 }

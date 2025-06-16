@@ -36,6 +36,7 @@ export async function POST(request: NextRequest) {
       phone: phone?.trim() || undefined,
       subject: subject?.trim() || undefined,
       message: message?.trim(),
+      status: 'NEW' as const,
       ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || undefined,
       userAgent: request.headers.get('user-agent') || undefined
     }
