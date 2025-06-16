@@ -6,7 +6,7 @@ import Image from "next/image"
 import { PageTransition } from "@/components/page-transition"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { ScrollIndicator } from "@/components/scroll-animations/scroll-indicator"
+
 import { ServiceCard3D } from "@/components/service-card-3d"
 import { TestimonialCard3D } from "@/components/testimonial-card-3d"
 import { ScrollReveal } from "@/components/scroll-animations/scroll-reveal"
@@ -25,7 +25,7 @@ export default function Home() {
     <PageTransition>
       <div className="min-h-screen bg-[#161616] text-[#E9E7E2]">
         <Header />
-        <ScrollIndicator />
+
 
         <main>
           {/* Hero Section */}
