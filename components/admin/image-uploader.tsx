@@ -169,8 +169,9 @@ export function ImageUploader({
     try {
       setIsUploading(true)
 
-      // If it's an external URL, just remove it without calling the API
-      if (!imageUrl.includes("supabase")) {
+      // For external URLs, just remove them without calling the API
+      // For uploaded files, we'll try to delete them from storage
+      if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
         setImageUrl(null)
         onImageChange(null)
         toast({

@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { pool } from '@/lib/postgres';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 interface BlogPost {
   id: string;
@@ -23,39 +25,38 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const published = searchParams.get('published');
     
-    let query = 'SELECT * FROM blog_posts';
-    const params: any[] = [];
+    const whereClause = published !== null ? { published: published === 'true' } : {};
     
-    if (published !== null) {
-      query += ' WHERE published = $1';
-      params.push(published === 'true');
-    }
+    const blogPosts = await prisma.blogPost.findMany({
+      where: whereClause,
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
     
-    query += ' ORDER BY created_at DESC';
-    
-    const result = await pool.query(query, params);
-    
-    const blogPosts = result.rows.map(row => ({
-      id: row.id,
-      title: row.title,
-      slug: row.slug,
-      excerpt: row.excerpt,
-      content: row.content,
-      imageUrl: row.image_url,
-      published: row.published,
-      tags: row.tags || [],
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-      authorId: row.author_id
+    const formattedPosts = blogPosts.map(post => ({
+      id: post.id,
+      title: post.title,
+      slug: post.slug,
+      excerpt: post.excerpt,
+      content: post.content,
+      imageUrl: post.imageUrl,
+      published: post.published,
+      tags: post.tags,
+      createdAt: post.createdAt.toISOString(),
+      updatedAt: post.updatedAt.toISOString(),
+      authorId: post.authorId
     }));
     
-    return NextResponse.json(blogPosts);
+    return NextResponse.json(formattedPosts);
   } catch (error) {
     console.error('Error fetching blog posts:', error);
     return NextResponse.json(
       { error: 'Failed to fetch blog posts' },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
@@ -83,12 +84,11 @@ export async function POST(request: NextRequest) {
     }
     
     // Check if slug already exists
-    const existingPost = await pool.query(
-      'SELECT id FROM blog_posts WHERE slug = $1',
-      [slug]
-    );
+    const existingPost = await prisma.blogPost.findUnique({
+      where: { slug }
+    });
     
-    if (existingPost.rows.length > 0) {
+    if (existingPost) {
       return NextResponse.json(
         { error: 'A blog post with this slug already exists' },
         { status: 409 }
@@ -96,24 +96,18 @@ export async function POST(request: NextRequest) {
     }
     
     // Create the blog post
-    const result = await pool.query(
-      `INSERT INTO blog_posts 
-       (title, slug, excerpt, content, image_url, published, tags, author_id) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
-       RETURNING *`,
-      [
+    const newPost = await prisma.blogPost.create({
+      data: {
         title,
         slug,
         excerpt,
         content,
-        imageUrl || null,
-        published || false,
-        JSON.stringify(tags || []),
-        session.user.email
-      ]
-    );
-    
-    const newPost = result.rows[0];
+        imageUrl: imageUrl || null,
+        published: published || false,
+        tags: tags || [],
+        authorId: session.user.email
+      }
+    });
     
     const blogPost = {
       id: newPost.id,
@@ -121,20 +115,30 @@ export async function POST(request: NextRequest) {
       slug: newPost.slug,
       excerpt: newPost.excerpt,
       content: newPost.content,
-      imageUrl: newPost.image_url,
+      imageUrl: newPost.imageUrl,
       published: newPost.published,
-      tags: JSON.parse(newPost.tags || '[]'),
-      createdAt: newPost.created_at,
-      updatedAt: newPost.updated_at,
-      authorId: newPost.author_id
+      tags: newPost.tags,
+      createdAt: newPost.createdAt.toISOString(),
+      updatedAt: newPost.updatedAt.toISOString(),
+      authorId: newPost.authorId
     };
     
     return NextResponse.json(blogPost, { status: 201 });
   } catch (error) {
     console.error('Error creating blog post:', error);
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      return NextResponse.json(
+        { error: `Failed to create blog post: ${error.message}` },
+        { status: 500 }
+      );
+    }
     return NextResponse.json(
       { error: 'Failed to create blog post' },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }

@@ -42,9 +42,12 @@ export default function AdminDashboard() {
         const testimonialsRes = await fetch('/api/testimonials');
         const testimonials = testimonialsRes.ok ? await testimonialsRes.json() : [];
         
-        // Mock data for projects and blog posts (you can implement these APIs later)
+        // Fetch blog posts
+        const blogPostsRes = await fetch('/api/blog-posts');
+        const blogPosts = blogPostsRes.ok ? await blogPostsRes.json() : [];
+
+        // Mock data for projects (you can implement these APIs later)
         const projects = [];
-        const blogPosts = [];
         
         // Create recent activity from available data
         const recentActivity = [
@@ -59,6 +62,12 @@ export default function AdminDashboard() {
             type: 'testimonial' as const,
             title: `New testimonial from ${testimonial.name}`,
             date: new Date(testimonial.created_at).toLocaleDateString()
+          })),
+          ...blogPosts.slice(0, 3).map((post: any) => ({
+            id: post.id,
+            type: 'blog' as const,
+            title: `New blog post: ${post.title}`,
+            date: new Date(post.created_at).toLocaleDateString()
           }))
         ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5);
         

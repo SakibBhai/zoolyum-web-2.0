@@ -1,5 +1,9 @@
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
+import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
+
+const prisma = new PrismaClient()
 
 // Extend the built-in session types
 declare module 'next-auth' {
@@ -45,25 +49,35 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          // Simple hardcoded admin authentication (replace with your preferred auth method)
-          const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com'
-          const adminPassword = process.env.ADMIN_PASSWORD || 'admin123'
+          // Database-based admin authentication
+          const adminUser = await prisma.adminUser.findUnique({
+            where: { email: credentials.email }
+          });
 
-          if (credentials.email !== adminEmail || credentials.password !== adminPassword) {
-            console.error(`Invalid credentials for: ${credentials.email}`);
+          if (!adminUser) {
+            console.error(`Admin user not found: ${credentials.email}`);
+            throw new Error('Invalid email or password');
+          }
+
+          const isValidPassword = await bcrypt.compare(credentials.password, adminUser.password);
+          
+          if (!isValidPassword) {
+            console.error(`Invalid password for: ${credentials.email}`);
             throw new Error('Invalid email or password');
           }
 
           console.log(`Admin authenticated successfully: ${credentials.email}`);
           return {
-            id: '1',
-            email: credentials.email,
-            name: 'Admin',
-            role: 'ADMIN',
+            id: adminUser.id,
+            email: adminUser.email,
+            name: adminUser.name,
+            role: adminUser.role,
           }
         } catch (error) {
           console.error('Authentication error:', error);
           throw error;
+        } finally {
+          await prisma.$disconnect();
         }
       },
     }),

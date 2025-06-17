@@ -72,7 +72,8 @@ export async function createBlogPost(data: CreateBlogPostData): Promise<BlogPost
       }),
     });
     if (!response.ok) {
-      throw new Error('Failed to create blog post');
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to create blog post');
     }
     const post = await response.json();
     return post;

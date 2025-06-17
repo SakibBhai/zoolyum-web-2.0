@@ -164,7 +164,7 @@ export default function NewBlogPostPage() {
           <InfoIcon className="h-4 w-4" />
           <AlertTitle>Using External Images</AlertTitle>
           <AlertDescription>
-            The Supabase storage bucket is not set up yet. Please use external image URLs for now. You can upload images
+            Please use external image URLs for now. You can upload images
             to services like Imgur, ImgBB, or PostImages and then use the URL.
           </AlertDescription>
         </Alert>

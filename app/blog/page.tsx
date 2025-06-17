@@ -5,7 +5,8 @@ import Link from "next/link"
 import { PageTransition } from "@/components/page-transition"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { BlogCard3D } from "@/components/blog-card-3d"
+import Image from "next/image"
+import { Calendar } from "lucide-react"
 import { ScrollReveal } from "@/components/scroll-animations/scroll-reveal"
 import { StaggerReveal } from "@/components/scroll-animations/stagger-reveal"
 import { PageHeadline } from "@/components/page-headline"
@@ -27,7 +28,36 @@ export default function BlogPage() {
 
             <StaggerReveal className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {blogPosts.map((post, index) => (
-                <BlogCard3D key={index} post={post} index={index} />
+                <div key={index} className="group">
+                  <Link href={`/blog/${post.slug}`} className="block">
+                    <div className="h-full flex flex-col bg-[#1A1A1A] rounded-xl overflow-hidden transition-all duration-300 hover:bg-[#252525]">
+                      <div className="overflow-hidden">
+                        <Image
+                          src={post.image || "/placeholder.svg"}
+                          alt={post.title}
+                          width={600}
+                          height={400}
+                          className="w-full aspect-[3/2] object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </div>
+                      <div className="p-6 flex-grow flex flex-col">
+                        <div className="flex items-center text-[#E9E7E2]/60 text-sm mb-2">
+                          <Calendar className="w-4 h-4 mr-2" />
+                          <span>{post.date}</span>
+                        </div>
+                        <h3 className="text-xl font-bold group-hover:text-[#FF5001] transition-colors">{post.title}</h3>
+                        <p className="text-[#E9E7E2]/70 mt-2 flex-grow">{post.excerpt}</p>
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {post.tags.map((tag, i) => (
+                            <span key={i} className="px-3 py-1 bg-[#252525] rounded-full text-xs">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                </div>
               ))}
             </StaggerReveal>
 

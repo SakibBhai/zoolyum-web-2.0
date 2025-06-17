@@ -18,7 +18,6 @@ This project has been migrated from Prisma to PostgreSQL with native SQL queries
 
 **Cloud Options:**
 - [Neon](https://neon.tech/) - Serverless PostgreSQL
-- [Supabase](https://supabase.com/) - Open source Firebase alternative
 - [Railway](https://railway.app/) - Simple cloud deployment
 - [Heroku Postgres](https://www.heroku.com/postgres) - Managed PostgreSQL
 
