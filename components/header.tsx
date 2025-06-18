@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import { Menu } from "lucide-react"
+import Image from "next/image"
 import { MobileMenu } from "./mobile-menu"
 import { EnhancedLink, EnhancedButton } from "./interactive-elements"
 import { MagneticElement } from "./magnetic-element"
@@ -27,12 +28,19 @@ export function Header() {
         <MagneticElement
           as="a"
           href="/"
-          className="text-[#FF5001] font-bold text-xl"
+          className="flex items-center"
           strength={30}
           cursorType="link"
           cursorText="Home"
         >
-          Zoolyum
+          <Image
+            src="/zoolyum-logo.svg"
+            alt="Zoolyum Logo"
+            width={40}
+            height={40}
+            className="w-8 h-8 md:w-10 md:h-10 transition-all duration-300 hover:scale-105"
+            priority
+          />
         </MagneticElement>
 
         <nav className="hidden md:flex space-x-8">
@@ -45,15 +53,11 @@ export function Header() {
           <NavLink href="/portfolio" isActive={isActive("/portfolio")}>
             Portfolio
           </NavLink>
-          <NavLink href="/team" isActive={isActive("/team")}>
-            Team
-          </NavLink>
+
           <NavLink href="/contact" isActive={isActive("/contact")}>
             Contact
           </NavLink>
-          <NavLink href="/admin/login" isActive={isActive("/admin/login")}>
-            Admin
-          </NavLink>
+
         </nav>
 
         <EnhancedButton
