@@ -70,3 +70,23 @@ model Testimonial {
 
   @@map("testimonials")
 }
+
+model TeamMember {
+  id          String   @id @default(cuid())
+  name        String
+  position    String?
+  designation String?  // New field for official designation
+  websiteTag  String?  @map("website_tag") // New field for website tag
+  bio         String?
+  imageUrl    String?  @map("image_url")
+  email       String?
+  linkedin    String?
+  twitter     String?
+  status      String   @default("ACTIVE")
+  order       Int      @default(0)
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("team_members")
+}
