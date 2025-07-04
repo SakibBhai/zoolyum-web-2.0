@@ -4,10 +4,10 @@ import { query } from "./postgres";
 export interface Testimonial {
   id: string;
   name: string;
-  position: string;
-  company: string;
+  position: string | null;
+  company: string | null;
   content: string;
-  rating: number;
+  rating: number | null;
   imageUrl?: string;
   featured: boolean;
   approved: boolean;
@@ -253,6 +253,15 @@ export async function getTestimonialStats(): Promise<TestimonialStats> {
     lastMonth,
     growth: Math.round(growth * 100) / 100,
   };
+}
+
+// Get testimonial by ID
+export async function getTestimonialById(
+  id: string
+): Promise<Testimonial | null> {
+  const result = await query(`SELECT * FROM testimonials WHERE id = $1`, [id]);
+
+  return result.rows.length > 0 ? mapTestimonialFromDb(result.rows[0]) : null;
 }
 
 // Helper function to map database rows to TypeScript objects

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,7 +8,6 @@ import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
   Card,
@@ -36,7 +35,8 @@ import {
 import { ImageUploader } from "@/components/admin/image-uploader";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const testimonialSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -51,9 +51,15 @@ const testimonialSchema = z.object({
 
 type TestimonialFormData = z.infer<typeof testimonialSchema>;
 
-export default function NewTestimonialPage() {
+export default function EditTestimonialPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(true);
 
   const form = useForm<TestimonialFormData>({
     resolver: zodResolver(testimonialSchema),
@@ -69,29 +75,103 @@ export default function NewTestimonialPage() {
     },
   });
 
-  const onSubmit = async (data: TestimonialFormData) => {
-    startTransition(async () => {
+  useEffect(() => {
+    const fetchTestimonial = async () => {
       try {
-        const response = await fetch("/api/testimonials", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        });
-
+        const response = await fetch(`/api/testimonials/${params.id}`);
         if (!response.ok) {
-          throw new Error("Failed to create testimonial");
+          throw new Error("Failed to fetch testimonial");
         }
+        const testimonial = await response.json();
 
-        toast.success("Testimonial created successfully");
-        router.push("/admin/testimonials");
+        form.reset({
+          name: testimonial.name || "",
+          position: testimonial.position || "",
+          company: testimonial.company || "",
+          content: testimonial.content || "",
+          rating: testimonial.rating || 5,
+          imageUrl: testimonial.imageUrl || "",
+          featured: testimonial.featured || false,
+          order: testimonial.order || 0,
+        });
       } catch (error) {
-        console.error("Error creating testimonial:", error);
-        toast.error("Failed to create testimonial");
+        console.error("Error fetching testimonial:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load testimonial",
+          variant: "destructive",
+        });
+        router.push("/admin/testimonials");
+      } finally {
+        setIsLoadingData(false);
       }
-    });
+    };
+
+    fetchTestimonial();
+  }, [params.id, form, toast, router]);
+
+  const onSubmit = async (data: TestimonialFormData) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/testimonials/${params.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update testimonial");
+      }
+
+      toast({
+        title: "Success",
+        description: "Testimonial updated successfully",
+      });
+
+      router.push("/admin/testimonials");
+    } catch (error) {
+      console.error("Error updating testimonial:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update testimonial",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  if (isLoadingData) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-10 w-10" />
+          <div>
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-32 mt-2" />
+          </div>
+        </div>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-40" />
+            <Skeleton className="h-4 w-64" />
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Skeleton className="h-10" />
+              <Skeleton className="h-10" />
+              <Skeleton className="h-10" />
+              <Skeleton className="h-10" />
+            </div>
+            <Skeleton className="h-32" />
+            <Skeleton className="h-40" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -102,9 +182,9 @@ export default function NewTestimonialPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-3xl font-bold">Add New Testimonial</h1>
+          <h1 className="text-3xl font-bold">Edit Testimonial</h1>
           <p className="text-muted-foreground">
-            Create a new client testimonial
+            Update testimonial information
           </p>
         </div>
       </div>
@@ -113,7 +193,7 @@ export default function NewTestimonialPage() {
         <CardHeader>
           <CardTitle>Testimonial Details</CardTitle>
           <CardDescription>
-            Fill in the information below to create a new testimonial
+            Update the information below to modify the testimonial
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -175,7 +255,7 @@ export default function NewTestimonialPage() {
                         onValueChange={(value) =>
                           field.onChange(parseInt(value))
                         }
-                        defaultValue={field.value?.toString()}
+                        value={field.value?.toString()}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -278,7 +358,7 @@ export default function NewTestimonialPage() {
                         />
                       </FormControl>
                       <FormDescription>
-                        Lower numbers appear first (0 = auto-assign)
+                        Lower numbers appear first
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -287,13 +367,18 @@ export default function NewTestimonialPage() {
               </div>
 
               <div className="flex gap-4">
-                <Button type="submit" disabled={isPending}>
-                  {isPending ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Updating...
+                    </>
                   ) : (
-                    <Save className="mr-2 h-4 w-4" />
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Update Testimonial
+                    </>
                   )}
-                  {isPending ? "Creating..." : "Create Testimonial"}
                 </Button>
                 <Link href="/admin/testimonials">
                   <Button type="button" variant="outline">

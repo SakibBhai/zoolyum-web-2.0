@@ -8,7 +8,9 @@ interface EditTestimonialPageProps {
 }
 
 // Server Component - Main page wrapper
-export default async function EditTestimonialPage({ params }: EditTestimonialPageProps) {
+export default async function EditTestimonialPage({
+  params,
+}: EditTestimonialPageProps) {
   const { id } = await params;
 
   return (

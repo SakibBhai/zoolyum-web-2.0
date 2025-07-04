@@ -26,33 +26,13 @@ async function SettingsWrapper() {
 // Server-side data fetching function
 async function getSettings() {
   try {
-    // Fetch settings from API route
-    const response = await fetch(
-      `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/settings`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        cache: "no-store", // Ensure fresh data
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch settings");
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error("Error fetching settings:", error);
-
-    // Return default settings if fetch fails
+    // Mock settings for now - in a real app, fetch from database
     return {
       siteName: "Zoolyum",
       siteDescription: "Creative Design Studio",
       contactEmail: "hello@zoolyum.com",
       contactPhone: "+1 (555) 123-4567",
       address: "123 Creative Street, Design City, DC 12345",
-      logo: "",
       socialLinks: {
         twitter: "https://twitter.com/zoolyum",
         facebook: "https://facebook.com/zoolyum",
@@ -69,5 +49,8 @@ async function getSettings() {
         keywords: ["design", "creative", "studio"],
       },
     };
+  } catch (error) {
+    console.error("Error fetching settings:", error);
+    return null;
   }
 }
