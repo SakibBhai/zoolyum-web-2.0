@@ -45,7 +45,24 @@ import {
   Download,
   BarChart3
 } from 'lucide-react'
-import { format } from 'date-fns'
+
+// Helper function to format dates
+const formatDate = (date: Date, formatType: 'short' | 'full' = 'short') => {
+  if (formatType === 'short') {
+    return date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: '2-digit', 
+      year: 'numeric' 
+    })
+  }
+  return date.toLocaleDateString('en-US', { 
+    month: 'short', 
+    day: '2-digit', 
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
 
 interface Contact {
   id: string
@@ -381,7 +398,7 @@ export default function ContactsAdminPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-[#E9E7E2]">
-                    {format(new Date(contact.createdAt), 'MMM dd, yyyy')}
+                    {formatDate(new Date(contact.createdAt), 'short')}
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
@@ -460,7 +477,7 @@ export default function ContactsAdminPage() {
                                 <div>
                                   <Label className="text-sm font-medium">Submitted</Label>
                                   <p className="text-[#E9E7E2] mt-1">
-                                    {format(new Date(selectedContact.createdAt), 'PPpp')}
+                                    {formatDate(new Date(selectedContact.createdAt), 'full')}
                                   </p>
                                 </div>
                               </div>
@@ -469,7 +486,7 @@ export default function ContactsAdminPage() {
                         </DialogContent>
                       </Dialog>
                       <Button
-                        variant="outline"
+                        variant="destructive"
                         size="sm"
                         className="border-red-500 text-red-400 hover:bg-red-500/10"
                         onClick={() => deleteContact(contact.id)}

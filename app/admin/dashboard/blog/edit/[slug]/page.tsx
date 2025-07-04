@@ -223,7 +223,7 @@ export default function EditBlogPostPage({ params }: { params: { slug: string } 
             <ImageUploader
               label="Featured Image"
               initialImageUrl={formData.image_url}
-              onImageChange={handleImageChange}
+              onImageChangeAction={handleImageChange}
               helpText="Upload a featured image for your blog post (16:9 ratio recommended)"
             />
           </div>
@@ -233,8 +233,8 @@ export default function EditBlogPostPage({ params }: { params: { slug: string } 
               Content
             </label>
             <RichTextEditor
-              initialValue={formData.content}
-              onChange={handleContentChange}
+              value={formData.content}
+              onChangeAction={handleContentChange}
               placeholder="Write your post content here..."
               minHeight="400px"
             />

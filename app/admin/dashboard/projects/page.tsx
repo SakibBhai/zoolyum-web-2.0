@@ -3,15 +3,15 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { fetchProjects, deleteProject } from "@/lib/project-operations"
+import { fetchProjects, deleteProject, Project } from "@/lib/project-operations"
 import { PageTransition } from "@/components/page-transition"
 import { Plus, Edit, Trash2, Eye, Search } from "lucide-react"
 
 export default function ProjectsManagementPage() {
-  const [projects, setProjects] = useState([])
+  const [projects, setProjects] = useState<Project[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
-  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -46,7 +46,7 @@ export default function ProjectsManagementPage() {
     })
   }
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (deleteConfirm !== id) {
       setDeleteConfirm(id)
       return
@@ -54,7 +54,7 @@ export default function ProjectsManagementPage() {
 
     try {
       await deleteProject(id)
-      setProjects(projects.filter((project: any) => project.id !== id))
+      setProjects(projects.filter((project: Project) => project.id !== id))
       setDeleteConfirm(null)
     } catch (error) {
       console.error("Error deleting project:", error)

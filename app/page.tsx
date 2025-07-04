@@ -103,21 +103,18 @@ export default function Home() {
                 mobileStaggerDelay={0.05}
                 mobileAnimation="fade"
               >
-                <ServiceCard3D
-                  title="Brand Strategy"
-                  description="Developing comprehensive brand strategies that position your business for success in competitive markets."
-                  icon="strategy"
-                />
-                <ServiceCard3D
-                  title="Digital Transformation"
-                  description="Creating digital ecosystems that amplify your brand's presence and engage audiences across platforms."
-                  icon="globe"
-                />
-                <ServiceCard3D
-                  title="Creative Direction"
-                  description="Providing expert guidance to navigate complex brand challenges and identify growth opportunities."
-                  icon="compass"
-                />
+                <div className="p-6 bg-[#1A1A1A] rounded-xl border border-[#333333]">
+                  <h3 className="text-xl font-bold mb-2">Brand Strategy</h3>
+                  <p className="text-[#E9E7E2]/70">Strategic brand positioning and identity development</p>
+                </div>
+                <div className="p-6 bg-[#1A1A1A] rounded-xl border border-[#333333]">
+                  <h3 className="text-xl font-bold mb-2">Digital Design</h3>
+                  <p className="text-[#E9E7E2]/70">Modern digital experiences and user interfaces</p>
+                </div>
+                <div className="p-6 bg-[#1A1A1A] rounded-xl border border-[#333333]">
+                  <h3 className="text-xl font-bold mb-2">Growth Marketing</h3>
+                  <p className="text-[#E9E7E2]/70">Data-driven marketing strategies for scalable growth</p>
+                </div>
               </StaggerReveal>
 
               <ScrollReveal className="mt-10 md:mt-12 text-center" delay={0.3} mobileDelay={0.2} mobileAnimation="fade">

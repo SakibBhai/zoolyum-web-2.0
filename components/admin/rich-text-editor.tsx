@@ -33,21 +33,21 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 interface RichTextEditorProps {
-  initialValue?: string
-  onChange: (content: string) => void
+  value: string
+  onChangeAction: (content: string) => void
   placeholder?: string
   minHeight?: string
   folder?: string
 }
 
 export function RichTextEditor({
-  initialValue = "",
-  onChange,
+  value,
+  onChangeAction,
   placeholder = "Write your content here...",
   minHeight = "300px",
   folder = "blog",
 }: RichTextEditorProps) {
-  const [content, setContent] = useState(initialValue)
+  const [content, setContent] = useState(value)
   const [imageUrl, setImageUrl] = useState("")
   const [imageAlt, setImageAlt] = useState("")
   const [externalUrl, setExternalUrl] = useState("")
@@ -64,8 +64,8 @@ export function RichTextEditor({
 
   // Set initial content once on mount
   useEffect(() => {
-    setContent(initialValue)
-  }, [initialValue])
+    setContent(value)
+  }, [value])
 
   // Check for storage bucket on component mount
   useEffect(() => {
@@ -98,7 +98,7 @@ export function RichTextEditor({
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newContent = e.target.value
     setContent(newContent)
-    onChange(newContent)
+    onChangeAction(newContent)
   }
 
   const insertAtCursor = (textToInsert: string) => {
@@ -112,7 +112,7 @@ export function RichTextEditor({
 
     const newContent = before + textToInsert + after
     setContent(newContent)
-    onChange(newContent)
+    onChangeAction(newContent)
 
     // Set cursor position after the inserted text
     setTimeout(() => {
@@ -327,7 +327,7 @@ export function RichTextEditor({
             </DialogHeader>
 
             {bucketError && (
-              <Alert variant="warning" className="mb-4">
+              <Alert variant="destructive" className="mb-4">
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Storage Not Available</AlertTitle>
                 <AlertDescription>Please use the Image URL tab to add images from external sources.</AlertDescription>

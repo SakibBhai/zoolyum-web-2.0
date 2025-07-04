@@ -1,4 +1,5 @@
 import { query } from './postgres'
+import { DatabaseError } from 'pg'
 
 // Types
 export interface Contact {
@@ -16,23 +17,12 @@ export interface Contact {
 }
 
 export interface ContactSettings {
-  id: string
-  email: string
-  phone: string
-  address: string
-  workingHours: string
-  twitterUrl?: string
-  linkedinUrl?: string
-  instagramUrl?: string
-  behanceUrl?: string
-  enablePhoneField: boolean
-  requirePhoneField: boolean
-  autoReplyEnabled: boolean
-  autoReplyMessage?: string
-  notificationEmail?: string
-  emailNotifications: boolean
-  createdAt: Date
-  updatedAt: Date
+  id: number;
+  email: string;
+  phone: string;
+  address: string;
+  hours: string;
+  updatedAt: Date;
 }
 
 export interface ContactStats {
@@ -135,85 +125,75 @@ export async function deleteContact(id: string): Promise<boolean> {
     [id]
   )
   
-  return result.rowCount > 0
+  return result?.rowCount ? result.rowCount > 0 : false
 }
 
 // Contact Settings operations
-export async function fetchContactSettings(): Promise<ContactSettings | null> {
-  const result = await query(
-    `SELECT * FROM contact_settings ORDER BY created_at DESC LIMIT 1`
-  )
-  
-  return result.rows.length > 0 ? mapContactSettingsFromDb(result.rows[0]) : null
+export class ContactOperationError extends Error {
+  constructor(message: string, public code?: string, public cause?: Error) {
+    super(message);
+    this.name = 'ContactOperationError';
+  }
 }
 
-export async function updateContactSettings(data: Partial<ContactSettings>): Promise<ContactSettings> {
-  // First try to update existing settings
-  const existing = await fetchContactSettings()
-  
-  if (existing) {
-    const fields = []
-    const values = []
-    let paramCount = 1
-    
-    Object.entries(data).forEach(([key, value]) => {
-      if (value !== undefined && key !== 'id' && key !== 'createdAt') {
-        const dbKey = key === 'twitterUrl' ? 'twitter_url' : 
-                     key === 'linkedinUrl' ? 'linkedin_url' : 
-                     key === 'instagramUrl' ? 'instagram_url' : 
-                     key === 'behanceUrl' ? 'behance_url' : 
-                     key === 'enablePhoneField' ? 'enable_phone_field' : 
-                     key === 'requirePhoneField' ? 'require_phone_field' : 
-                     key === 'autoReplyEnabled' ? 'auto_reply_enabled' : 
-                     key === 'autoReplyMessage' ? 'auto_reply_message' : 
-                     key === 'notificationEmail' ? 'notification_email' : 
-                     key === 'emailNotifications' ? 'email_notifications' : 
-                     key === 'workingHours' ? 'working_hours' : 
-                     key === 'updatedAt' ? 'updated_at' : key
-        fields.push(`${dbKey} = $${paramCount}`)
-        values.push(value)
-        paramCount++
-      }
-    })
-    
-    fields.push(`updated_at = NOW()`)
-    values.push(existing.id)
-    
+// Helper function to handle database errors
+function handleDatabaseError(error: unknown): never {
+  if (error instanceof DatabaseError) {
+    throw new ContactOperationError(
+      'Database operation failed',
+      error.code,
+      error
+    );
+  }
+  throw new ContactOperationError(
+    'An unexpected error occurred',
+    undefined,
+    error instanceof Error ? error : undefined
+  );
+}
+
+// Fetch contact settings with proper error handling
+export async function fetchContactSettings(): Promise<ContactSettings | null> {
+  try {
     const result = await query(
-      `UPDATE contact_settings SET ${fields.join(', ')} WHERE id = $${paramCount} RETURNING *`,
-      values
-    )
-    
-    return mapContactSettingsFromDb(result.rows[0])
-  } else {
-    // Create new settings
+      `SELECT * FROM contact_settings ORDER BY id DESC LIMIT 1`
+    );
+
+    return result.rows[0] ? mapContactSettingsFromDb(result.rows[0]) : null;
+  } catch (error) {
+    handleDatabaseError(error);
+  }
+}
+
+// Update contact settings with validation and error handling
+export async function updateContactSettings(settings: Partial<ContactSettings>): Promise<ContactSettings> {
+  try {
+    // Validate required fields
+    if (!settings.email || !settings.email.trim()) {
+      throw new ContactOperationError('Email is required');
+    }
+
     const result = await query(
-      `INSERT INTO contact_settings (
-        email, phone, address, working_hours, twitter_url, linkedin_url, 
-        instagram_url, behance_url, enable_phone_field, require_phone_field, 
-        auto_reply_enabled, auto_reply_message, notification_email, 
-        email_notifications, created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
-      RETURNING *`,
+      `
+      INSERT INTO contact_settings (email, phone, address, hours)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *
+      `,
       [
-        data.email || 'hello@zoolyum.com',
-        data.phone || '+1 (555) 123-4567',
-        data.address || '123 Creative Street, Design District, San Francisco, CA 94103',
-        data.workingHours || 'Monday - Friday: 9:00 AM - 6:00 PM',
-        data.twitterUrl,
-        data.linkedinUrl,
-        data.instagramUrl,
-        data.behanceUrl,
-        data.enablePhoneField ?? true,
-        data.requirePhoneField ?? false,
-        data.autoReplyEnabled ?? false,
-        data.autoReplyMessage,
-        data.notificationEmail,
-        data.emailNotifications ?? true
+        settings.email.trim(),
+        settings.phone?.trim() || '',
+        settings.address?.trim() || '',
+        settings.hours?.trim() || ''
       ]
-    )
-    
-    return mapContactSettingsFromDb(result.rows[0])
+    );
+
+    if (!result.rows[0]) {
+      throw new ContactOperationError('Failed to update contact settings');
+    }
+
+    return mapContactSettingsFromDb(result.rows[0]);
+  } catch (error) {
+    handleDatabaseError(error);
   }
 }
 
@@ -280,18 +260,7 @@ function mapContactSettingsFromDb(row: any): ContactSettings {
     email: row.email,
     phone: row.phone,
     address: row.address,
-    workingHours: row.working_hours,
-    twitterUrl: row.twitter_url,
-    linkedinUrl: row.linkedin_url,
-    instagramUrl: row.instagram_url,
-    behanceUrl: row.behance_url,
-    enablePhoneField: row.enable_phone_field,
-    requirePhoneField: row.require_phone_field,
-    autoReplyEnabled: row.auto_reply_enabled,
-    autoReplyMessage: row.auto_reply_message,
-    notificationEmail: row.notification_email,
-    emailNotifications: row.email_notifications,
-    createdAt: row.created_at,
+    hours: row.hours,
     updatedAt: row.updated_at
   }
 }

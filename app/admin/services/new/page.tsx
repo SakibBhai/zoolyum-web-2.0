@@ -200,7 +200,7 @@ export default function NewServicePage() {
                       <FormControl>
                         <ImageUploader
                           initialImageUrl={field.value || ''}
-                          onImageChange={field.onChange}
+                          onImageChangeAction={field.onChange}
                           folder="services"
                         />
                       </FormControl>

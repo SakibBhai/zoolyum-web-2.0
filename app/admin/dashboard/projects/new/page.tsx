@@ -289,15 +289,15 @@ export default function NewProjectPage() {
           <CardContent className="space-y-6">
             <ImageUploader
               label="Thumbnail Image *"
-              initialImageUrl={thumbnailUrl}
-              onImageChange={setThumbnailUrl}
+              initialImageUrl={thumbnailUrl || undefined}
+              onImageChangeAction={setThumbnailUrl}
               helpText="This image will be displayed in project cards (recommended: 16:9 ratio)"
             />
 
             <ImageUploader
               label="Hero Image"
-              initialImageUrl={heroImageUrl}
-              onImageChange={setHeroImageUrl}
+              initialImageUrl={heroImageUrl || undefined}
+              onImageChangeAction={setHeroImageUrl}
               helpText="This image will be displayed at the top of the project detail page"
             />
 

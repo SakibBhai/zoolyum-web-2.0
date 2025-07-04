@@ -8,8 +8,23 @@ import { Plus, Eye, Pencil, Trash } from 'lucide-react';
 import { BlogPostsSkeleton } from '@/components/admin/blog-posts-skeleton';
 
 // Client component for fetching blog posts data
+interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  published: boolean;
+  updatedAt: string;
+  author: { name: string };
+}
+
+interface DataTableBlogPost extends BlogPost {
+  authorName: string;
+  status: string;
+  actions: string;
+}
+
 function BlogPostsTable() {
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,7 +49,7 @@ function BlogPostsTable() {
 
 
   return (
-    <DataTable
+    <DataTable<DataTableBlogPost>
       data={posts.map(post => ({
         ...post,
         authorName: post.author?.name || 'Unknown',

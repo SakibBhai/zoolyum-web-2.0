@@ -2,6 +2,7 @@ import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
+import { NextRequest } from 'next/server'
 
 const prisma = new PrismaClient()
 
@@ -102,4 +103,21 @@ export const authOptions: NextAuthOptions = {
       return token
     },
   },
+}
+
+// Auth verification function for API routes
+export async function verifyAuth(request: NextRequest) {
+  const { getServerSession } = await import('next-auth/next')
+  
+  try {
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user) {
+      return { success: false, error: 'Unauthorized' }
+    }
+    
+    return { success: true, user: session.user }
+  } catch (error) {
+    return { success: false, error: 'Authentication failed' }
+  }
 }

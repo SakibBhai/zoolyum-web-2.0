@@ -104,6 +104,7 @@ export default function NewBlogPostPage() {
 
       const postData = {
         ...formData,
+        imageUrl: formData.image_url,
         tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : [],
       }
 
@@ -223,7 +224,7 @@ export default function NewBlogPostPage() {
             <ImageUploader
               label="Featured Image"
               initialImageUrl={formData.image_url}
-              onImageChange={handleImageChange}
+              onImageChangeAction={handleImageChange}
               helpText="Upload a featured image for your blog post (16:9 ratio recommended)"
               folder="blog-thumbnails"
             />
@@ -234,8 +235,8 @@ export default function NewBlogPostPage() {
               Content
             </label>
             <RichTextEditor
-              initialValue={formData.content}
-              onChange={handleContentChange}
+              value={formData.content}
+              onChangeAction={handleContentChange}
               placeholder="Write your post content here..."
               minHeight="400px"
               folder="blog-content"

@@ -278,9 +278,11 @@ export default function EditServicePage({ params }: EditServicePageProps) {
                       <FormLabel>Service Image</FormLabel>
                       <FormControl>
                         <ImageUploader
-                          value={field.value || ''}
-                          onChange={field.onChange}
+                          initialImageUrl={field.value || undefined}
+                          onImageChangeAction={field.onChange}
                           folder="services"
+                          label="Service Image"
+                          helpText="Upload an image for the service (optional)"
                         />
                       </FormControl>
                       <FormDescription>

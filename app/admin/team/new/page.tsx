@@ -209,7 +209,7 @@ export default function NewTeamMemberPage() {
                 <ImageUploader
                   label="Profile Image"
                   initialImageUrl={formData.imageUrl}
-                  onImageChange={(url) => handleInputChange('imageUrl', url || '')}
+                  onImageChangeAction={(url) => handleInputChange('imageUrl', url || '')}
                   folder="team"
                   helpText="Upload a square profile image (1:1 aspect ratio recommended). Accepted formats: JPG, PNG, WebP."
                 />

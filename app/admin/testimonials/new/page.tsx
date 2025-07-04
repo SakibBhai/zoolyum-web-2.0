@@ -207,7 +207,7 @@ export default function NewTestimonialPage() {
                       <ImageUploader
                         label="Upload client photo"
                         initialImageUrl={field.value}
-                        onImageChange={field.onChange}
+                        onImageChangeAction={field.onChange}
                         folder="testimonials"
                         helpText="Upload a photo of the client (optional)"
                       />

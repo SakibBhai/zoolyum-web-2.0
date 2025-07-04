@@ -72,7 +72,7 @@ export function StaggerReveal({
           hidden: { opacity: 0 },
           visible: {
             opacity: 1,
-            transition: { duration, ease: [0.22, 1, 0.36, 1] },
+            transition: { duration },
           },
         }
       case "slide":
@@ -84,7 +84,7 @@ export function StaggerReveal({
           visible: {
             x: 0,
             y: 0,
-            transition: { duration, ease: [0.22, 1, 0.36, 1] },
+            transition: { duration },
           },
         }
       case "scale":
@@ -93,7 +93,7 @@ export function StaggerReveal({
           visible: {
             scale: 1,
             opacity: 1,
-            transition: { duration, ease: [0.22, 1, 0.36, 1] },
+            transition: { duration },
           },
         }
       case "fade-scale":
@@ -102,7 +102,7 @@ export function StaggerReveal({
           visible: {
             opacity: 1,
             scale: 1,
-            transition: { duration, ease: [0.22, 1, 0.36, 1] },
+            transition: { duration },
           },
         }
       case "fade-slide":
@@ -126,7 +126,7 @@ export function StaggerReveal({
             opacity: 1,
             x: 0,
             y: 0,
-            transition: { duration, ease: [0.22, 1, 0.36, 1] },
+            transition: { duration },
           },
         }
     }

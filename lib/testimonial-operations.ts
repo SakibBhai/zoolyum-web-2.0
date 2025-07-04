@@ -159,7 +159,7 @@ export async function deleteTestimonial(id: string): Promise<boolean> {
     [id]
   )
   
-  return result.rowCount > 0
+  return result?.rowCount ? result.rowCount > 0 : false
 }
 
 // Featured testimonials

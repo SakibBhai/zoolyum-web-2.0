@@ -104,7 +104,7 @@ export function EnhancedCursor() {
 
       if (isInteractive) {
         setCursorState({
-          variant: cursorType || "link",
+          variant: (cursorType as CursorVariant) || "link",
           text: cursorText,
           color: cursorColor,
           size: cursorSize ? Number.parseInt(cursorSize) : undefined,

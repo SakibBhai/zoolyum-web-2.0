@@ -1,6 +1,57 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllTeamMembers, createTeamMember } from '@/lib/team-operations';
-import { verifyAuth } from '@/lib/auth';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
+
+interface ApiError {
+  message: string;
+  code?: string;
+  status: number;
+}
+
+interface TeamMemberData {
+  name: string;
+  role: string;
+  bio: string;
+  image: string;
+  social?: {
+    twitter?: string;
+    linkedin?: string;
+    github?: string;
+  };
+}
+
+// Error handler utility
+function handleApiError(error: unknown): NextResponse {
+  console.error('API Error:', error);
+  
+  const defaultError: ApiError = {
+    message: 'An unexpected error occurred',
+    status: 500
+  };
+
+  // If error is already an ApiError, use it directly
+  if (typeof error === 'object' && error !== null && 'status' in error) {
+    const apiError = error as ApiError;
+    return NextResponse.json(
+      { error: apiError.message || defaultError.message },
+      { status: apiError.status }
+    );
+  }
+
+  // If error is a standard Error instance
+  if (error instanceof Error) {
+    return NextResponse.json(
+      { error: error.message },
+      { status: defaultError.status }
+    );
+  }
+
+  return NextResponse.json(
+    { error: defaultError.message },
+    { status: defaultError.status }
+  );
+}
 
 // GET /api/team - Get all team members
 export async function GET() {
@@ -8,55 +59,47 @@ export async function GET() {
     const teamMembers = await getAllTeamMembers();
     return NextResponse.json(teamMembers);
   } catch (error) {
-    console.error('Error in GET /api/team:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch team members' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 
 // POST /api/team - Create new team member
 export async function POST(request: NextRequest) {
   try {
-    // Verify authentication
-    const authResult = await verifyAuth(request);
-    if (!authResult.success) {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    const body = await request.json();
+    const data = await request.json() as Partial<TeamMemberData>;
     
     // Validate required fields
-    if (!body.name) {
+    if (!data.name?.trim()) {
       return NextResponse.json(
         { error: 'Name is required' },
         { status: 400 }
       );
     }
 
-    const teamMember = await createTeamMember({
-      name: body.name,
-      position: body.position,
-      bio: body.bio,
-      imageUrl: body.imageUrl,
-      email: body.email,
-      linkedin: body.linkedin,
-      twitter: body.twitter,
-      status: body.status,
-      order: body.order,
-      featured: body.featured
-    });
+    const newTeamMember: TeamMemberData = {
+      name: data.name.trim(),
+      role: data.role?.trim() || '',
+      bio: data.bio?.trim() || '',
+      image: data.image?.trim() || '',
+      social: {
+        twitter: data.social?.twitter?.trim() || '',
+        linkedin: data.social?.linkedin?.trim() || '',
+        github: data.social?.github?.trim() || '',
+      }
+    };
 
-    return NextResponse.json(teamMember, { status: 201 });
+    const createdMember = await createTeamMember(newTeamMember);
+    return NextResponse.json(createdMember, { status: 201 });
   } catch (error) {
-    console.error('Error in POST /api/team:', error);
-    return NextResponse.json(
-      { error: 'Failed to create team member' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

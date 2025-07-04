@@ -488,7 +488,7 @@ export default function SettingsPage() {
                             <FormControl>
                               <RichTextEditor
                                 value={field.value || ''}
-                                onChange={field.onChange}
+                                onChangeAction={field.onChange}
                                 placeholder="Enter your footer content..."
                               />
                             </FormControl>
@@ -793,10 +793,10 @@ export default function SettingsPage() {
                               <FormLabel>Footer Logo</FormLabel>
                               <FormControl>
                                 <ImageUploader
-                                  value={field.value || ''}
-                                  onChange={field.onChange}
-                                  accept="image/*"
-                                  maxSize={2 * 1024 * 1024} // 2MB
+                                  initialImageUrl={field.value || undefined}
+                                  onImageChangeAction={field.onChange}
+                                  label="Footer Logo"
+                                  helpText="Upload a logo for your footer. Recommended size: 200x60px (max 2MB)"
                                 />
                               </FormControl>
                               <FormDescription>

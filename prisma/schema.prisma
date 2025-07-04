@@ -90,3 +90,25 @@ model TeamMember {
 
   @@map("team_members")
 }
+
+model Campaign {
+  id                String    @id @default(cuid())
+  title             String
+  slug              String    @unique
+  shortDescription  String?
+  content           String?
+  startDate         DateTime? @map("start_date")
+  endDate           DateTime? @map("end_date")
+  status            String    @default("DRAFT")
+  imageUrls         String[]  @map("image_urls")
+  videoUrls         String[]  @map("video_urls")
+  enableForm        Boolean   @default(false) @map("enable_form")
+  successMessage    String?   @map("success_message")
+  redirectUrl       String?   @map("redirect_url")
+  ctas              Json?     @map("ctas")
+  formFields        Json?     @map("form_fields")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  @@map("campaigns")
+}

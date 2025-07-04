@@ -11,7 +11,7 @@ import { Save, X, Loader2 } from "lucide-react"
 
 export default function EditProjectPage() {
   const [formData, setFormData] = useState({
-    id: 0,
+    id: "",
     title: "",
     slug: "",
     category: "",
@@ -51,17 +51,42 @@ export default function EditProjectPage() {
         const formattedProject = { ...project }
 
         jsonFields.forEach((field) => {
-          if (formattedProject[field]) {
-            formattedProject[field] = JSON.stringify(formattedProject[field], null, 2)
+          if (formattedProject[field as keyof typeof formattedProject]) {
+            (formattedProject as any)[field] = JSON.stringify(formattedProject[field as keyof typeof formattedProject], null, 2)
           }
         })
 
         // Format services array to comma-separated string
-        if (Array.isArray(formattedProject.services)) {
-          formattedProject.services = formattedProject.services.join(", ")
+        if (Array.isArray((formattedProject as any).services)) {
+          (formattedProject as any).services = (formattedProject as any).services.join(", ")
         }
 
-        setFormData(formattedProject)
+        // Map Project interface to formData structure
+        const mappedFormData = {
+          id: formattedProject.id || "",
+          title: formattedProject.title || "",
+          slug: formattedProject.slug || "",
+          category: (formattedProject as any).category || "",
+          description: formattedProject.description || "",
+          image_url: (formattedProject as any).imageUrl || "",
+          image_path: (formattedProject as any).image_path || "",
+          hero_image_url: (formattedProject as any).hero_image_url || "",
+          hero_image_path: (formattedProject as any).hero_image_path || "",
+          year: (formattedProject as any).year || "",
+          client: (formattedProject as any).client || "",
+          duration: (formattedProject as any).duration || "",
+          services: (formattedProject as any).services || "",
+          overview: (formattedProject as any).overview || "",
+          challenge: (formattedProject as any).challenge || "",
+          solution: (formattedProject as any).solution || "",
+          process: (formattedProject as any).process || "",
+          gallery: (formattedProject as any).gallery || "",
+          results: (formattedProject as any).results || "",
+          testimonial: (formattedProject as any).testimonial || "",
+          status: (formattedProject as any).status || "draft",
+        }
+
+        setFormData(mappedFormData)
       } catch (error) {
         console.error("Error loading project:", error)
         setError("Failed to load project. Please try again.")
@@ -81,13 +106,20 @@ export default function EditProjectPage() {
     })
   }
 
+  const handleInputChange = (field: string, value: string) => {
+    setFormData({
+      ...formData,
+      [field]: value,
+    })
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
     setError(null)
 
     try {
-      await updateProject(formData.id, formData)
+      await updateProject(formData)
       router.push("/admin/dashboard/projects")
     } catch (err: any) {
       setError(err.message || "An error occurred while updating the project")
@@ -301,23 +333,21 @@ export default function EditProjectPage() {
             <div>
               <label className="block text-sm font-medium mb-2">Thumbnail Image</label>
               <ImageUploader
-                initialImage={formData.image_url}
-                initialPath={formData.image_path}
-                onImageUploaded={handleThumbnailUploaded}
-                onImageRemoved={handleThumbnailRemoved}
+                label="Thumbnail Image"
+                initialImageUrl={formData.image_url}
+                onImageChangeAction={(url) => handleInputChange('image_url', url || '')}
                 folder="thumbnails"
-                aspectRatio="landscape"
+                helpText="Upload a thumbnail image for the project"
               />
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Hero Image</label>
               <ImageUploader
-                initialImage={formData.hero_image_url}
-                initialPath={formData.hero_image_path}
-                onImageUploaded={handleHeroImageUploaded}
-                onImageRemoved={handleHeroImageRemoved}
+                label="Hero Image"
+                initialImageUrl={formData.hero_image_url}
+                onImageChangeAction={(url) => handleInputChange('hero_image_url', url || '')}
                 folder="hero-images"
-                aspectRatio="landscape"
+                helpText="Upload a hero image for the project"
               />
             </div>
           </div>

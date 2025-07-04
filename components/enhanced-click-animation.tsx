@@ -155,10 +155,11 @@ function PulseEffect({ x, y, color, size }: EffectProps) {
   return (
     <motion.div
       initial={{ opacity: 0.7, scale: 0.5 }}
-      animate={[
-        { opacity: 0.7, scale: 0.5, borderWidth: size / 10 },
-        { opacity: 0, scale: 1.2, borderWidth: 1 },
-      ]}
+      animate={{
+        opacity: [0.7, 0],
+        scale: [0.5, 1.2],
+        borderWidth: [size / 10, 1],
+      }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
       style={{

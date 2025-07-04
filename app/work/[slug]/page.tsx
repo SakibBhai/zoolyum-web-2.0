@@ -3,14 +3,19 @@
 import { ArrowLeft, ArrowRight, Calendar, Clock, User } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { Suspense, useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { PageTransition } from "@/components/page-transition"
 import { motion } from "framer-motion"
-import { useEffect, useState } from "react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 
-const NavLink = ({ href, children }) => {
+interface NavLinkProps {
+  href: string
+  children: React.ReactNode
+}
+
+const NavLink = ({ href, children }: NavLinkProps) => {
   return (
     <Link href={href} className="text-[#E9E7E2]/60 hover:text-[#FF5001] transition-colors duration-300">
       {children}
@@ -19,12 +24,13 @@ const NavLink = ({ href, children }) => {
 }
 
 export default function ProjectDetailPage() {
-  const params = useParams()
+  const params = useParams<{ slug: string }>()
+
   const router = useRouter()
-  const slug = params.slug as string
-  const [project, setProject] = useState<any>(null)
-  const [nextProject, setNextProject] = useState<any>(null)
-  const [prevProject, setPrevProject] = useState<any>(null)
+  const slug = params.slug
+  const [project, setProject] = useState<Project | null>(null)
+  const [nextProject, setNextProject] = useState<Project | null>(null)
+  const [prevProject, setPrevProject] = useState<Project | null>(null)
 
   useEffect(() => {
     // Find the current project based on the slug
@@ -60,84 +66,100 @@ export default function ProjectDetailPage() {
         <Header />
 
         <main className="pt-24">
-          {/* Hero Section */}
-          <section className="relative">
-            <div className="h-[50vh] md:h-[70vh] w-full relative overflow-hidden">
-              <Image
-                src={project.heroImage || "/placeholder.svg?height=800&width=1600"}
-                alt={project.title}
-                fill
-                className="object-cover"
-                priority
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#161616] to-transparent opacity-70"></div>
-              <div className="absolute inset-0 flex items-end">
-                <div className="container mx-auto px-4 pb-12">
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <span className="text-[#FF5001] text-sm uppercase tracking-widest font-medium">
-                      {project.category}
-                    </span>
-                    <h1 className="text-4xl md:text-6xl font-bold mt-2 mb-4 max-w-4xl">{project.title}</h1>
-                    <div className="flex flex-wrap gap-4 items-center text-[#E9E7E2]/80">
-                      <div className="flex items-center">
-                        <Calendar className="w-4 h-4 mr-2" />
-                        <span>{project.year}</span>
+          <Suspense
+            fallback={
+              <div className="h-[50vh] md:h-[70vh] w-full relative flex items-center justify-center">
+                <div className="w-8 h-8 border-4 border-[#FF5001] border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            }
+          >
+            {/* Hero Section */}
+            <section className="relative">
+              <div className="h-[50vh] md:h-[70vh] w-full relative overflow-hidden">
+                <Image
+                  src={project.heroImage || "/placeholder.svg?height=800&width=1600"}
+                  alt={project.title}
+                  fill
+                  className="object-cover"
+                  priority
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#161616] to-transparent opacity-70"></div>
+                <div className="absolute inset-0 flex items-end">
+                  <div className="container mx-auto px-4 pb-12">
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <span className="text-[#FF5001] text-sm uppercase tracking-widest font-medium">
+                        {project.category}
+                      </span>
+                      <h1 className="text-4xl md:text-6xl font-bold mt-2 mb-4 max-w-4xl">{project.title}</h1>
+                      <div className="flex flex-wrap gap-4 items-center text-[#E9E7E2]/80">
+                        <div className="flex items-center">
+                          <Calendar className="w-4 h-4 mr-2" />
+                          <span>{project.year}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <User className="w-4 h-4 mr-2" />
+                          <span>{project.client}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <Clock className="w-4 h-4 mr-2" />
+                          <span>{project.duration}</span>
+                        </div>
                       </div>
-                      <div className="flex items-center">
-                        <User className="w-4 h-4 mr-2" />
-                        <span>{project.client}</span>
-                      </div>
-                      <div className="flex items-center">
-                        <Clock className="w-4 h-4 mr-2" />
-                        <span>{project.duration}</span>
-                      </div>
-                    </div>
-                  </motion.div>
+                    </motion.div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
+          </Suspense>
 
           {/* Project Overview */}
-          <section className="py-16 md:py-24">
-            <div className="container mx-auto px-4">
-              <div className="grid md:grid-cols-3 gap-12">
-                <div className="md:col-span-2">
-                  <h2 className="text-3xl font-bold mb-6">Project Overview</h2>
-                  <div className="prose prose-lg prose-invert max-w-none">
-                    <p>{project.overview}</p>
+          <Suspense
+            fallback={
+              <div className="py-16 md:py-24 flex items-center justify-center">
+                <div className="w-8 h-8 border-4 border-[#FF5001] border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            }
+          >
+            <section className="py-16 md:py-24">
+              <div className="container mx-auto px-4">
+                <div className="grid md:grid-cols-3 gap-12">
+                  <div className="md:col-span-2">
+                    <h2 className="text-3xl font-bold mb-6">Project Overview</h2>
+                    <div className="prose prose-lg prose-invert max-w-none">
+                      <p>{project.overview}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="bg-[#1A1A1A] p-6 rounded-xl h-fit">
-                  <h3 className="text-xl font-bold mb-4">Project Details</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="text-[#FF5001] text-sm font-medium">Client</h4>
-                      <p>{project.client}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-[#FF5001] text-sm font-medium">Timeline</h4>
-                      <p>{project.duration}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-[#FF5001] text-sm font-medium">Services</h4>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {project.services.map((service, index) => (
-                          <span key={index} className="px-3 py-1 bg-[#252525] rounded-full text-xs">
-                            {service}
-                          </span>
-                        ))}
+                  <div className="bg-[#1A1A1A] p-6 rounded-xl h-fit">
+                    <h3 className="text-xl font-bold mb-4">Project Details</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="text-[#FF5001] text-sm font-medium">Client</h4>
+                        <p>{project.client}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-[#FF5001] text-sm font-medium">Timeline</h4>
+                        <p>{project.duration}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-[#FF5001] text-sm font-medium">Services</h4>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {project.services.map((service: Service, index: number) => (
+                            <span key={index} className="px-3 py-1 bg-[#252525] rounded-full text-xs">
+                              {service.name}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
+          </Suspense>
 
           {/* Challenge & Solution */}
           <section className="py-16 md:py-24 bg-[#1A1A1A]">
@@ -164,7 +186,7 @@ export default function ProjectDetailPage() {
             <div className="container mx-auto px-4">
               <h2 className="text-3xl font-bold mb-12 text-center">Our Approach</h2>
               <div className="grid md:grid-cols-3 gap-8">
-                {project.process.map((step, index) => (
+                {project.process.map((step: ProcessStep, index: number) => (
                   <ProcessCard key={index} step={step} index={index} />
                 ))}
               </div>
@@ -176,7 +198,7 @@ export default function ProjectDetailPage() {
             <div className="container mx-auto px-4">
               <h2 className="text-3xl font-bold mb-12 text-center">Project Gallery</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {project.gallery.map((image, index) => (
+                {project.gallery.map((image: GalleryImage, index: number) => (
                   <motion.div
                     key={index}
                     initial={{ opacity: 0, y: 20 }}
@@ -186,7 +208,7 @@ export default function ProjectDetailPage() {
                     className="overflow-hidden rounded-xl"
                   >
                     <Image
-                      src={image.src || "/placeholder.svg?height=600&width=800"}
+                      src={image.url || "/placeholder.svg?height=600&width=800"}
                       alt={image.alt || "Project image"}
                       width={800}
                       height={600}
@@ -203,7 +225,7 @@ export default function ProjectDetailPage() {
             <div className="container mx-auto px-4">
               <h2 className="text-3xl font-bold mb-12 text-center">Results & Impact</h2>
               <div className="grid md:grid-cols-3 gap-8">
-                {project.results.map((result, index) => (
+                {project.results.map((result: Result, index: number) => (
                   <ResultCard key={index} result={result} index={index} />
                 ))}
               </div>
@@ -240,58 +262,17 @@ export default function ProjectDetailPage() {
             </section>
           )}
 
-          {/* Next/Prev Projects */}
-          <section className="py-16 md:py-24 border-t border-[#333333]">
-            <div className="container mx-auto px-4">
-              <h2 className="text-3xl font-bold mb-12 text-center">Explore More Projects</h2>
-              <div className="grid md:grid-cols-2 gap-8">
-                <Link href={`/work/${prevProject.slug}`} className="group">
-                  <div className="bg-[#1A1A1A] rounded-xl overflow-hidden">
-                    <div className="relative h-48 overflow-hidden">
-                      <Image
-                        src={prevProject.image || "/placeholder.svg?height=400&width=600"}
-                        alt={prevProject.title}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#161616] to-transparent opacity-70"></div>
-                      <div className="absolute inset-0 flex items-end p-6">
-                        <div>
-                          <div className="flex items-center text-[#FF5001] mb-2">
-                            <ArrowLeft className="w-4 h-4 mr-2" />
-                            <span className="text-sm">Previous Project</span>
-                          </div>
-                          <h3 className="text-xl font-bold">{prevProject.title}</h3>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-                <Link href={`/work/${nextProject.slug}`} className="group">
-                  <div className="bg-[#1A1A1A] rounded-xl overflow-hidden">
-                    <div className="relative h-48 overflow-hidden">
-                      <Image
-                        src={nextProject.image || "/placeholder.svg?height=400&width=600"}
-                        alt={nextProject.title}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#161616] to-transparent opacity-70"></div>
-                      <div className="absolute inset-0 flex items-end justify-end p-6">
-                        <div className="text-right">
-                          <div className="flex items-center justify-end text-[#FF5001] mb-2">
-                            <span className="text-sm">Next Project</span>
-                            <ArrowRight className="w-4 h-4 ml-2" />
-                          </div>
-                          <h3 className="text-xl font-bold">{nextProject.title}</h3>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              </div>
-            </div>
-          </section>
+          {/* Project Navigation */}
+          <Suspense fallback={<div className="py-16 md:py-24 flex items-center justify-center">
+              <div className="w-8 h-8 border-4 border-[#FF5001] border-t-transparent rounded-full animate-spin"></div>
+            </div>}>
+            {project && (
+              <ProjectNavigation 
+                prevProject={prevProject} 
+                nextProject={nextProject} 
+              />
+            )}
+          </Suspense>
 
           {/* CTA */}
           <section className="py-16 md:py-24 bg-[#1A1A1A]">
@@ -318,7 +299,69 @@ export default function ProjectDetailPage() {
   )
 }
 
-function ProcessCard({ step, index }) {
+interface Service {
+  name: string
+  description: string
+}
+
+interface ProcessStep {
+  title: string
+  description: string
+  icon?: string
+}
+
+interface GalleryImage {
+  url: string
+  alt: string
+  width: number
+  height: number
+}
+
+interface Result {
+  title: string
+  value: string
+  description: string
+}
+
+interface Testimonial {
+  quote: string
+  author: string
+  position: string
+  company: string
+}
+
+interface Project {
+  slug: string
+  title: string
+  description: string
+  category: string
+  image: string
+  heroImage: string
+  year: string
+  client: string
+  duration: string
+  overview: string
+  challenge: string
+  solution: string
+  testimonial: Testimonial
+  services: Service[]
+  process: ProcessStep[]
+  gallery: GalleryImage[]
+  results: Result[]
+  // Add other project fields as needed
+}
+
+interface ProcessCardProps {
+  step: ProcessStep
+  index: number
+}
+
+interface ResultCardProps {
+  result: Result
+  index: number
+}
+
+function ProcessCard({ step, index }: ProcessCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -336,7 +379,7 @@ function ProcessCard({ step, index }) {
   )
 }
 
-function ResultCard({ result, index }) {
+function ResultCard({ result, index }: ResultCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -345,15 +388,83 @@ function ResultCard({ result, index }) {
       transition={{ delay: index * 0.1, duration: 0.5 }}
       className="bg-[#1A1A1A] p-8 rounded-xl border border-[#333333] text-center"
     >
-      <div className="text-[#FF5001] text-4xl font-bold mb-2">{result.stat}</div>
+      <div className="text-[#FF5001] text-4xl font-bold mb-2">{result.value}</div>
       <h3 className="text-xl font-bold mb-4">{result.title}</h3>
       <p className="text-[#E9E7E2]/70">{result.description}</p>
     </motion.div>
   )
 }
 
+// Create a ProjectNavigationError component for error handling
+function ProjectNavigationError() {
+  return (
+    <div className="py-16 md:py-24">
+      <div className="container mx-auto px-4">
+        <div className="text-center text-[#E9E7E2]/60">
+          Unable to load project navigation. Please try refreshing the page.
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Create a ProjectNavigation component for better organization
+function ProjectNavigation({ 
+  prevProject, 
+  nextProject 
+}: { 
+  prevProject: Project | null
+  nextProject: Project | null 
+}) {
+  if (!prevProject && !nextProject) return null
+
+  return (
+    <section className="py-16 md:py-24">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-2 gap-8">
+          {prevProject && (
+            <Link href={`/work/${prevProject.slug}`} className="group">
+              <div className="relative aspect-video overflow-hidden rounded-lg mb-4">
+                <Image
+                  src={prevProject.image || "/placeholder.svg?height=400&width=600"}
+                  alt={prevProject.title}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-[#161616]/50 group-hover:bg-[#161616]/30 transition-colors duration-300"></div>
+              </div>
+              <div className="space-y-2">
+                <div className="text-sm text-[#E9E7E2]/60">Previous Project</div>
+                <h3 className="text-xl font-bold">{prevProject.title}</h3>
+              </div>
+            </Link>
+          )}
+
+          {nextProject && (
+            <Link href={`/work/${nextProject.slug}`} className="group">
+              <div className="relative aspect-video overflow-hidden rounded-lg mb-4">
+                <Image
+                  src={nextProject.image || "/placeholder.svg?height=400&width=600"}
+                  alt={nextProject.title}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-[#161616]/50 group-hover:bg-[#161616]/30 transition-colors duration-300"></div>
+              </div>
+              <div className="space-y-2 text-right">
+                <div className="text-sm text-[#E9E7E2]/60">Next Project</div>
+                <h3 className="text-xl font-bold">{nextProject.title}</h3>
+              </div>
+            </Link>
+          )}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 // Expanded project data with detailed case study information
-const projects = [
+const projects: Project[] = [
   {
     title: "Nexus Rebrand",
     slug: "nexus-rebrand",
@@ -364,7 +475,12 @@ const projects = [
     year: "2023",
     client: "Nexus Technologies",
     duration: "3 months",
-    services: ["Brand Strategy", "Visual Identity", "Brand Guidelines", "Marketing Collateral"],
+    services: [
+      { name: "Brand Strategy", description: "Defining the brand's core message and positioning." },
+      { name: "Visual Identity", description: "Creating the logo, color palette, and typography." },
+      { name: "Brand Guidelines", description: "Documenting how to use brand assets." },
+      { name: "Marketing Collateral", description: "Designing brochures, business cards, and other materials." },
+    ],
     overview:
       "Nexus Technologies was at a pivotal moment in their growth journey. As they prepared to expand into new international markets and launch innovative product lines, their existing brand no longer reflected their vision and ambitions. We partnered with Nexus to completely reimagine their brand identity, creating a cohesive system that would position them as industry leaders and support their expansion goals.",
     challenge:
@@ -404,27 +520,27 @@ const projects = [
       },
     ],
     gallery: [
-      { src: "/placeholder.svg?height=600&width=800", alt: "Nexus logo design process" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Brand guidelines" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Digital application" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Marketing materials" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Office environment" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Product packaging" },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Nexus logo design process", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Brand guidelines", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Digital application", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Marketing materials", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Office environment", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Product packaging", width: 800, height: 600 },
     ],
     results: [
       {
-        stat: "42%",
+        value: "42%",
         title: "Increase in Brand Recognition",
         description:
           "Post-launch surveys showed significant improvement in brand recall and recognition in target markets.",
       },
       {
-        stat: "3.5x",
+        value: "3.5x",
         title: "Growth in International Inquiries",
         description: "The new brand positioning attracted substantially more interest from international prospects.",
       },
       {
-        stat: "87%",
+        value: "87%",
         title: "Employee Brand Alignment",
         description: "Internal surveys revealed strong understanding and embodiment of the new brand values.",
       },
@@ -434,6 +550,7 @@ const projects = [
         "The rebrand has been transformative for our business. Not only do we have a visual identity that truly represents our vision, but the strategic foundation has aligned our entire organization and clarified our market position. Since launching, we've seen tangible business results and received overwhelmingly positive feedback from clients and partners.",
       author: "Sarah Johnson",
       position: "CEO, Nexus Technologies",
+      company: "Nexus Technologies",
     },
   },
   {
@@ -446,7 +563,12 @@ const projects = [
     year: "2022",
     client: "Elevate Lifestyle",
     duration: "6 months",
-    services: ["Digital Strategy", "UX/UI Design", "Content Strategy", "E-commerce Optimization"],
+    services: [
+      { name: "Digital Strategy", description: "Developing a comprehensive digital strategy." },
+      { name: "UX/UI Design", description: "Designing user-friendly and engaging interfaces." },
+      { name: "Content Strategy", description: "Planning and creating valuable content." },
+      { name: "E-commerce Optimization", description: "Improving online store performance." },
+    ],
     overview:
       "Elevate, a premium lifestyle brand with a strong physical retail presence, needed to accelerate their digital transformation to meet changing consumer behaviors and expand their market reach. We partnered with them to develop a comprehensive digital strategy and reimagine their online presence, creating a cohesive ecosystem that would drive e-commerce growth while maintaining their premium brand experience.",
     challenge:
@@ -482,26 +604,26 @@ const projects = [
       },
     ],
     gallery: [
-      { src: "/placeholder.svg?height=600&width=800", alt: "Website redesign" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Mobile experience" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Content strategy framework" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Email marketing templates" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Social media content" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Analytics dashboard" },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Website redesign", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Mobile experience", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Content strategy framework", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Email marketing templates", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Social media content", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Analytics dashboard", width: 800, height: 600 },
     ],
     results: [
       {
-        stat: "156%",
+        value: "156%",
         title: "Increase in E-commerce Revenue",
         description: "Year-over-year growth following the implementation of the new digital ecosystem.",
       },
       {
-        stat: "4.2x",
+        value: "4.2x",
         title: "Improvement in Conversion Rate",
         description: "Significant increase in website conversion rate through improved UX and content strategy.",
       },
       {
-        stat: "68%",
+        value: "68%",
         title: "Growth in Email Engagement",
         description: "Higher open and click-through rates with the new content strategy and design approach.",
       },
@@ -511,6 +633,7 @@ const projects = [
         "Working with Zoolyum transformed not just our digital presence but our entire approach to customer engagement. The strategic vision and execution excellence delivered results far beyond our expectations. Our team now has both the tools and the capabilities to continue evolving our digital ecosystem as our business grows.",
       author: "Michael Chen",
       position: "Marketing Director, Elevate",
+      company: "Elevate Lifestyle",
     },
   },
   {
@@ -523,7 +646,12 @@ const projects = [
     year: "2023",
     client: "Horizon",
     duration: "4 months",
-    services: ["Market Analysis", "Brand Positioning", "Go-to-Market Strategy", "Pitch Development"],
+    services: [
+      { name: "Market Analysis", description: "Researching market dynamics and competitor positioning." },
+      { name: "Brand Positioning", description: "Defining a distinctive market position and value proposition." },
+      { name: "Go-to-Market Strategy", description: "Planning the market entry strategy and tactics." },
+      { name: "Pitch Development", description: "Creating a compelling pitch for investors and partners." },
+    ],
     overview:
       "Horizon, an innovative fintech startup with a unique solution for sustainable investing, needed to establish a distinctive position in a crowded market dominated by established players. We provided strategic consultancy to help them define their market entry strategy, develop a compelling brand narrative, and create a roadmap for growth that would attract both customers and investors.",
     challenge:
@@ -563,26 +691,26 @@ const projects = [
       },
     ],
     gallery: [
-      { src: "/placeholder.svg?height=600&width=800", alt: "Market analysis" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Positioning framework" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Brand narrative" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Go-to-market strategy" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Investor pitch deck" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Launch event" },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Market analysis", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Positioning framework", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Brand narrative", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Go-to-market strategy", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Investor pitch deck", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Launch event", width: 800, height: 600 },
     ],
     results: [
       {
-        stat: "$4.2M",
+        value: "$4.2M",
         title: "Seed Funding Secured",
         description: "Successfully raised seed round from top-tier investors based on the strategic vision.",
       },
       {
-        stat: "12K+",
+        value: "12K+",
         title: "Early Adopters",
         description: "Exceeded user acquisition targets in the first quarter after launch.",
       },
       {
-        stat: "8",
+        value: "8",
         title: "Strategic Partnerships",
         description:
           "Secured key partnerships with established financial institutions and sustainability organizations.",
@@ -593,6 +721,7 @@ const projects = [
         "Sakib's strategic guidance was instrumental in our successful market entry. His ability to identify our unique value proposition and translate it into a compelling narrative gave us clarity and confidence. The positioning strategy and go-to-market plan provided a roadmap that helped us secure funding and gain early traction in a highly competitive space.",
       author: "Jessica Williams",
       position: "Founder, Horizon",
+      company: "Horizon",
     },
   },
   {
@@ -605,7 +734,12 @@ const projects = [
     year: "2022",
     client: "Pulse Fashion",
     duration: "5 months",
-    services: ["E-commerce Strategy", "UX/UI Design", "Conversion Optimization", "Analytics Setup"],
+    services: [
+      { name: "E-commerce Strategy", description: "Developing a comprehensive e-commerce strategy." },
+      { name: "UX/UI Design", description: "Designing user-friendly and engaging online shopping experiences." },
+      { name: "Conversion Optimization", description: "Improving the conversion rate of the e-commerce site." },
+      { name: "Analytics Setup", description: "Implementing analytics to track and optimize performance." },
+    ],
     overview:
       "Pulse, an established fashion retailer with a strong brick-and-mortar presence, needed to transform their underperforming e-commerce platform into a growth driver for the business. We developed a comprehensive e-commerce strategy and redesigned their digital shopping experience to increase online sales, improve customer engagement, and create a seamless omnichannel experience that complemented their physical stores.",
     challenge:
@@ -642,26 +776,26 @@ const projects = [
       },
     ],
     gallery: [
-      { src: "/placeholder.svg?height=600&width=800", alt: "E-commerce homepage" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Product detail page" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Mobile shopping experience" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Checkout flow" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Email marketing" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Analytics dashboard" },
+      { url: "/placeholder.svg?height=600&width=800", alt: "E-commerce homepage", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Product detail page", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Mobile shopping experience", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Checkout flow", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Email marketing", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Analytics dashboard", width: 800, height: 600 },
     ],
     results: [
       {
-        stat: "187%",
+        value: "187%",
         title: "Increase in Online Revenue",
         description: "Year-over-year growth in e-commerce sales following the platform relaunch.",
       },
       {
-        stat: "3.2x",
+        value: "3.2x",
         title: "Improvement in Conversion Rate",
         description: "Significant increase in the percentage of visitors completing purchases.",
       },
       {
-        stat: "-42%",
+        value: "-42%",
         title: "Reduction in Cart Abandonment",
         description: "Substantial decrease in the rate of abandoned shopping carts through improved UX.",
       },
@@ -671,6 +805,7 @@ const projects = [
         "The e-commerce transformation has been a game-changer for our business. What started as a website redesign evolved into a complete rethinking of how we engage with customers across channels. The strategic approach and attention to detail resulted in an online experience that truly captures our brand essence while driving significant business results.",
       author: "David Rodriguez",
       position: "COO, Pulse",
+      company: "Pulse Fashion",
     },
   },
   {
@@ -683,7 +818,12 @@ const projects = [
     year: "2023",
     client: "Vertex Architecture",
     duration: "4 months",
-    services: ["Brand Strategy", "Visual Identity", "Brand Guidelines", "Marketing Collateral"],
+    services: [
+      { name: "Brand Strategy", description: "Defining the brand's core message and positioning." },
+      { name: "Visual Identity", description: "Creating the logo, color palette, and typography." },
+      { name: "Brand Guidelines", description: "Documenting how to use brand assets." },
+      { name: "Marketing Collateral", description: "Designing brochures, business cards, and other materials." },
+    ],
     overview:
       "Vertex Architecture, an award-winning firm with a growing international portfolio, needed a brand identity that would reflect their innovative approach and position them for continued growth. We developed a comprehensive brand strategy and visual identity system that captured their unique perspective on architectural design and created a distinctive presence in a competitive market.",
     challenge:
@@ -719,26 +859,26 @@ const projects = [
       },
     ],
     gallery: [
-      { src: "/placeholder.svg?height=600&width=800", alt: "Logo design" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Brand guidelines" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Website design" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Project portfolio" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Business cards" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Office signage" },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Logo design", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Brand guidelines", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Website design", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Project portfolio", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Business cards", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Office signage", width: 800, height: 600 },
     ],
     results: [
       {
-        stat: "3",
+        value: "3",
         title: "Major International Projects",
         description: "Secured significant new commissions following the rebrand launch.",
       },
       {
-        stat: "86%",
+        value: "86%",
         title: "Positive Client Feedback",
         description: "Overwhelmingly positive response from existing clients and industry peers.",
       },
       {
-        stat: "52%",
+        value: "52%",
         title: "Increase in Press Coverage",
         description: "Greater media interest and coverage of the firm and their projects.",
       },
@@ -748,6 +888,7 @@ const projects = [
         "Our new brand identity perfectly captures the essence of our practice and has elevated our presence in the industry. The strategic thinking behind the visual system has given us a powerful platform to communicate our approach and vision. Since launching, we've seen tangible benefits in terms of client engagement and new business opportunities.",
       author: "Alexandra Torres",
       position: "Principal, Vertex Architecture",
+      company: "Vertex Architecture",
     },
   },
   {
@@ -760,7 +901,12 @@ const projects = [
     year: "2022",
     client: "Quantum Financial",
     duration: "3 months",
-    services: ["Market Analysis", "Brand Positioning", "Messaging Strategy", "Internal Alignment"],
+    services: [
+      { name: "Market Analysis", description: "Researching market trends and customer insights." },
+      { name: "Brand Positioning", description: "Defining a unique brand position and messaging." },
+      { name: "Messaging Strategy", description: "Developing messaging frameworks for target audiences." },
+      { name: "Internal Alignment", description: "Ensuring internal teams understand and embody the brand." },
+    ],
     overview:
       "Quantum Financial, an established financial services provider, was facing increasing competition and commoditization in their core markets. We developed a distinctive positioning strategy that identified untapped opportunities, differentiated their offerings, and aligned their organization around a compelling vision for the future. This strategic foundation enabled them to revitalize their brand and drive new growth.",
     challenge:
@@ -797,26 +943,26 @@ const projects = [
       },
     ],
     gallery: [
-      { src: "/placeholder.svg?height=600&width=800", alt: "Market analysis" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Positioning framework" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Customer journey map" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Messaging architecture" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Internal workshop" },
-      { src: "/placeholder.svg?height=600&width=800", alt: "Implementation roadmap" },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Market analysis", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Positioning framework", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Customer journey map", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Messaging architecture", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Internal workshop", width: 800, height: 600 },
+      { url: "/placeholder.svg?height=600&width=800", alt: "Implementation roadmap", width: 800, height: 600 },
     ],
     results: [
       {
-        stat: "24%",
+        value: "24%",
         title: "Growth in High-Value Segments",
         description: "Increased acquisition and retention in strategically important customer segments.",
       },
       {
-        stat: "18%",
+        value: "18%",
         title: "Improvement in Price Realization",
         description: "Ability to command premium pricing based on clearer value differentiation.",
       },
       {
-        stat: "92%",
+        value: "92%",
         title: "Employee Understanding",
         description: "High level of internal clarity about positioning and individual role in delivering it.",
       },
@@ -826,6 +972,7 @@ const projects = [
         "The positioning work gave us the strategic clarity we needed to revitalize our business in a challenging market. The process was rigorous yet practical, resulting in a positioning that is both distinctive and authentic to who we are. Most importantly, it has united our organization around a compelling vision and provided a clear direction for our growth initiatives.",
       author: "Robert Chen",
       position: "CEO, Quantum Financial",
+      company: "Quantum Financial",
     },
   },
 ]

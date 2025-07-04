@@ -52,7 +52,7 @@ export function ImageReveal({
           hidden: { clipPath: "inset(0 100% 0 0)" },
           visible: {
             clipPath: "inset(0 0% 0 0)",
-            transition: { duration, ease: [0.22, 1, 0.36, 1], delay },
+            transition: { duration, delay },
           },
         }
       case "top":
@@ -60,7 +60,7 @@ export function ImageReveal({
           hidden: { clipPath: "inset(100% 0 0 0)" },
           visible: {
             clipPath: "inset(0 0 0 0)",
-            transition: { duration, ease: [0.22, 1, 0.36, 1], delay },
+            transition: { duration, delay },
           },
         }
       case "bottom":
@@ -68,7 +68,7 @@ export function ImageReveal({
           hidden: { clipPath: "inset(0 0 100% 0)" },
           visible: {
             clipPath: "inset(0 0 0% 0)",
-            transition: { duration, ease: [0.22, 1, 0.36, 1], delay },
+            transition: { duration, delay },
           },
         }
       case "left":
@@ -77,7 +77,7 @@ export function ImageReveal({
           hidden: { clipPath: "inset(0 0 0 100%)" },
           visible: {
             clipPath: "inset(0 0 0 0%)",
-            transition: { duration, ease: [0.22, 1, 0.36, 1], delay },
+            transition: { duration, delay },
           },
         }
     }
