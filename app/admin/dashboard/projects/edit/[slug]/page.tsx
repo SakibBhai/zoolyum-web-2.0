@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { useRouter, useParams } from "next/navigation"
-import { fetchProject, updateProject } from "@/lib/project-operations"
-import { PageTransition } from "@/components/page-transition"
-import { ImageUploader } from "@/components/admin/image-uploader"
-import { Save, X, Loader2 } from "lucide-react"
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
+import { fetchProject, updateProject } from "@/lib/project-operations";
+import { PageTransition } from "@/components/page-transition";
+import { ImageUploader } from "@/components/admin/image-uploader";
+import { Save, X, Loader2 } from "lucide-react";
 
 export default function EditProjectPage() {
   const [formData, setFormData] = useState({
@@ -32,33 +32,39 @@ export default function EditProjectPage() {
     results: "",
     testimonial: "",
     status: "draft",
-  })
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
-  const params = useParams()
-  const slug = params.slug as string
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const params = useParams();
+  const slug = params.slug as string;
 
   useEffect(() => {
     const loadProject = async () => {
       try {
-        setIsLoading(true)
-        const project = await fetchProject(slug)
+        setIsLoading(true);
+        const project = await fetchProject(slug);
 
         // Format JSON fields for display in textarea
-        const jsonFields = ["process", "gallery", "results", "testimonial"]
-        const formattedProject = { ...project }
+        const jsonFields = ["process", "gallery", "results", "testimonial"];
+        const formattedProject = { ...project };
 
         jsonFields.forEach((field) => {
           if (formattedProject[field as keyof typeof formattedProject]) {
-            (formattedProject as any)[field] = JSON.stringify(formattedProject[field as keyof typeof formattedProject], null, 2)
+            (formattedProject as any)[field] = JSON.stringify(
+              formattedProject[field as keyof typeof formattedProject],
+              null,
+              2
+            );
           }
-        })
+        });
 
         // Format services array to comma-separated string
         if (Array.isArray((formattedProject as any).services)) {
-          (formattedProject as any).services = (formattedProject as any).services.join(", ")
+          (formattedProject as any).services = (
+            formattedProject as any
+          ).services.join(", ");
         }
 
         // Map Project interface to formData structure
@@ -84,84 +90,88 @@ export default function EditProjectPage() {
           results: (formattedProject as any).results || "",
           testimonial: (formattedProject as any).testimonial || "",
           status: (formattedProject as any).status || "draft",
-        }
+        };
 
-        setFormData(mappedFormData)
+        setFormData(mappedFormData);
       } catch (error) {
-        console.error("Error loading project:", error)
-        setError("Failed to load project. Please try again.")
+        console.error("Error loading project:", error);
+        setError("Failed to load project. Please try again.");
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    loadProject()
-  }, [slug])
+    loadProject();
+  }, [slug]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
       [name]: value,
-    })
-  }
+    });
+  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData({
       ...formData,
       [field]: value,
-    })
-  }
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setError(null)
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
 
     try {
-      await updateProject(formData)
-      router.push("/admin/dashboard/projects")
+      await updateProject(formData);
+      router.push("/admin/dashboard/projects");
     } catch (err: any) {
-      setError(err.message || "An error occurred while updating the project")
-      setIsSubmitting(false)
+      setError(err.message || "An error occurred while updating the project");
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleCancel = () => {
-    router.push("/admin/dashboard/projects")
-  }
+    router.push("/admin/dashboard/projects");
+  };
 
   const handleThumbnailUploaded = (url: string, path: string) => {
     setFormData({
       ...formData,
       image_url: url,
       image_path: path,
-    })
-  }
+    });
+  };
 
   const handleThumbnailRemoved = () => {
     setFormData({
       ...formData,
       image_url: "",
       image_path: "",
-    })
-  }
+    });
+  };
 
   const handleHeroImageUploaded = (url: string, path: string) => {
     setFormData({
       ...formData,
       hero_image_url: url,
       hero_image_path: path,
-    })
-  }
+    });
+  };
 
   const handleHeroImageRemoved = () => {
     setFormData({
       ...formData,
       hero_image_url: "",
       hero_image_path: "",
-    })
-  }
+    });
+  };
 
   if (isLoading) {
     return (
@@ -171,7 +181,7 @@ export default function EditProjectPage() {
           <span className="ml-2">Loading project...</span>
         </div>
       </PageTransition>
-    )
+    );
   }
 
   return (
@@ -200,10 +210,15 @@ export default function EditProjectPage() {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-900/20 border border-red-900/50 rounded-lg text-red-400">{error}</div>
+          <div className="mb-6 p-4 bg-red-900/20 border border-red-900/50 rounded-lg text-red-400">
+            {error}
+          </div>
         )}
 
-        <form onSubmit={handleSubmit} className="bg-[#1A1A1A] rounded-xl border border-[#333333] p-6">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-[#1A1A1A] rounded-xl border border-[#333333] p-6"
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
               <label htmlFor="title" className="block text-sm font-medium mb-2">
@@ -239,7 +254,10 @@ export default function EditProjectPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
-              <label htmlFor="category" className="block text-sm font-medium mb-2">
+              <label
+                htmlFor="category"
+                className="block text-sm font-medium mb-2"
+              >
                 Category
               </label>
               <input
@@ -253,7 +271,10 @@ export default function EditProjectPage() {
               />
             </div>
             <div>
-              <label htmlFor="client" className="block text-sm font-medium mb-2">
+              <label
+                htmlFor="client"
+                className="block text-sm font-medium mb-2"
+              >
                 Client
               </label>
               <input
@@ -284,7 +305,10 @@ export default function EditProjectPage() {
               />
             </div>
             <div>
-              <label htmlFor="duration" className="block text-sm font-medium mb-2">
+              <label
+                htmlFor="duration"
+                className="block text-sm font-medium mb-2"
+              >
                 Duration
               </label>
               <input
@@ -298,7 +322,10 @@ export default function EditProjectPage() {
               />
             </div>
             <div>
-              <label htmlFor="services" className="block text-sm font-medium mb-2">
+              <label
+                htmlFor="services"
+                className="block text-sm font-medium mb-2"
+              >
                 Services (comma separated)
               </label>
               <input
@@ -314,7 +341,10 @@ export default function EditProjectPage() {
           </div>
 
           <div className="mb-6">
-            <label htmlFor="description" className="block text-sm font-medium mb-2">
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium mb-2"
+            >
               Short Description
             </label>
             <textarea
@@ -331,21 +361,29 @@ export default function EditProjectPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
-              <label className="block text-sm font-medium mb-2">Thumbnail Image</label>
+              <label className="block text-sm font-medium mb-2">
+                Thumbnail Image
+              </label>
               <ImageUploader
                 label="Thumbnail Image"
                 initialImageUrl={formData.image_url}
-                onImageChangeAction={(url) => handleInputChange('image_url', url || '')}
+                onImageChangeAction={(url) =>
+                  handleInputChange("image_url", url || "")
+                }
                 folder="thumbnails"
                 helpText="Upload a thumbnail image for the project"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Hero Image</label>
+              <label className="block text-sm font-medium mb-2">
+                Hero Image
+              </label>
               <ImageUploader
                 label="Hero Image"
                 initialImageUrl={formData.hero_image_url}
-                onImageChangeAction={(url) => handleInputChange('hero_image_url', url || '')}
+                onImageChangeAction={(url) =>
+                  handleInputChange("hero_image_url", url || "")
+                }
                 folder="hero-images"
                 helpText="Upload a hero image for the project"
               />
@@ -353,7 +391,10 @@ export default function EditProjectPage() {
           </div>
 
           <div className="mb-6">
-            <label htmlFor="overview" className="block text-sm font-medium mb-2">
+            <label
+              htmlFor="overview"
+              className="block text-sm font-medium mb-2"
+            >
               Project Overview
             </label>
             <textarea
@@ -369,7 +410,10 @@ export default function EditProjectPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
-              <label htmlFor="challenge" className="block text-sm font-medium mb-2">
+              <label
+                htmlFor="challenge"
+                className="block text-sm font-medium mb-2"
+              >
                 The Challenge
               </label>
               <textarea
@@ -383,7 +427,10 @@ export default function EditProjectPage() {
               />
             </div>
             <div>
-              <label htmlFor="solution" className="block text-sm font-medium mb-2">
+              <label
+                htmlFor="solution"
+                className="block text-sm font-medium mb-2"
+              >
                 The Solution
               </label>
               <textarea
@@ -429,7 +476,9 @@ export default function EditProjectPage() {
               className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2] font-mono text-sm"
               placeholder='[{"src": "/image.jpg", "alt": "Image description"}]'
             />
-            <p className="mt-1 text-xs text-[#E9E7E2]/50">JSON array of gallery images with src and alt properties</p>
+            <p className="mt-1 text-xs text-[#E9E7E2]/50">
+              JSON array of gallery images with src and alt properties
+            </p>
           </div>
 
           <div className="mb-6">
@@ -451,7 +500,10 @@ export default function EditProjectPage() {
           </div>
 
           <div className="mb-6">
-            <label htmlFor="testimonial" className="block text-sm font-medium mb-2">
+            <label
+              htmlFor="testimonial"
+              className="block text-sm font-medium mb-2"
+            >
               Testimonial (JSON Object)
             </label>
             <textarea
@@ -463,7 +515,9 @@ export default function EditProjectPage() {
               className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2] font-mono text-sm"
               placeholder='{"quote": "Great work!", "author": "Client Name", "position": "CEO, Company"}'
             />
-            <p className="mt-1 text-xs text-[#E9E7E2]/50">JSON object with quote, author, and position properties</p>
+            <p className="mt-1 text-xs text-[#E9E7E2]/50">
+              JSON object with quote, author, and position properties
+            </p>
           </div>
 
           <div>
@@ -484,5 +538,5 @@ export default function EditProjectPage() {
         </form>
       </div>
     </PageTransition>
-  )
+  );
 }

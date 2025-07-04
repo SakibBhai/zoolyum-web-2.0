@@ -1,10 +1,10 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, useFieldArray } from 'react-hook-form'
-import { z } from 'zod'
-import { Button } from '@/components/ui/button'
+import { useState, useEffect } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, useFieldArray } from "react-hook-form";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -13,13 +13,19 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Switch } from '@/components/ui/switch'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Separator } from '@/components/ui/separator'
-import { toast } from '@/components/ui/use-toast'
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { toast } from "@/components/ui/use-toast";
 import {
   Card,
   CardContent,
@@ -27,70 +33,125 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs'
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '@/components/ui/collapsible'
-import { ChevronDown, Plus, Trash2, Upload } from 'lucide-react'
-import { RichTextEditor } from '@/components/admin/rich-text-editor'
-import { ImageUploader } from '@/components/admin/image-uploader'
+} from "@/components/ui/collapsible";
+import { ChevronDown, Plus, Trash2, Upload } from "lucide-react";
+import { RichTextEditor } from "@/components/admin/rich-text-editor";
+import { ImageUploader } from "@/components/admin/image-uploader";
 
 const siteSettingsSchema = z.object({
-  siteName: z.string().min(1, { message: 'Site name is required' }),
-  siteDescription: z.string().min(1, { message: 'Site description is required' }),
-  contactEmail: z.string().email({ message: 'Please enter a valid email address' }),
+  siteName: z.string().min(1, { message: "Site name is required" }),
+  siteDescription: z
+    .string()
+    .min(1, { message: "Site description is required" }),
+  contactEmail: z
+    .string()
+    .email({ message: "Please enter a valid email address" }),
   contactPhone: z.string().optional(),
   address: z.string().optional(),
   socialLinks: z.object({
-    twitter: z.string().url({ message: 'Please enter a valid URL' }).optional().or(z.literal('')),
-    facebook: z.string().url({ message: 'Please enter a valid URL' }).optional().or(z.literal('')),
-    instagram: z.string().url({ message: 'Please enter a valid URL' }).optional().or(z.literal('')),
-    linkedin: z.string().url({ message: 'Please enter a valid URL' }).optional().or(z.literal('')),
+    twitter: z
+      .string()
+      .url({ message: "Please enter a valid URL" })
+      .optional()
+      .or(z.literal("")),
+    facebook: z
+      .string()
+      .url({ message: "Please enter a valid URL" })
+      .optional()
+      .or(z.literal("")),
+    instagram: z
+      .string()
+      .url({ message: "Please enter a valid URL" })
+      .optional()
+      .or(z.literal("")),
+    linkedin: z
+      .string()
+      .url({ message: "Please enter a valid URL" })
+      .optional()
+      .or(z.literal("")),
   }),
-})
+});
 
-type SiteSettingsValues = z.infer<typeof siteSettingsSchema>
+type SiteSettingsValues = z.infer<typeof siteSettingsSchema>;
 
-const userSettingsSchema = z.object({
-  name: z.string().min(1, { message: 'Name is required' }),
-  email: z.string().email({ message: 'Please enter a valid email address' }),
-  currentPassword: z.string().min(1, { message: 'Current password is required' }),
-  newPassword: z.string().min(6, { message: 'Password must be at least 6 characters' }).optional().or(z.literal('')),
-  confirmPassword: z.string().optional().or(z.literal('')),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-})
+const userSettingsSchema = z
+  .object({
+    name: z.string().min(1, { message: "Name is required" }),
+    email: z.string().email({ message: "Please enter a valid email address" }),
+    currentPassword: z
+      .string()
+      .min(1, { message: "Current password is required" }),
+    newPassword: z
+      .string()
+      .min(6, { message: "Password must be at least 6 characters" })
+      .optional()
+      .or(z.literal("")),
+    confirmPassword: z.string().optional().or(z.literal("")),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
-type UserSettingsValues = z.infer<typeof userSettingsSchema>
+type UserSettingsValues = z.infer<typeof userSettingsSchema>;
 
 const footerSettingsSchema = z.object({
   footerContent: z.string().optional(),
   copyright: z.string().optional(),
   disclaimer: z.string().optional(),
   aboutTagline: z.string().optional(),
-  quickLinks: z.array(z.object({
-    label: z.string().min(1, 'Label is required'),
-    url: z.string().url('Please enter a valid URL'),
-    openInNewTab: z.boolean().default(false)
-  })).optional(),
+  quickLinks: z
+    .array(
+      z.object({
+        label: z.string().min(1, "Label is required"),
+        url: z.string().url("Please enter a valid URL"),
+        openInNewTab: z.boolean().default(false),
+      })
+    )
+    .optional(),
   showSocialMedia: z.boolean().default(true),
-  facebookUrl: z.string().url('Please enter a valid URL').optional().or(z.literal('')),
-  instagramUrl: z.string().url('Please enter a valid URL').optional().or(z.literal('')),
-  linkedinUrl: z.string().url('Please enter a valid URL').optional().or(z.literal('')),
-  youtubeUrl: z.string().url('Please enter a valid URL').optional().or(z.literal('')),
-  twitterUrl: z.string().url('Please enter a valid URL').optional().or(z.literal('')),
-  whatsappUrl: z.string().url('Please enter a valid URL').optional().or(z.literal('')),
+  facebookUrl: z
+    .string()
+    .url("Please enter a valid URL")
+    .optional()
+    .or(z.literal("")),
+  instagramUrl: z
+    .string()
+    .url("Please enter a valid URL")
+    .optional()
+    .or(z.literal("")),
+  linkedinUrl: z
+    .string()
+    .url("Please enter a valid URL")
+    .optional()
+    .or(z.literal("")),
+  youtubeUrl: z
+    .string()
+    .url("Please enter a valid URL")
+    .optional()
+    .or(z.literal("")),
+  twitterUrl: z
+    .string()
+    .url("Please enter a valid URL")
+    .optional()
+    .or(z.literal("")),
+  whatsappUrl: z
+    .string()
+    .url("Please enter a valid URL")
+    .optional()
+    .or(z.literal("")),
   customSocialIcon: z.string().optional(),
-  customSocialUrl: z.string().url('Please enter a valid URL').optional().or(z.literal('')),
+  customSocialUrl: z
+    .string()
+    .url("Please enter a valid URL")
+    .optional()
+    .or(z.literal("")),
   showLogo: z.boolean().default(true),
   logoUrl: z.string().optional(),
   showLanguageSelector: z.boolean().default(false),
@@ -102,196 +163,214 @@ const footerSettingsSchema = z.object({
   columnLayout: z.number().min(1).max(4).default(3),
   customCSS: z.string().optional(),
   showLegalLinks: z.boolean().default(true),
-  privacyPolicyUrl: z.string().url('Please enter a valid URL').optional().or(z.literal('')),
-  termsConditionsUrl: z.string().url('Please enter a valid URL').optional().or(z.literal('')),
-  cookiePolicyUrl: z.string().url('Please enter a valid URL').optional().or(z.literal(''))
-})
+  privacyPolicyUrl: z
+    .string()
+    .url("Please enter a valid URL")
+    .optional()
+    .or(z.literal("")),
+  termsConditionsUrl: z
+    .string()
+    .url("Please enter a valid URL")
+    .optional()
+    .or(z.literal("")),
+  cookiePolicyUrl: z
+    .string()
+    .url("Please enter a valid URL")
+    .optional()
+    .or(z.literal("")),
+});
 
-type FooterSettingsValues = z.infer<typeof footerSettingsSchema>
+type FooterSettingsValues = z.infer<typeof footerSettingsSchema>;
 
 export default function SettingsPage() {
-  const [isSubmittingSite, setIsSubmittingSite] = useState(false)
-  const [isSubmittingUser, setIsSubmittingUser] = useState(false)
-  const [isSubmittingFooter, setIsSubmittingFooter] = useState(false)
-  const [footerSettingsLoaded, setFooterSettingsLoaded] = useState(false)
+  const [isSubmittingSite, setIsSubmittingSite] = useState(false);
+  const [isSubmittingUser, setIsSubmittingUser] = useState(false);
+  const [isSubmittingFooter, setIsSubmittingFooter] = useState(false);
+  const [footerSettingsLoaded, setFooterSettingsLoaded] = useState(false);
 
   const siteForm = useForm<SiteSettingsValues>({
     resolver: zodResolver(siteSettingsSchema),
     defaultValues: {
-      siteName: 'Zoolyum',
-      siteDescription: 'Creative Agency',
-      contactEmail: 'contact@zoolyum.com',
-      contactPhone: '',
-      address: '',
+      siteName: "Zoolyum",
+      siteDescription: "Creative Agency",
+      contactEmail: "contact@zoolyum.com",
+      contactPhone: "",
+      address: "",
       socialLinks: {
-        twitter: '',
-        facebook: '',
-        instagram: '',
-        linkedin: '',
+        twitter: "",
+        facebook: "",
+        instagram: "",
+        linkedin: "",
       },
     },
-  })
+  });
 
   const userForm = useForm<UserSettingsValues>({
     resolver: zodResolver(userSettingsSchema),
     defaultValues: {
-      name: '',
-      email: '',
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: '',
+      name: "",
+      email: "",
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
     },
-  })
+  });
 
   const footerForm = useForm<FooterSettingsValues>({
     resolver: zodResolver(footerSettingsSchema),
     defaultValues: {
-      footerContent: '',
-      copyright: '© 2024 Zoolyum. All rights reserved.',
-      disclaimer: '',
-      aboutTagline: '',
+      footerContent: "",
+      copyright: "© 2024 Zoolyum. All rights reserved.",
+      disclaimer: "",
+      aboutTagline: "",
       quickLinks: [],
       showSocialMedia: true,
-      facebookUrl: '',
-      instagramUrl: '',
-      linkedinUrl: '',
-      youtubeUrl: '',
-      twitterUrl: '',
-      whatsappUrl: '',
-      customSocialIcon: '',
-      customSocialUrl: '',
+      facebookUrl: "",
+      instagramUrl: "",
+      linkedinUrl: "",
+      youtubeUrl: "",
+      twitterUrl: "",
+      whatsappUrl: "",
+      customSocialIcon: "",
+      customSocialUrl: "",
       showLogo: true,
-      logoUrl: '',
+      logoUrl: "",
       showLanguageSelector: false,
       supportedLanguages: [],
       showNewsletter: false,
-      newsletterPlaceholder: 'Enter your email for updates',
-      backgroundColor: '#1A1A1A',
-      textColor: '#E9E7E2',
+      newsletterPlaceholder: "Enter your email for updates",
+      backgroundColor: "#1A1A1A",
+      textColor: "#E9E7E2",
       columnLayout: 3,
-      customCSS: '',
+      customCSS: "",
       showLegalLinks: true,
-      privacyPolicyUrl: '',
-      termsConditionsUrl: '',
-      cookiePolicyUrl: ''
+      privacyPolicyUrl: "",
+      termsConditionsUrl: "",
+      cookiePolicyUrl: "",
     },
-  })
+  });
 
-  const { fields: quickLinkFields, append: appendQuickLink, remove: removeQuickLink } = useFieldArray({
+  const {
+    fields: quickLinkFields,
+    append: appendQuickLink,
+    remove: removeQuickLink,
+  } = useFieldArray({
     control: footerForm.control,
-    name: 'quickLinks'
-  })
+    name: "quickLinks",
+  });
 
   async function onSubmitSiteSettings(data: SiteSettingsValues) {
-    setIsSubmittingSite(true)
+    setIsSubmittingSite(true);
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       toast({
-        title: 'Settings updated',
-        description: 'Your site settings have been updated successfully.',
-      })
+        title: "Settings updated",
+        description: "Your site settings have been updated successfully.",
+      });
     } catch (error) {
-      console.error('Error updating settings:', error)
+      console.error("Error updating settings:", error);
       toast({
-        title: 'Error',
-        description: 'Failed to update settings. Please try again.',
-        variant: 'destructive',
-      })
+        title: "Error",
+        description: "Failed to update settings. Please try again.",
+        variant: "destructive",
+      });
     } finally {
-      setIsSubmittingSite(false)
+      setIsSubmittingSite(false);
     }
   }
 
   async function onSubmitUserSettings(data: UserSettingsValues) {
-    setIsSubmittingUser(true)
+    setIsSubmittingUser(true);
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       toast({
-        title: 'Profile updated',
-        description: 'Your profile has been updated successfully.',
-      })
-      
+        title: "Profile updated",
+        description: "Your profile has been updated successfully.",
+      });
+
       // Reset password fields
       userForm.reset({
         ...data,
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
-      })
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
     } catch (error) {
-      console.error('Error updating profile:', error)
+      console.error("Error updating profile:", error);
       toast({
-        title: 'Error',
-        description: 'Failed to update profile. Please try again.',
-        variant: 'destructive',
-      })
+        title: "Error",
+        description: "Failed to update profile. Please try again.",
+        variant: "destructive",
+      });
     } finally {
-      setIsSubmittingUser(false)
+      setIsSubmittingUser(false);
     }
   }
 
   async function loadFooterSettings() {
     try {
-      const response = await fetch('/api/footer-settings')
+      const response = await fetch("/api/footer-settings");
       if (response.ok) {
-        const data = await response.json()
+        const data = await response.json();
         footerForm.reset({
           ...data,
           quickLinks: data.quickLinks || [],
-          supportedLanguages: data.supportedLanguages || []
-        })
+          supportedLanguages: data.supportedLanguages || [],
+        });
       }
     } catch (error) {
-      console.error('Error loading footer settings:', error)
+      console.error("Error loading footer settings:", error);
     } finally {
-      setFooterSettingsLoaded(true)
+      setFooterSettingsLoaded(true);
     }
   }
 
   async function onSubmitFooterSettings(data: FooterSettingsValues) {
-    setIsSubmittingFooter(true)
+    setIsSubmittingFooter(true);
     try {
-      const response = await fetch('/api/footer-settings', {
-        method: 'PUT',
+      const response = await fetch("/api/footer-settings", {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error('Failed to update footer settings')
+        throw new Error("Failed to update footer settings");
       }
-      
+
       toast({
-        title: 'Footer settings updated',
-        description: 'Your footer settings have been updated successfully.',
-      })
+        title: "Footer settings updated",
+        description: "Your footer settings have been updated successfully.",
+      });
     } catch (error) {
-      console.error('Error updating footer settings:', error)
+      console.error("Error updating footer settings:", error);
       toast({
-        title: 'Error',
-        description: 'Failed to update footer settings. Please try again.',
-        variant: 'destructive',
-      })
+        title: "Error",
+        description: "Failed to update footer settings. Please try again.",
+        variant: "destructive",
+      });
     } finally {
-      setIsSubmittingFooter(false)
+      setIsSubmittingFooter(false);
     }
   }
 
   useEffect(() => {
-    loadFooterSettings()
-  }, [])
+    loadFooterSettings();
+  }, []);
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Settings</h1>
-        <p className="text-muted-foreground">Manage your account and site settings</p>
+        <p className="text-muted-foreground">
+          Manage your account and site settings
+        </p>
       </div>
 
       <Tabs defaultValue="site">
@@ -300,7 +379,7 @@ export default function SettingsPage() {
           <TabsTrigger value="footer">Footer Settings</TabsTrigger>
           <TabsTrigger value="account">Account</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="site" className="space-y-4 mt-6">
           <Card>
             <CardHeader>
@@ -311,7 +390,10 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent>
               <Form {...siteForm}>
-                <form onSubmit={siteForm.handleSubmit(onSubmitSiteSettings)} className="space-y-8">
+                <form
+                  onSubmit={siteForm.handleSubmit(onSubmitSiteSettings)}
+                  className="space-y-8"
+                >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField
                       control={siteForm.control}
@@ -334,7 +416,10 @@ export default function SettingsPage() {
                         <FormItem>
                           <FormLabel>Contact Email</FormLabel>
                           <FormControl>
-                            <Input placeholder="contact@example.com" {...field} />
+                            <Input
+                              placeholder="contact@example.com"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -349,10 +434,10 @@ export default function SettingsPage() {
                       <FormItem>
                         <FormLabel>Site Description</FormLabel>
                         <FormControl>
-                          <Textarea 
-                            placeholder="Brief description of your site" 
+                          <Textarea
+                            placeholder="Brief description of your site"
                             className="min-h-24"
-                            {...field} 
+                            {...field}
                           />
                         </FormControl>
                         <FormMessage />
@@ -382,7 +467,10 @@ export default function SettingsPage() {
                         <FormItem>
                           <FormLabel>Address</FormLabel>
                           <FormControl>
-                            <Input placeholder="123 Main St, City, Country" {...field} />
+                            <Input
+                              placeholder="123 Main St, City, Country"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -391,7 +479,9 @@ export default function SettingsPage() {
                   </div>
 
                   <div>
-                    <h3 className="text-lg font-medium mb-4">Social Media Links</h3>
+                    <h3 className="text-lg font-medium mb-4">
+                      Social Media Links
+                    </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <FormField
                         control={siteForm.control}
@@ -400,7 +490,10 @@ export default function SettingsPage() {
                           <FormItem>
                             <FormLabel>Twitter</FormLabel>
                             <FormControl>
-                              <Input placeholder="https://twitter.com/yourusername" {...field} />
+                              <Input
+                                placeholder="https://twitter.com/yourusername"
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -414,7 +507,10 @@ export default function SettingsPage() {
                           <FormItem>
                             <FormLabel>Facebook</FormLabel>
                             <FormControl>
-                              <Input placeholder="https://facebook.com/yourpage" {...field} />
+                              <Input
+                                placeholder="https://facebook.com/yourpage"
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -428,7 +524,10 @@ export default function SettingsPage() {
                           <FormItem>
                             <FormLabel>Instagram</FormLabel>
                             <FormControl>
-                              <Input placeholder="https://instagram.com/yourusername" {...field} />
+                              <Input
+                                placeholder="https://instagram.com/yourusername"
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -442,7 +541,10 @@ export default function SettingsPage() {
                           <FormItem>
                             <FormLabel>LinkedIn</FormLabel>
                             <FormControl>
-                              <Input placeholder="https://linkedin.com/in/yourusername" {...field} />
+                              <Input
+                                placeholder="https://linkedin.com/in/yourusername"
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -452,14 +554,14 @@ export default function SettingsPage() {
                   </div>
 
                   <Button type="submit" disabled={isSubmittingSite}>
-                    {isSubmittingSite ? 'Saving...' : 'Save Changes'}
+                    {isSubmittingSite ? "Saving..." : "Save Changes"}
                   </Button>
                 </form>
               </Form>
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="footer" className="space-y-4 mt-6">
           <Card>
             <CardHeader>
@@ -470,8 +572,10 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent>
               <Form {...footerForm}>
-                <form onSubmit={footerForm.handleSubmit(onSubmitFooterSettings)} className="space-y-8">
-                  
+                <form
+                  onSubmit={footerForm.handleSubmit(onSubmitFooterSettings)}
+                  className="space-y-8"
+                >
                   {/* Footer Content Section */}
                   <Collapsible defaultOpen>
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors">
@@ -487,19 +591,20 @@ export default function SettingsPage() {
                             <FormLabel>Main Footer Content</FormLabel>
                             <FormControl>
                               <RichTextEditor
-                                value={field.value || ''}
+                                value={field.value || ""}
                                 onChangeAction={field.onChange}
                                 placeholder="Enter your footer content..."
                               />
                             </FormControl>
                             <FormDescription>
-                              Rich text content for your footer. Supports formatting, links, and basic HTML.
+                              Rich text content for your footer. Supports
+                              formatting, links, and basic HTML.
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
-                      
+
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <FormField
                           control={footerForm.control}
@@ -508,13 +613,16 @@ export default function SettingsPage() {
                             <FormItem>
                               <FormLabel>Copyright Text</FormLabel>
                               <FormControl>
-                                <Input placeholder="© 2024 Your Company. All rights reserved." {...field} />
+                                <Input
+                                  placeholder="© 2024 Your Company. All rights reserved."
+                                  {...field}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
-                        
+
                         <FormField
                           control={footerForm.control}
                           name="aboutTagline"
@@ -522,14 +630,17 @@ export default function SettingsPage() {
                             <FormItem>
                               <FormLabel>About Tagline</FormLabel>
                               <FormControl>
-                                <Input placeholder="Brief tagline about your company" {...field} />
+                                <Input
+                                  placeholder="Brief tagline about your company"
+                                  {...field}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
                       </div>
-                      
+
                       <FormField
                         control={footerForm.control}
                         name="disclaimer"
@@ -537,10 +648,10 @@ export default function SettingsPage() {
                           <FormItem>
                             <FormLabel>Disclaimer</FormLabel>
                             <FormControl>
-                              <Textarea 
-                                placeholder="Legal disclaimer or additional information" 
+                              <Textarea
+                                placeholder="Legal disclaimer or additional information"
                                 className="min-h-20"
-                                {...field} 
+                                {...field}
                               />
                             </FormControl>
                             <FormMessage />
@@ -549,9 +660,9 @@ export default function SettingsPage() {
                       />
                     </CollapsibleContent>
                   </Collapsible>
-                  
+
                   <Separator />
-                  
+
                   {/* Quick Links Section */}
                   <Collapsible defaultOpen>
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors">
@@ -561,7 +672,10 @@ export default function SettingsPage() {
                     <CollapsibleContent className="space-y-6 pt-6">
                       <div className="space-y-4">
                         {quickLinkFields.map((field, index) => (
-                          <div key={field.id} className="flex gap-4 items-end p-4 border rounded-lg">
+                          <div
+                            key={field.id}
+                            className="flex gap-4 items-end p-4 border rounded-lg"
+                          >
                             <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                               <FormField
                                 control={footerForm.control}
@@ -570,13 +684,16 @@ export default function SettingsPage() {
                                   <FormItem>
                                     <FormLabel>Link Label</FormLabel>
                                     <FormControl>
-                                      <Input placeholder="About Us" {...field} />
+                                      <Input
+                                        placeholder="About Us"
+                                        {...field}
+                                      />
                                     </FormControl>
                                     <FormMessage />
                                   </FormItem>
                                 )}
                               />
-                              
+
                               <FormField
                                 control={footerForm.control}
                                 name={`quickLinks.${index}.url`}
@@ -584,14 +701,17 @@ export default function SettingsPage() {
                                   <FormItem>
                                     <FormLabel>URL</FormLabel>
                                     <FormControl>
-                                      <Input placeholder="https://example.com/about" {...field} />
+                                      <Input
+                                        placeholder="https://example.com/about"
+                                        {...field}
+                                      />
                                     </FormControl>
                                     <FormMessage />
                                   </FormItem>
                                 )}
                               />
                             </div>
-                            
+
                             <FormField
                               control={footerForm.control}
                               name={`quickLinks.${index}.openInNewTab`}
@@ -609,7 +729,7 @@ export default function SettingsPage() {
                                 </FormItem>
                               )}
                             />
-                            
+
                             <Button
                               type="button"
                               variant="outline"
@@ -620,11 +740,17 @@ export default function SettingsPage() {
                             </Button>
                           </div>
                         ))}
-                        
+
                         <Button
                           type="button"
                           variant="outline"
-                          onClick={() => appendQuickLink({ label: '', url: '', openInNewTab: false })}
+                          onClick={() =>
+                            appendQuickLink({
+                              label: "",
+                              url: "",
+                              openInNewTab: false,
+                            })
+                          }
                           className="w-full"
                         >
                           <Plus className="h-4 w-4 mr-2" />
@@ -633,9 +759,9 @@ export default function SettingsPage() {
                       </div>
                     </CollapsibleContent>
                   </Collapsible>
-                  
+
                   <Separator />
-                  
+
                   {/* Social Media Section */}
                   <Collapsible defaultOpen>
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors">
@@ -649,7 +775,9 @@ export default function SettingsPage() {
                         render={({ field }) => (
                           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                             <div className="space-y-0.5">
-                              <FormLabel className="text-base">Show Social Media Icons</FormLabel>
+                              <FormLabel className="text-base">
+                                Show Social Media Icons
+                              </FormLabel>
                               <FormDescription>
                                 Display social media icons in the footer
                               </FormDescription>
@@ -663,8 +791,8 @@ export default function SettingsPage() {
                           </FormItem>
                         )}
                       />
-                      
-                      {footerForm.watch('showSocialMedia') && (
+
+                      {footerForm.watch("showSocialMedia") && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <FormField
                             control={footerForm.control}
@@ -673,13 +801,16 @@ export default function SettingsPage() {
                               <FormItem>
                                 <FormLabel>Facebook URL</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="https://facebook.com/yourpage" {...field} />
+                                  <Input
+                                    placeholder="https://facebook.com/yourpage"
+                                    {...field}
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
-                          
+
                           <FormField
                             control={footerForm.control}
                             name="instagramUrl"
@@ -687,13 +818,16 @@ export default function SettingsPage() {
                               <FormItem>
                                 <FormLabel>Instagram URL</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="https://instagram.com/yourusername" {...field} />
+                                  <Input
+                                    placeholder="https://instagram.com/yourusername"
+                                    {...field}
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
-                          
+
                           <FormField
                             control={footerForm.control}
                             name="linkedinUrl"
@@ -701,13 +835,16 @@ export default function SettingsPage() {
                               <FormItem>
                                 <FormLabel>LinkedIn URL</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="https://linkedin.com/company/yourcompany" {...field} />
+                                  <Input
+                                    placeholder="https://linkedin.com/company/yourcompany"
+                                    {...field}
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
-                          
+
                           <FormField
                             control={footerForm.control}
                             name="youtubeUrl"
@@ -715,13 +852,16 @@ export default function SettingsPage() {
                               <FormItem>
                                 <FormLabel>YouTube URL</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="https://youtube.com/c/yourchannel" {...field} />
+                                  <Input
+                                    placeholder="https://youtube.com/c/yourchannel"
+                                    {...field}
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
-                          
+
                           <FormField
                             control={footerForm.control}
                             name="twitterUrl"
@@ -729,13 +869,16 @@ export default function SettingsPage() {
                               <FormItem>
                                 <FormLabel>Twitter URL</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="https://twitter.com/yourusername" {...field} />
+                                  <Input
+                                    placeholder="https://twitter.com/yourusername"
+                                    {...field}
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
-                          
+
                           <FormField
                             control={footerForm.control}
                             name="whatsappUrl"
@@ -743,7 +886,10 @@ export default function SettingsPage() {
                               <FormItem>
                                 <FormLabel>WhatsApp URL</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="https://wa.me/1234567890" {...field} />
+                                  <Input
+                                    placeholder="https://wa.me/1234567890"
+                                    {...field}
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -753,9 +899,9 @@ export default function SettingsPage() {
                       )}
                     </CollapsibleContent>
                   </Collapsible>
-                  
+
                   <Separator />
-                  
+
                   {/* Footer Logo Section */}
                   <Collapsible>
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors">
@@ -769,7 +915,9 @@ export default function SettingsPage() {
                         render={({ field }) => (
                           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                             <div className="space-y-0.5">
-                              <FormLabel className="text-base">Show Logo in Footer</FormLabel>
+                              <FormLabel className="text-base">
+                                Show Logo in Footer
+                              </FormLabel>
                               <FormDescription>
                                 Display your logo in the footer
                               </FormDescription>
@@ -783,8 +931,8 @@ export default function SettingsPage() {
                           </FormItem>
                         )}
                       />
-                      
-                      {footerForm.watch('showLogo') && (
+
+                      {footerForm.watch("showLogo") && (
                         <FormField
                           control={footerForm.control}
                           name="logoUrl"
@@ -800,7 +948,8 @@ export default function SettingsPage() {
                                 />
                               </FormControl>
                               <FormDescription>
-                                Upload a logo for your footer. Recommended size: 200x60px
+                                Upload a logo for your footer. Recommended size:
+                                200x60px
                               </FormDescription>
                               <FormMessage />
                             </FormItem>
@@ -809,9 +958,9 @@ export default function SettingsPage() {
                       )}
                     </CollapsibleContent>
                   </Collapsible>
-                  
+
                   <Separator />
-                  
+
                   {/* Newsletter Section */}
                   <Collapsible>
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors">
@@ -825,7 +974,9 @@ export default function SettingsPage() {
                         render={({ field }) => (
                           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                             <div className="space-y-0.5">
-                              <FormLabel className="text-base">Show Newsletter Signup</FormLabel>
+                              <FormLabel className="text-base">
+                                Show Newsletter Signup
+                              </FormLabel>
                               <FormDescription>
                                 Display newsletter signup form in footer
                               </FormDescription>
@@ -839,8 +990,8 @@ export default function SettingsPage() {
                           </FormItem>
                         )}
                       />
-                      
-                      {footerForm.watch('showNewsletter') && (
+
+                      {footerForm.watch("showNewsletter") && (
                         <FormField
                           control={footerForm.control}
                           name="newsletterPlaceholder"
@@ -848,7 +999,10 @@ export default function SettingsPage() {
                             <FormItem>
                               <FormLabel>Newsletter Placeholder Text</FormLabel>
                               <FormControl>
-                                <Input placeholder="Enter your email for updates" {...field} />
+                                <Input
+                                  placeholder="Enter your email for updates"
+                                  {...field}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -857,9 +1011,9 @@ export default function SettingsPage() {
                       )}
                     </CollapsibleContent>
                   </Collapsible>
-                  
+
                   <Separator />
-                  
+
                   {/* Styling Section */}
                   <Collapsible>
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors">
@@ -876,15 +1030,15 @@ export default function SettingsPage() {
                               <FormLabel>Background Color</FormLabel>
                               <FormControl>
                                 <div className="flex gap-2">
-                                  <Input 
-                                    type="color" 
+                                  <Input
+                                    type="color"
                                     className="w-16 h-10 p-1 border rounded"
-                                    {...field} 
+                                    {...field}
                                   />
-                                  <Input 
-                                    placeholder="#1A1A1A" 
+                                  <Input
+                                    placeholder="#1A1A1A"
                                     className="flex-1"
-                                    {...field} 
+                                    {...field}
                                   />
                                 </div>
                               </FormControl>
@@ -892,7 +1046,7 @@ export default function SettingsPage() {
                             </FormItem>
                           )}
                         />
-                        
+
                         <FormField
                           control={footerForm.control}
                           name="textColor"
@@ -901,15 +1055,15 @@ export default function SettingsPage() {
                               <FormLabel>Text Color</FormLabel>
                               <FormControl>
                                 <div className="flex gap-2">
-                                  <Input 
-                                    type="color" 
+                                  <Input
+                                    type="color"
                                     className="w-16 h-10 p-1 border rounded"
-                                    {...field} 
+                                    {...field}
                                   />
-                                  <Input 
-                                    placeholder="#E9E7E2" 
+                                  <Input
+                                    placeholder="#E9E7E2"
                                     className="flex-1"
-                                    {...field} 
+                                    {...field}
                                   />
                                 </div>
                               </FormControl>
@@ -917,14 +1071,19 @@ export default function SettingsPage() {
                             </FormItem>
                           )}
                         />
-                        
+
                         <FormField
                           control={footerForm.control}
                           name="columnLayout"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Column Layout</FormLabel>
-                              <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
+                              <Select
+                                onValueChange={(value) =>
+                                  field.onChange(parseInt(value))
+                                }
+                                value={field.value?.toString()}
+                              >
                                 <FormControl>
                                   <SelectTrigger>
                                     <SelectValue placeholder="Select columns" />
@@ -942,7 +1101,7 @@ export default function SettingsPage() {
                           )}
                         />
                       </div>
-                      
+
                       <FormField
                         control={footerForm.control}
                         name="customCSS"
@@ -950,14 +1109,15 @@ export default function SettingsPage() {
                           <FormItem>
                             <FormLabel>Custom CSS</FormLabel>
                             <FormControl>
-                              <Textarea 
-                                placeholder="/* Custom CSS for footer */" 
+                              <Textarea
+                                placeholder="/* Custom CSS for footer */"
                                 className="min-h-32 font-mono text-sm"
-                                {...field} 
+                                {...field}
                               />
                             </FormControl>
                             <FormDescription>
-                              Add custom CSS to further customize your footer appearance
+                              Add custom CSS to further customize your footer
+                              appearance
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
@@ -965,13 +1125,15 @@ export default function SettingsPage() {
                       />
                     </CollapsibleContent>
                   </Collapsible>
-                  
+
                   <Separator />
-                  
+
                   {/* Legal Links Section */}
                   <Collapsible>
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors">
-                      <h3 className="text-lg font-medium">Legal & Compliance</h3>
+                      <h3 className="text-lg font-medium">
+                        Legal & Compliance
+                      </h3>
                       <ChevronDown className="h-4 w-4" />
                     </CollapsibleTrigger>
                     <CollapsibleContent className="space-y-6 pt-6">
@@ -981,7 +1143,9 @@ export default function SettingsPage() {
                         render={({ field }) => (
                           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                             <div className="space-y-0.5">
-                              <FormLabel className="text-base">Show Legal Links</FormLabel>
+                              <FormLabel className="text-base">
+                                Show Legal Links
+                              </FormLabel>
                               <FormDescription>
                                 Display legal and compliance links in footer
                               </FormDescription>
@@ -995,8 +1159,8 @@ export default function SettingsPage() {
                           </FormItem>
                         )}
                       />
-                      
-                      {footerForm.watch('showLegalLinks') && (
+
+                      {footerForm.watch("showLegalLinks") && (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                           <FormField
                             control={footerForm.control}
@@ -1005,13 +1169,16 @@ export default function SettingsPage() {
                               <FormItem>
                                 <FormLabel>Privacy Policy URL</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="https://example.com/privacy" {...field} />
+                                  <Input
+                                    placeholder="https://example.com/privacy"
+                                    {...field}
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
-                          
+
                           <FormField
                             control={footerForm.control}
                             name="termsConditionsUrl"
@@ -1019,13 +1186,16 @@ export default function SettingsPage() {
                               <FormItem>
                                 <FormLabel>Terms & Conditions URL</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="https://example.com/terms" {...field} />
+                                  <Input
+                                    placeholder="https://example.com/terms"
+                                    {...field}
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
-                          
+
                           <FormField
                             control={footerForm.control}
                             name="cookiePolicyUrl"
@@ -1033,7 +1203,10 @@ export default function SettingsPage() {
                               <FormItem>
                                 <FormLabel>Cookie Policy URL</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="https://example.com/cookies" {...field} />
+                                  <Input
+                                    placeholder="https://example.com/cookies"
+                                    {...field}
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -1043,10 +1216,15 @@ export default function SettingsPage() {
                       )}
                     </CollapsibleContent>
                   </Collapsible>
-                  
+
                   <div className="flex justify-end pt-6">
-                    <Button type="submit" disabled={isSubmittingFooter || !footerSettingsLoaded}>
-                      {isSubmittingFooter ? 'Saving...' : 'Save Footer Settings'}
+                    <Button
+                      type="submit"
+                      disabled={isSubmittingFooter || !footerSettingsLoaded}
+                    >
+                      {isSubmittingFooter
+                        ? "Saving..."
+                        : "Save Footer Settings"}
                     </Button>
                   </div>
                 </form>
@@ -1054,7 +1232,7 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="account" className="space-y-4 mt-6">
           <Card>
             <CardHeader>
@@ -1065,7 +1243,10 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent>
               <Form {...userForm}>
-                <form onSubmit={userForm.handleSubmit(onSubmitUserSettings)} className="space-y-8">
+                <form
+                  onSubmit={userForm.handleSubmit(onSubmitUserSettings)}
+                  className="space-y-8"
+                >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField
                       control={userForm.control}
@@ -1088,7 +1269,10 @@ export default function SettingsPage() {
                         <FormItem>
                           <FormLabel>Email</FormLabel>
                           <FormControl>
-                            <Input placeholder="your.email@example.com" {...field} />
+                            <Input
+                              placeholder="your.email@example.com"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -1098,7 +1282,7 @@ export default function SettingsPage() {
 
                   <div className="space-y-4">
                     <h3 className="text-lg font-medium">Change Password</h3>
-                    
+
                     <FormField
                       control={userForm.control}
                       name="currentPassword"
@@ -1106,7 +1290,11 @@ export default function SettingsPage() {
                         <FormItem>
                           <FormLabel>Current Password</FormLabel>
                           <FormControl>
-                            <Input type="password" placeholder="••••••••" {...field} />
+                            <Input
+                              type="password"
+                              placeholder="••••••••"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -1121,7 +1309,11 @@ export default function SettingsPage() {
                           <FormItem>
                             <FormLabel>New Password</FormLabel>
                             <FormControl>
-                              <Input type="password" placeholder="••••••••" {...field} />
+                              <Input
+                                type="password"
+                                placeholder="••••••••"
+                                {...field}
+                              />
                             </FormControl>
                             <FormDescription>
                               Leave blank to keep current password
@@ -1138,7 +1330,11 @@ export default function SettingsPage() {
                           <FormItem>
                             <FormLabel>Confirm New Password</FormLabel>
                             <FormControl>
-                              <Input type="password" placeholder="••••••••" {...field} />
+                              <Input
+                                type="password"
+                                placeholder="••••••••"
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -1148,7 +1344,7 @@ export default function SettingsPage() {
                   </div>
 
                   <Button type="submit" disabled={isSubmittingUser}>
-                    {isSubmittingUser ? 'Saving...' : 'Update Profile'}
+                    {isSubmittingUser ? "Saving..." : "Update Profile"}
                   </Button>
                 </form>
               </Form>
@@ -1157,5 +1353,5 @@ export default function SettingsPage() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

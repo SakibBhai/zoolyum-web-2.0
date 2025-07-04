@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getAllTeamMembers, createTeamMember } from '@/lib/team-operations';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
+import { NextRequest, NextResponse } from "next/server";
+import { getAllTeamMembers, createTeamMember } from "@/lib/team-operations";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 
 interface ApiError {
   message: string;
@@ -23,15 +23,15 @@ interface TeamMemberData {
 
 // Error handler utility
 function handleApiError(error: unknown): NextResponse {
-  console.error('API Error:', error);
-  
+  console.error("API Error:", error);
+
   const defaultError: ApiError = {
-    message: 'An unexpected error occurred',
-    status: 500
+    message: "An unexpected error occurred",
+    status: 500,
   };
 
   // If error is already an ApiError, use it directly
-  if (typeof error === 'object' && error !== null && 'status' in error) {
+  if (typeof error === "object" && error !== null && "status" in error) {
     const apiError = error as ApiError;
     return NextResponse.json(
       { error: apiError.message || defaultError.message },
@@ -67,34 +67,28 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const data = await request.json() as Partial<TeamMemberData>;
-    
+    const data = (await request.json()) as Partial<TeamMemberData>;
+
     // Validate required fields
     if (!data.name?.trim()) {
-      return NextResponse.json(
-        { error: 'Name is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
 
     const newTeamMember: TeamMemberData = {
       name: data.name.trim(),
-      role: data.role?.trim() || '',
-      bio: data.bio?.trim() || '',
-      image: data.image?.trim() || '',
+      role: data.role?.trim() || "",
+      bio: data.bio?.trim() || "",
+      image: data.image?.trim() || "",
       social: {
-        twitter: data.social?.twitter?.trim() || '',
-        linkedin: data.social?.linkedin?.trim() || '',
-        github: data.social?.github?.trim() || '',
-      }
+        twitter: data.social?.twitter?.trim() || "",
+        linkedin: data.social?.linkedin?.trim() || "",
+        github: data.social?.github?.trim() || "",
+      },
     };
 
     const createdMember = await createTeamMember(newTeamMember);

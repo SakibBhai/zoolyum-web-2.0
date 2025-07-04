@@ -1,13 +1,13 @@
-import { NextAuthOptions } from 'next-auth'
-import CredentialsProvider from 'next-auth/providers/credentials'
-import { PrismaClient } from '@prisma/client'
-import bcrypt from 'bcryptjs'
-import { NextRequest } from 'next/server'
+import { NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
+import { NextRequest } from "next/server";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 // Extend the built-in session types
-declare module 'next-auth' {
+declare module "next-auth" {
   interface Session {
     user: {
       id: string;
@@ -28,43 +28,46 @@ declare module 'next-auth' {
 
 export const authOptions: NextAuthOptions = {
   session: {
-    strategy: 'jwt',
+    strategy: "jwt",
     maxAge: 24 * 60 * 60, // 24 hours
   },
   pages: {
-    signIn: '/admin/login',
-    error: '/admin/login',
+    signIn: "/admin/login",
+    error: "/admin/login",
   },
-  debug: process.env.NODE_ENV === 'development',
+  debug: process.env.NODE_ENV === "development",
   providers: [
     CredentialsProvider({
-      name: 'Credentials',
+      name: "Credentials",
       credentials: {
-        email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' },
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          console.error('Missing credentials');
-          throw new Error('Please enter both email and password');
+          console.error("Missing credentials");
+          throw new Error("Please enter both email and password");
         }
 
         try {
           // Database-based admin authentication
           const adminUser = await prisma.adminUser.findUnique({
-            where: { email: credentials.email }
+            where: { email: credentials.email },
           });
 
           if (!adminUser) {
             console.error(`Admin user not found: ${credentials.email}`);
-            throw new Error('Invalid email or password');
+            throw new Error("Invalid email or password");
           }
 
-          const isValidPassword = await bcrypt.compare(credentials.password, adminUser.password);
-          
+          const isValidPassword = await bcrypt.compare(
+            credentials.password,
+            adminUser.password
+          );
+
           if (!isValidPassword) {
             console.error(`Invalid password for: ${credentials.email}`);
-            throw new Error('Invalid email or password');
+            throw new Error("Invalid email or password");
           }
 
           console.log(`Admin authenticated successfully: ${credentials.email}`);
@@ -73,9 +76,9 @@ export const authOptions: NextAuthOptions = {
             email: adminUser.email,
             name: adminUser.name,
             role: adminUser.role,
-          }
+          };
         } catch (error) {
-          console.error('Authentication error:', error);
+          console.error("Authentication error:", error);
           throw error;
         } finally {
           await prisma.$disconnect();
@@ -91,7 +94,7 @@ export const authOptions: NextAuthOptions = {
         session.user.email = token.email as string | null;
         session.user.role = token.role as string | null;
       }
-      return session
+      return session;
     },
     async jwt({ token, user }) {
       if (user) {
@@ -100,24 +103,24 @@ export const authOptions: NextAuthOptions = {
         token.email = user.email;
         token.role = user.role;
       }
-      return token
+      return token;
     },
   },
-}
+};
 
 // Auth verification function for API routes
 export async function verifyAuth(request: NextRequest) {
-  const { getServerSession } = await import('next-auth/next')
-  
+  const { getServerSession } = await import("next-auth/next");
+
   try {
-    const session = await getServerSession(authOptions)
-    
+    const session = await getServerSession(authOptions);
+
     if (!session?.user) {
-      return { success: false, error: 'Unauthorized' }
+      return { success: false, error: "Unauthorized" };
     }
-    
-    return { success: true, user: session.user }
+
+    return { success: true, user: session.user };
   } catch (error) {
-    return { success: false, error: 'Authentication failed' }
+    return { success: false, error: "Authentication failed" };
   }
 }

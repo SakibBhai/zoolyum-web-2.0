@@ -1,11 +1,11 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { Button } from '@/components/ui/button'
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -14,75 +14,88 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Checkbox } from '@/components/ui/checkbox'
-import { toast } from '@/components/ui/use-toast'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ImageUploader } from '@/components/admin/image-uploader'
-import { createService, generateSlug } from '@/lib/service-operations'
-import { ArrowLeft, Save } from 'lucide-react'
-import Link from 'next/link'
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "@/components/ui/use-toast";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ImageUploader } from "@/components/admin/image-uploader";
+import { createService, generateSlug } from "@/lib/service-operations";
+import { ArrowLeft, Save } from "lucide-react";
+import Link from "next/link";
 
 const serviceFormSchema = z.object({
-  title: z.string().min(1, { message: 'Title is required' }),
-  slug: z.string().min(1, { message: 'Slug is required' }),
+  title: z.string().min(1, { message: "Title is required" }),
+  slug: z.string().min(1, { message: "Slug is required" }),
   description: z.string().optional(),
   content: z.string().optional(),
-  imageUrl: z.string().url({ message: 'Must be a valid URL' }).optional().or(z.literal('')),
+  imageUrl: z
+    .string()
+    .url({ message: "Must be a valid URL" })
+    .optional()
+    .or(z.literal("")),
   icon: z.string().optional(),
   featured: z.boolean().default(false),
-  order: z.number().min(0, { message: 'Order must be a non-negative number' }).default(0),
-})
+  order: z
+    .number()
+    .min(0, { message: "Order must be a non-negative number" })
+    .default(0),
+});
 
-type ServiceFormValues = z.infer<typeof serviceFormSchema>
+type ServiceFormValues = z.infer<typeof serviceFormSchema>;
 
 export default function NewServicePage() {
-  const router = useRouter()
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<ServiceFormValues>({
     resolver: zodResolver(serviceFormSchema),
     defaultValues: {
-      title: '',
-      slug: '',
-      description: '',
-      content: '',
-      imageUrl: '',
-      icon: '',
+      title: "",
+      slug: "",
+      description: "",
+      content: "",
+      imageUrl: "",
+      icon: "",
       featured: false,
       order: 0,
     },
-  })
+  });
 
   // Auto-generate slug from title
   const handleTitleChange = (title: string) => {
     if (!title) return;
-    const slug = generateSlug(title)
-    form.setValue('slug', slug)
-  }
+    const slug = generateSlug(title);
+    form.setValue("slug", slug);
+  };
 
   const onSubmit = async (data: ServiceFormValues) => {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
-      await createService(data)
+      await createService(data);
       toast({
-        title: 'Success',
-        description: 'Service created successfully.',
-      })
-      router.push('/admin/services')
+        title: "Success",
+        description: "Service created successfully.",
+      });
+      router.push("/admin/services");
     } catch (error) {
-      console.error('Error creating service:', error)
+      console.error("Error creating service:", error);
       toast({
-        title: 'Error',
-        description: 'Failed to create service. Please try again.',
-        variant: 'destructive',
-      })
+        title: "Error",
+        description: "Failed to create service. Please try again.",
+        variant: "destructive",
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className="container mx-auto py-6">
@@ -94,7 +107,9 @@ export default function NewServicePage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Create New Service</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Create New Service
+          </h1>
           <p className="text-muted-foreground">
             Add a new service to your portfolio
           </p>
@@ -123,8 +138,8 @@ export default function NewServicePage() {
                           placeholder="Enter service title"
                           {...field}
                           onChange={(e) => {
-                            field.onChange(e)
-                            handleTitleChange(e.target.value)
+                            field.onChange(e);
+                            handleTitleChange(e.target.value);
                           }}
                         />
                       </FormControl>
@@ -143,7 +158,8 @@ export default function NewServicePage() {
                         <Input placeholder="service-slug" {...field} />
                       </FormControl>
                       <FormDescription>
-                        URL-friendly version of the title. Auto-generated from title.
+                        URL-friendly version of the title. Auto-generated from
+                        title.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -183,7 +199,8 @@ export default function NewServicePage() {
                       />
                     </FormControl>
                     <FormDescription>
-                      Detailed description of the service. You can use Markdown formatting.
+                      Detailed description of the service. You can use Markdown
+                      formatting.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -199,7 +216,7 @@ export default function NewServicePage() {
                       <FormLabel>Service Image</FormLabel>
                       <FormControl>
                         <ImageUploader
-                          initialImageUrl={field.value || ''}
+                          initialImageUrl={field.value || ""}
                           onImageChangeAction={field.onChange}
                           folder="services"
                         />
@@ -219,10 +236,7 @@ export default function NewServicePage() {
                     <FormItem>
                       <FormLabel>Icon</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="Icon name or URL"
-                          {...field}
-                        />
+                        <Input placeholder="Icon name or URL" {...field} />
                       </FormControl>
                       <FormDescription>
                         Icon identifier for the service (optional)
@@ -246,7 +260,9 @@ export default function NewServicePage() {
                           min="0"
                           placeholder="0"
                           {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          onChange={(e) =>
+                            field.onChange(parseInt(e.target.value) || 0)
+                          }
                         />
                       </FormControl>
                       <FormDescription>
@@ -285,7 +301,7 @@ export default function NewServicePage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => router.push('/admin/services')}
+                  onClick={() => router.push("/admin/services")}
                   disabled={isSubmitting}
                 >
                   Cancel
@@ -309,5 +325,5 @@ export default function NewServicePage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

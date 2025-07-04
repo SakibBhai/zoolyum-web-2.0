@@ -1,50 +1,59 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { ImageUploader } from "@/components/admin/image-uploader"
-import { GalleryUploader } from "@/components/admin/gallery-uploader"
-import { useToast } from "@/hooks/use-toast"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ImageUploader } from "@/components/admin/image-uploader";
+import { GalleryUploader } from "@/components/admin/gallery-uploader";
+import { useToast } from "@/hooks/use-toast";
 
 export default function NewProjectPage() {
-  const router = useRouter()
-  const { toast } = useToast()
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const router = useRouter();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Basic project info
-  const [title, setTitle] = useState("")
-  const [slug, setSlug] = useState("")
-  const [category, setCategory] = useState("")
-  const [client, setClient] = useState("")
-  const [year, setYear] = useState("")
-  const [duration, setDuration] = useState("")
+  const [title, setTitle] = useState("");
+  const [slug, setSlug] = useState("");
+  const [category, setCategory] = useState("");
+  const [client, setClient] = useState("");
+  const [year, setYear] = useState("");
+  const [duration, setDuration] = useState("");
 
   // Project content
-  const [description, setDescription] = useState("")
-  const [overview, setOverview] = useState("")
-  const [challenge, setChallenge] = useState("")
-  const [solution, setSolution] = useState("")
+  const [description, setDescription] = useState("");
+  const [overview, setOverview] = useState("");
+  const [challenge, setChallenge] = useState("");
+  const [solution, setSolution] = useState("");
 
   // Media
-  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null)
-  const [heroImageUrl, setHeroImageUrl] = useState<string | null>(null)
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+  const [heroImageUrl, setHeroImageUrl] = useState<string | null>(null);
 
   // Structured data (as JSON strings for the form)
-  const [processSteps, setProcessSteps] = useState("")
-  const [galleryImages, setGalleryImages] = useState<Array<{ url: string; caption?: string }>>([])
-  const [results, setResults] = useState("")
-  const [testimonial, setTestimonial] = useState("")
+  const [processSteps, setProcessSteps] = useState("");
+  const [galleryImages, setGalleryImages] = useState<
+    Array<{ url: string; caption?: string }>
+  >([]);
+  const [results, setResults] = useState("");
+  const [testimonial, setTestimonial] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
 
     try {
       // Validate required fields
@@ -53,28 +62,28 @@ export default function NewProjectPage() {
           title: "Missing required fields",
           description: "Please fill in all required fields",
           variant: "destructive",
-        })
-        setIsSubmitting(false)
-        return
+        });
+        setIsSubmitting(false);
+        return;
       }
 
       // Parse JSON fields
-      let processStepsArray = []
-      let resultsArray = []
-      let testimonialObj = {}
+      let processStepsArray = [];
+      let resultsArray = [];
+      let testimonialObj = {};
 
       try {
-        if (processSteps) processStepsArray = JSON.parse(processSteps)
-        if (results) resultsArray = JSON.parse(results)
-        if (testimonial) testimonialObj = JSON.parse(testimonial)
+        if (processSteps) processStepsArray = JSON.parse(processSteps);
+        if (results) resultsArray = JSON.parse(results);
+        if (testimonial) testimonialObj = JSON.parse(testimonial);
       } catch (error) {
         toast({
           title: "Invalid JSON format",
           description: "Please check your JSON fields for proper formatting",
           variant: "destructive",
-        })
-        setIsSubmitting(false)
-        return
+        });
+        setIsSubmitting(false);
+        return;
       }
 
       // Prepare project data
@@ -95,7 +104,7 @@ export default function NewProjectPage() {
         gallery: galleryImages,
         results: resultsArray,
         testimonial: testimonialObj,
-      }
+      };
 
       // Submit to API
       const response = await fetch("/api/projects", {
@@ -104,37 +113,40 @@ export default function NewProjectPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(projectData),
-      })
+      });
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || "Failed to create project")
+        const error = await response.json();
+        throw new Error(error.message || "Failed to create project");
       }
 
       toast({
         title: "Project created",
         description: "Your project has been created successfully",
-      })
+      });
 
       // Redirect to projects list
-      router.push("/admin/dashboard/projects")
-      router.refresh()
+      router.push("/admin/dashboard/projects");
+      router.refresh();
     } catch (error) {
-      console.error("Error creating project:", error)
+      console.error("Error creating project:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "An error occurred while creating the project",
+        description:
+          error instanceof Error
+            ? error.message
+            : "An error occurred while creating the project",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   // Generate slug from title
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTitle = e.target.value
-    setTitle(newTitle)
+    const newTitle = e.target.value;
+    setTitle(newTitle);
 
     // Only auto-generate slug if it hasn't been manually edited
     if (
@@ -149,10 +161,10 @@ export default function NewProjectPage() {
         newTitle
           .toLowerCase()
           .replace(/\s+/g, "-")
-          .replace(/[^a-z0-9-]/g, ""),
-      )
+          .replace(/[^a-z0-9-]/g, "")
+      );
     }
-  }
+  };
 
   return (
     <div className="container py-10">
@@ -162,13 +174,21 @@ export default function NewProjectPage() {
         <Card>
           <CardHeader>
             <CardTitle>Basic Information</CardTitle>
-            <CardDescription>Enter the basic details about your project</CardDescription>
+            <CardDescription>
+              Enter the basic details about your project
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="title">Title *</Label>
-                <Input id="title" value={title} onChange={handleTitleChange} placeholder="Project Title" required />
+                <Input
+                  id="title"
+                  value={title}
+                  onChange={handleTitleChange}
+                  placeholder="Project Title"
+                  required
+                />
               </div>
 
               <div className="space-y-2">
@@ -180,7 +200,9 @@ export default function NewProjectPage() {
                   placeholder="project-slug"
                   required
                 />
-                <p className="text-sm text-gray-500">Used in the URL: /work/{slug || "project-slug"}</p>
+                <p className="text-sm text-gray-500">
+                  Used in the URL: /work/{slug || "project-slug"}
+                </p>
               </div>
             </div>
 
@@ -209,7 +231,12 @@ export default function NewProjectPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="year">Year</Label>
-                  <Input id="year" value={year} onChange={(e) => setYear(e.target.value)} placeholder="2023" />
+                  <Input
+                    id="year"
+                    value={year}
+                    onChange={(e) => setYear(e.target.value)}
+                    placeholder="2023"
+                  />
                 </div>
 
                 <div className="space-y-2">
@@ -313,7 +340,9 @@ export default function NewProjectPage() {
         <Card>
           <CardHeader>
             <CardTitle>Structured Data</CardTitle>
-            <CardDescription>Add structured data for your project (in JSON format)</CardDescription>
+            <CardDescription>
+              Add structured data for your project (in JSON format)
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -328,7 +357,9 @@ export default function NewProjectPage() {
 ]`}
                 rows={6}
               />
-              <p className="text-sm text-gray-500">Enter an array of objects with title and description fields</p>
+              <p className="text-sm text-gray-500">
+                Enter an array of objects with title and description fields
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -343,11 +374,15 @@ export default function NewProjectPage() {
 ]`}
                 rows={6}
               />
-              <p className="text-sm text-gray-500">Enter an array of objects with metric and value fields</p>
+              <p className="text-sm text-gray-500">
+                Enter an array of objects with metric and value fields
+              </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="testimonial">Client Testimonial (JSON Object)</Label>
+              <Label htmlFor="testimonial">
+                Client Testimonial (JSON Object)
+              </Label>
               <Textarea
                 id="testimonial"
                 value={testimonial}
@@ -359,13 +394,19 @@ export default function NewProjectPage() {
 }`}
                 rows={6}
               />
-              <p className="text-sm text-gray-500">Enter an object with quote, author, and position fields</p>
+              <p className="text-sm text-gray-500">
+                Enter an object with quote, author, and position fields
+              </p>
             </div>
           </CardContent>
         </Card>
 
         <CardFooter className="flex justify-between px-0">
-          <Button type="button" variant="outline" onClick={() => router.push("/admin/dashboard/projects")}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.push("/admin/dashboard/projects")}
+          >
             Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting}>
@@ -374,5 +415,5 @@ export default function NewProjectPage() {
         </CardFooter>
       </form>
     </div>
-  )
+  );
 }

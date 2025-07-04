@@ -1,31 +1,30 @@
-"use client"
-import { motion } from "framer-motion"
-import { ArrowRight } from "lucide-react"
-import Link from "next/link"
-import Image from "next/image"
-import { PageTransition } from "@/components/page-transition"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
+"use client";
+import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import { PageTransition } from "@/components/page-transition";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 
-import { ServiceCard3D } from "@/components/service-card-3d"
-import { TestimonialCard3D } from "@/components/testimonial-card-3d"
-import { ScrollReveal } from "@/components/scroll-animations/scroll-reveal"
-import { StaggerReveal } from "@/components/scroll-animations/stagger-reveal"
-import { TextReveal } from "@/components/scroll-animations/text-reveal"
-import { ImageReveal } from "@/components/scroll-animations/image-reveal"
-import { useMediaQuery } from "@/hooks/use-media-query"
-import { PageHeadline } from "@/components/page-headline"
-import { TeamMemberCard } from "@/components/team-member-card"
-import { CounterAnimation } from "@/components/scroll-animations/counter-animation"
+import { ServiceCard3D } from "@/components/service-card-3d";
+import { TestimonialCard3D } from "@/components/testimonial-card-3d";
+import { ScrollReveal } from "@/components/scroll-animations/scroll-reveal";
+import { StaggerReveal } from "@/components/scroll-animations/stagger-reveal";
+import { TextReveal } from "@/components/scroll-animations/text-reveal";
+import { ImageReveal } from "@/components/scroll-animations/image-reveal";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { PageHeadline } from "@/components/page-headline";
+import { TeamMemberCard } from "@/components/team-member-card";
+import { CounterAnimation } from "@/components/scroll-animations/counter-animation";
 
 export default function Home() {
-  const isMobile = useMediaQuery("(max-width: 768px)")
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   return (
     <PageTransition>
       <div className="min-h-screen bg-[#161616] text-[#E9E7E2]">
         <Header />
-
 
         <main>
           {/* Hero Section */}
@@ -50,8 +49,9 @@ export default function Home() {
                 transition={{ delay: isMobile ? 2.5 : 3.5, duration: 0.8 }}
                 className="mt-6 md:mt-8 text-lg md:text-xl lg:text-2xl max-w-2xl mx-auto text-[#E9E7E2]/80"
               >
-                We transform brands through strategic thinking and creative excellence, crafting digital experiences
-                that resonate and inspire action.
+                We transform brands through strategic thinking and creative
+                excellence, crafting digital experiences that resonate and
+                inspire action.
               </motion.p>
 
               <motion.div
@@ -105,19 +105,30 @@ export default function Home() {
               >
                 <div className="p-6 bg-[#1A1A1A] rounded-xl border border-[#333333]">
                   <h3 className="text-xl font-bold mb-2">Brand Strategy</h3>
-                  <p className="text-[#E9E7E2]/70">Strategic brand positioning and identity development</p>
+                  <p className="text-[#E9E7E2]/70">
+                    Strategic brand positioning and identity development
+                  </p>
                 </div>
                 <div className="p-6 bg-[#1A1A1A] rounded-xl border border-[#333333]">
                   <h3 className="text-xl font-bold mb-2">Digital Design</h3>
-                  <p className="text-[#E9E7E2]/70">Modern digital experiences and user interfaces</p>
+                  <p className="text-[#E9E7E2]/70">
+                    Modern digital experiences and user interfaces
+                  </p>
                 </div>
                 <div className="p-6 bg-[#1A1A1A] rounded-xl border border-[#333333]">
                   <h3 className="text-xl font-bold mb-2">Growth Marketing</h3>
-                  <p className="text-[#E9E7E2]/70">Data-driven marketing strategies for scalable growth</p>
+                  <p className="text-[#E9E7E2]/70">
+                    Data-driven marketing strategies for scalable growth
+                  </p>
                 </div>
               </StaggerReveal>
 
-              <ScrollReveal className="mt-10 md:mt-12 text-center" delay={0.3} mobileDelay={0.2} mobileAnimation="fade">
+              <ScrollReveal
+                className="mt-10 md:mt-12 text-center"
+                delay={0.3}
+                mobileDelay={0.2}
+                mobileAnimation="fade"
+              >
                 <Link
                   href="/services"
                   className="px-6 py-3 md:px-8 md:py-4 bg-[#FF5001] text-[#161616] font-bold rounded-full hover:bg-[#FF5001]/90 transition-all duration-300 inline-flex items-center group"
@@ -135,7 +146,11 @@ export default function Home() {
           <section id="about-preview">
             <div className="container mx-auto px-4 py-16 md:py-20 lg:py-32">
               <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-                <ScrollReveal animation="fade-slide" direction="right" mobileAnimation="fade">
+                <ScrollReveal
+                  animation="fade-slide"
+                  direction="right"
+                  mobileAnimation="fade"
+                >
                   <div className="relative">
                     <div className="relative z-10 rounded-2xl overflow-hidden">
                       <ImageReveal
@@ -159,23 +174,31 @@ export default function Home() {
                   mobileAnimation="fade"
                   mobileDelay={0.1}
                 >
-                  <span className="text-[#FF5001] text-sm uppercase tracking-widest font-medium">About Zoolyum</span>
+                  <span className="text-[#FF5001] text-sm uppercase tracking-widest font-medium">
+                    About Zoolyum
+                  </span>
                   <TextReveal
                     className="text-3xl md:text-4xl lg:text-5xl font-bold mt-2 mb-6 md:mb-8"
                     mobileType="words"
                     mobileStaggerDelay={0.02}
                   >
-                    Strategic <span className="headline-highlight">Brand Alchemy</span> for Growth
+                    Strategic{" "}
+                    <span className="headline-highlight">Brand Alchemy</span>{" "}
+                    for Growth
                   </TextReveal>
                   <p className="text-base md:text-lg text-[#E9E7E2]/80 mb-4 md:mb-6">
-                    Zoolyum is a strategic brand agency that transforms businesses into powerful market forces. We blend
-                    analytical precision with creative intuition to create brand experiences that capture attention and
-                    forge lasting connections with audiences.
+                    Zoolyum is a strategic brand agency that transforms
+                    businesses into powerful market forces. We blend analytical
+                    precision with creative intuition to create brand
+                    experiences that capture attention and forge lasting
+                    connections with audiences.
                   </p>
                   <p className="text-base md:text-lg text-[#E9E7E2]/80 mb-6 md:mb-8">
-                    Our approach is rooted in the belief that exceptional brands are built on strategic foundations and
-                    brought to life through compelling storytelling and innovative design. We partner with ambitious
-                    businesses ready to elevate their market presence and drive meaningful growth.
+                    Our approach is rooted in the belief that exceptional brands
+                    are built on strategic foundations and brought to life
+                    through compelling storytelling and innovative design. We
+                    partner with ambitious businesses ready to elevate their
+                    market presence and drive meaningful growth.
                   </p>
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mt-8">
@@ -264,7 +287,12 @@ export default function Home() {
                 />
               </StaggerReveal>
 
-              <ScrollReveal className="mt-10 md:mt-12 text-center" delay={0.3} mobileDelay={0.2} mobileAnimation="fade">
+              <ScrollReveal
+                className="mt-10 md:mt-12 text-center"
+                delay={0.3}
+                mobileDelay={0.2}
+                mobileAnimation="fade"
+              >
                 <Link
                   href="/portfolio"
                   className="px-6 py-3 md:px-8 md:py-4 bg-[#FF5001] text-[#161616] font-bold rounded-full hover:bg-[#FF5001]/90 transition-all duration-300 inline-flex items-center group"
@@ -315,7 +343,12 @@ export default function Home() {
                 />
               </StaggerReveal>
 
-              <ScrollReveal className="mt-10 md:mt-12 text-center" delay={0.3} mobileDelay={0.2} mobileAnimation="fade">
+              <ScrollReveal
+                className="mt-10 md:mt-12 text-center"
+                delay={0.3}
+                mobileDelay={0.2}
+                mobileAnimation="fade"
+              >
                 <Link
                   href="/team"
                   className="px-6 py-3 md:px-8 md:py-4 border border-[#FF5001] text-[#FF5001] font-bold rounded-full hover:bg-[#FF5001]/10 transition-all duration-300 inline-flex items-center group"
@@ -356,7 +389,12 @@ export default function Home() {
                 />
               </StaggerReveal>
 
-              <ScrollReveal className="mt-10 md:mt-12 text-center" delay={0.3} mobileDelay={0.2} mobileAnimation="fade">
+              <ScrollReveal
+                className="mt-10 md:mt-12 text-center"
+                delay={0.3}
+                mobileDelay={0.2}
+                mobileAnimation="fade"
+              >
                 <Link
                   href="/testimonials"
                   className="px-6 py-3 md:px-8 md:py-4 bg-[#FF5001] text-[#161616] font-bold rounded-full hover:bg-[#FF5001]/90 transition-all duration-300 inline-flex items-center group"
@@ -378,13 +416,16 @@ export default function Home() {
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#FF5001]/5 rounded-full filter blur-3xl"></div>
 
                 <div className="relative z-10 text-center max-w-3xl mx-auto">
-                  <span className="text-[#FF5001] text-sm uppercase tracking-widest font-medium">Get Started</span>
+                  <span className="text-[#FF5001] text-sm uppercase tracking-widest font-medium">
+                    Get Started
+                  </span>
                   <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mt-4 mb-6">
                     Ready to Transform Your Brand?
                   </h2>
                   <p className="text-lg md:text-xl text-[#E9E7E2]/80 mb-8 md:mb-10">
-                    Let's collaborate to create a strategic brand experience that resonates with your audience and
-                    drives meaningful results for your business.
+                    Let's collaborate to create a strategic brand experience
+                    that resonates with your audience and drives meaningful
+                    results for your business.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <Link
@@ -415,16 +456,16 @@ export default function Home() {
         <Footer />
       </div>
     </PageTransition>
-  )
+  );
 }
 
 // Agency Name Animation Component
 function AgencyNameAnimation() {
-  const isMobile = useMediaQuery("(max-width: 768px)")
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   // Faster animation on mobile
-  const charDelay = isMobile ? 0.05 : 0.1
-  const sparkleDelay = isMobile ? 1.5 : 2
+  const charDelay = isMobile ? 0.05 : 0.1;
+  const sparkleDelay = isMobile ? 1.5 : 2;
 
   return (
     <div className="relative">
@@ -490,7 +531,12 @@ function AgencyNameAnimation() {
       {/* Golden sparkle effect */}
       <motion.div
         initial={{ opacity: 0, scale: 0.5 }}
-        animate={{ opacity: [0, 1, 0], scale: [0.5, 1.5, 0], x: [0, 10, -10, 0], y: [0, -10, 10, 0] }}
+        animate={{
+          opacity: [0, 1, 0],
+          scale: [0.5, 1.5, 0],
+          x: [0, 10, -10, 0],
+          y: [0, -10, 10, 0],
+        }}
         transition={{
           delay: sparkleDelay,
           duration: 1.5,
@@ -512,11 +558,19 @@ function AgencyNameAnimation() {
         className="absolute bottom-0 right-0 w-1 h-12 md:h-16 bg-[#FF5001] translate-x-2"
       ></motion.div>
     </div>
-  )
+  );
 }
 
 // Portfolio Item Component
-function PortfolioItem({ title, category, image }: { title: string; category: string; image: string }) {
+function PortfolioItem({
+  title,
+  category,
+  image,
+}: {
+  title: string;
+  category: string;
+  image: string;
+}) {
   return (
     <div className="group relative overflow-hidden rounded-xl">
       <div className="aspect-[4/3] bg-[#212121] overflow-hidden">
@@ -541,5 +595,5 @@ function PortfolioItem({ title, category, image }: { title: string; category: st
         </Link>
       </div>
     </div>
-  )
+  );
 }

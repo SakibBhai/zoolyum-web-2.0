@@ -1,20 +1,24 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
-import { getBlogPostBySlug, updateBlogPost } from "@/lib/blog-operations"
-import { PageTransition } from "@/components/page-transition"
-import { Save, X, Loader2 } from "lucide-react"
-import { ImageUploader } from "@/components/admin/image-uploader"
-import { RichTextEditor } from "@/components/admin/rich-text-editor"
-import { useToast } from "@/hooks/use-toast"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { getBlogPostBySlug, updateBlogPost } from "@/lib/blog-operations";
+import { PageTransition } from "@/components/page-transition";
+import { Save, X, Loader2 } from "lucide-react";
+import { ImageUploader } from "@/components/admin/image-uploader";
+import { RichTextEditor } from "@/components/admin/rich-text-editor";
+import { useToast } from "@/hooks/use-toast";
 
-export default function EditBlogPostPage({ params }: { params: { slug: string } }) {
-  const { data: session } = useSession()
-  const { toast } = useToast()
+export default function EditBlogPostPage({
+  params,
+}: {
+  params: { slug: string };
+}) {
+  const { data: session } = useSession();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     id: "", // Change id to string
     title: "",
@@ -24,26 +28,26 @@ export default function EditBlogPostPage({ params }: { params: { slug: string } 
     image_url: "",
     tags: "", // Ensure tags is a string for form input
     status: "draft",
-  })
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const loadPost = async () => {
       try {
-        setIsLoading(true)
-        const post = await getBlogPostBySlug(params.slug)
+        setIsLoading(true);
+        const post = await getBlogPostBySlug(params.slug);
 
         if (!post) {
-          throw new Error("Blog post not found")
+          throw new Error("Blog post not found");
         }
 
         // Format tags if they're an array
-        let formattedTags = post.tags || ""
+        let formattedTags = post.tags || "";
         if (Array.isArray(post.tags)) {
-          formattedTags = post.tags.join(", ")
+          formattedTags = post.tags.join(", ");
         }
 
         setFormData({
@@ -53,82 +57,88 @@ export default function EditBlogPostPage({ params }: { params: { slug: string } 
           excerpt: post.excerpt || "",
           content: post.content,
           image_url: post.imageUrl || "",
-          tags: typeof formattedTags === 'string' ? formattedTags : '', // Ensure tags is always a string
-          status: post.published ? "published" : "draft"
-        })
+          tags: typeof formattedTags === "string" ? formattedTags : "", // Ensure tags is always a string
+          status: post.published ? "published" : "draft",
+        });
       } catch (err: any) {
-        setError(err.message || "Failed to load blog post")
+        setError(err.message || "Failed to load blog post");
         toast({
           title: "Error",
           description: err.message || "Failed to load blog post",
           variant: "destructive",
-        })
+        });
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    loadPost()
-  }, [params.slug, toast])
+    loadPost();
+  }, [params.slug, toast]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
       [name]: value,
-    })
-  }
+    });
+  };
 
   const handleContentChange = (content: string) => {
     setFormData({
       ...formData,
       content,
-    })
-  }
+    });
+  };
 
   const handleImageChange = (url: string | null) => {
     setFormData({
       ...formData,
       image_url: url || "",
-    })
-  }
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setError(null)
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
 
     try {
       if (!session || !session.user) {
-        throw new Error("You must be logged in to update a post")
+        throw new Error("You must be logged in to update a post");
       }
 
       const dataToUpdate = {
         ...formData,
         id: String(formData.id), // Ensure id is string
-        tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : [],
+        tags: formData.tags
+          ? formData.tags.split(",").map((tag) => tag.trim())
+          : [],
       };
 
-      await updateBlogPost(dataToUpdate)
+      await updateBlogPost(dataToUpdate);
       toast({
         title: "Success",
         description: "Blog post updated successfully",
-      })
-      router.push("/admin/dashboard/blog")
+      });
+      router.push("/admin/dashboard/blog");
     } catch (err: any) {
-      setError(err.message || "An error occurred while updating the post")
+      setError(err.message || "An error occurred while updating the post");
       toast({
         title: "Error",
         description: err.message || "An error occurred while updating the post",
         variant: "destructive",
-      })
-      setIsSubmitting(false)
+      });
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleCancel = () => {
-    router.push("/admin/dashboard/blog")
-  }
+    router.push("/admin/dashboard/blog");
+  };
 
   if (isLoading) {
     return (
@@ -137,7 +147,7 @@ export default function EditBlogPostPage({ params }: { params: { slug: string } 
           <Loader2 className="h-8 w-8 animate-spin text-[#FF5001]" />
         </div>
       </PageTransition>
-    )
+    );
   }
 
   return (
@@ -166,10 +176,15 @@ export default function EditBlogPostPage({ params }: { params: { slug: string } 
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-900/20 border border-red-900/50 rounded-lg text-red-400">{error}</div>
+          <div className="mb-6 p-4 bg-red-900/20 border border-red-900/50 rounded-lg text-red-400">
+            {error}
+          </div>
         )}
 
-        <form onSubmit={handleSubmit} className="bg-[#1A1A1A] rounded-xl border border-[#333333] p-6">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-[#1A1A1A] rounded-xl border border-[#333333] p-6"
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
               <label htmlFor="title" className="block text-sm font-medium mb-2">
@@ -273,5 +288,5 @@ export default function EditBlogPostPage({ params }: { params: { slug: string } 
         </form>
       </div>
     </PageTransition>
-  )
+  );
 }

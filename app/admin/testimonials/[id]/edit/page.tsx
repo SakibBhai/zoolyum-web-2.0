@@ -1,123 +1,147 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Switch } from '@/components/ui/switch'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ImageUploader } from '@/components/admin/image-uploader'
-import { ArrowLeft, Save, Loader2 } from 'lucide-react'
-import Link from 'next/link'
-import { useToast } from '@/hooks/use-toast'
-import { Skeleton } from '@/components/ui/skeleton'
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ImageUploader } from "@/components/admin/image-uploader";
+import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const testimonialSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
+  name: z.string().min(1, "Name is required"),
   position: z.string().optional(),
   company: z.string().optional(),
-  content: z.string().min(10, 'Content must be at least 10 characters'),
+  content: z.string().min(10, "Content must be at least 10 characters"),
   rating: z.number().min(1).max(5).optional(),
   imageUrl: z.string().optional(),
   featured: z.boolean().default(false),
   order: z.number().optional(),
-})
+});
 
-type TestimonialFormData = z.infer<typeof testimonialSchema>
+type TestimonialFormData = z.infer<typeof testimonialSchema>;
 
-export default function EditTestimonialPage({ params }: { params: { id: string } }) {
-  const router = useRouter()
-  const { toast } = useToast()
-  const [isLoading, setIsLoading] = useState(false)
-  const [isLoadingData, setIsLoadingData] = useState(true)
+export default function EditTestimonialPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(true);
 
   const form = useForm<TestimonialFormData>({
     resolver: zodResolver(testimonialSchema),
     defaultValues: {
-      name: '',
-      position: '',
-      company: '',
-      content: '',
+      name: "",
+      position: "",
+      company: "",
+      content: "",
       rating: 5,
-      imageUrl: '',
+      imageUrl: "",
       featured: false,
       order: 0,
     },
-  })
+  });
 
   useEffect(() => {
     const fetchTestimonial = async () => {
       try {
-        const response = await fetch(`/api/testimonials/${params.id}`)
+        const response = await fetch(`/api/testimonials/${params.id}`);
         if (!response.ok) {
-          throw new Error('Failed to fetch testimonial')
+          throw new Error("Failed to fetch testimonial");
         }
-        const testimonial = await response.json()
-        
+        const testimonial = await response.json();
+
         form.reset({
-          name: testimonial.name || '',
-          position: testimonial.position || '',
-          company: testimonial.company || '',
-          content: testimonial.content || '',
+          name: testimonial.name || "",
+          position: testimonial.position || "",
+          company: testimonial.company || "",
+          content: testimonial.content || "",
           rating: testimonial.rating || 5,
-          imageUrl: testimonial.imageUrl || '',
+          imageUrl: testimonial.imageUrl || "",
           featured: testimonial.featured || false,
           order: testimonial.order || 0,
-        })
+        });
       } catch (error) {
-        console.error('Error fetching testimonial:', error)
+        console.error("Error fetching testimonial:", error);
         toast({
-          title: 'Error',
-          description: 'Failed to load testimonial',
-          variant: 'destructive',
-        })
-        router.push('/admin/testimonials')
+          title: "Error",
+          description: "Failed to load testimonial",
+          variant: "destructive",
+        });
+        router.push("/admin/testimonials");
       } finally {
-        setIsLoadingData(false)
+        setIsLoadingData(false);
       }
-    }
+    };
 
-    fetchTestimonial()
-  }, [params.id, form, toast, router])
+    fetchTestimonial();
+  }, [params.id, form, toast, router]);
 
   const onSubmit = async (data: TestimonialFormData) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
       const response = await fetch(`/api/testimonials/${params.id}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error('Failed to update testimonial')
+        throw new Error("Failed to update testimonial");
       }
 
       toast({
-        title: 'Success',
-        description: 'Testimonial updated successfully',
-      })
+        title: "Success",
+        description: "Testimonial updated successfully",
+      });
 
-      router.push('/admin/testimonials')
+      router.push("/admin/testimonials");
     } catch (error) {
-      console.error('Error updating testimonial:', error)
+      console.error("Error updating testimonial:", error);
       toast({
-        title: 'Error',
-        description: 'Failed to update testimonial',
-        variant: 'destructive',
-      })
+        title: "Error",
+        description: "Failed to update testimonial",
+        variant: "destructive",
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   if (isLoadingData) {
     return (
@@ -146,7 +170,7 @@ export default function EditTestimonialPage({ params }: { params: { id: string }
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   return (
@@ -159,7 +183,9 @@ export default function EditTestimonialPage({ params }: { params: { id: string }
         </Link>
         <div>
           <h1 className="text-3xl font-bold">Edit Testimonial</h1>
-          <p className="text-muted-foreground">Update testimonial information</p>
+          <p className="text-muted-foreground">
+            Update testimonial information
+          </p>
         </div>
       </div>
 
@@ -195,7 +221,10 @@ export default function EditTestimonialPage({ params }: { params: { id: string }
                     <FormItem>
                       <FormLabel>Position/Title</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., CEO, Marketing Director" {...field} />
+                        <Input
+                          placeholder="e.g., CEO, Marketing Director"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -222,7 +251,12 @@ export default function EditTestimonialPage({ params }: { params: { id: string }
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Rating</FormLabel>
-                      <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
+                      <Select
+                        onValueChange={(value) =>
+                          field.onChange(parseInt(value))
+                        }
+                        value={field.value?.toString()}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select rating" />
@@ -249,7 +283,7 @@ export default function EditTestimonialPage({ params }: { params: { id: string }
                   <FormItem>
                     <FormLabel>Testimonial Content *</FormLabel>
                     <FormControl>
-                      <Textarea 
+                      <Textarea
                         placeholder="Enter the testimonial content..."
                         className="min-h-[120px]"
                         {...field}
@@ -290,7 +324,9 @@ export default function EditTestimonialPage({ params }: { params: { id: string }
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
-                        <FormLabel className="text-base">Featured Testimonial</FormLabel>
+                        <FormLabel className="text-base">
+                          Featured Testimonial
+                        </FormLabel>
                         <FormDescription>
                           Mark this testimonial as featured to highlight it
                         </FormDescription>
@@ -312,11 +348,13 @@ export default function EditTestimonialPage({ params }: { params: { id: string }
                     <FormItem>
                       <FormLabel>Display Order</FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
-                          placeholder="0" 
+                        <Input
+                          type="number"
+                          placeholder="0"
                           {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          onChange={(e) =>
+                            field.onChange(parseInt(e.target.value) || 0)
+                          }
                         />
                       </FormControl>
                       <FormDescription>
@@ -353,5 +391,5 @@ export default function EditTestimonialPage({ params }: { params: { id: string }
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

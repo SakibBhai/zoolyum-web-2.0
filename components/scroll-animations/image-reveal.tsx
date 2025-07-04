@@ -1,22 +1,22 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { useScrollAnimation } from "@/hooks/use-scroll-animation"
-import Image from "next/image"
+import { motion } from "framer-motion";
+import { useScrollAnimation } from "@/hooks/use-scroll-animation";
+import Image from "next/image";
 
 interface ImageRevealProps {
-  src: string
-  alt: string
-  width: number
-  height: number
-  className?: string
-  imageClassName?: string
-  delay?: number
-  threshold?: number
-  once?: boolean
-  direction?: "left" | "right" | "top" | "bottom"
-  mobileDirection?: "left" | "right" | "top" | "bottom"
-  mobileDuration?: number
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  className?: string;
+  imageClassName?: string;
+  delay?: number;
+  threshold?: number;
+  once?: boolean;
+  direction?: "left" | "right" | "top" | "bottom";
+  mobileDirection?: "left" | "right" | "top" | "bottom";
+  mobileDuration?: number;
 }
 
 export function ImageReveal({
@@ -37,14 +37,15 @@ export function ImageReveal({
     threshold,
     once,
     delay,
-  })
+  });
 
   // Use mobile-specific direction if provided and on mobile
-  const effectiveDirection = isMobile && mobileDirection ? mobileDirection : direction
+  const effectiveDirection =
+    isMobile && mobileDirection ? mobileDirection : direction;
 
   // Define the direction of the reveal animation
   const getDirectionVariants = () => {
-    const duration = isMobile ? mobileDuration || 0.6 : 0.8
+    const duration = isMobile ? mobileDuration || 0.6 : 0.8;
 
     switch (effectiveDirection) {
       case "right":
@@ -54,7 +55,7 @@ export function ImageReveal({
             clipPath: "inset(0 0% 0 0)",
             transition: { duration, delay },
           },
-        }
+        };
       case "top":
         return {
           hidden: { clipPath: "inset(100% 0 0 0)" },
@@ -62,7 +63,7 @@ export function ImageReveal({
             clipPath: "inset(0 0 0 0)",
             transition: { duration, delay },
           },
-        }
+        };
       case "bottom":
         return {
           hidden: { clipPath: "inset(0 0 100% 0)" },
@@ -70,7 +71,7 @@ export function ImageReveal({
             clipPath: "inset(0 0 0% 0)",
             transition: { duration, delay },
           },
-        }
+        };
       case "left":
       default:
         return {
@@ -79,11 +80,11 @@ export function ImageReveal({
             clipPath: "inset(0 0 0 0%)",
             transition: { duration, delay },
           },
-        }
+        };
     }
-  }
+  };
 
-  const variants = getDirectionVariants()
+  const variants = getDirectionVariants();
 
   return (
     <div ref={ref} className={`overflow-hidden ${className}`}>
@@ -106,5 +107,5 @@ export function ImageReveal({
         />
       </motion.div>
     </div>
-  )
+  );
 }

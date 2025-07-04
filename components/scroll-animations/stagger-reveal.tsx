@@ -1,24 +1,24 @@
-"use client"
+"use client";
 
-import React from "react"
+import React from "react";
 
-import { motion } from "framer-motion"
-import { useScrollAnimation } from "@/hooks/use-scroll-animation"
-import type { ReactNode } from "react"
+import { motion } from "framer-motion";
+import { useScrollAnimation } from "@/hooks/use-scroll-animation";
+import type { ReactNode } from "react";
 
 interface StaggerRevealProps {
-  children: ReactNode
-  className?: string
-  delay?: number
-  staggerDelay?: number
-  mobileStaggerDelay?: number
-  threshold?: number
-  once?: boolean
-  animation?: "fade" | "slide" | "scale" | "fade-slide" | "fade-scale"
-  direction?: "up" | "down" | "left" | "right"
-  mobileAnimation?: "fade" | "slide" | "scale" | "fade-slide" | "fade-scale"
-  mobileDirection?: "up" | "down" | "left" | "right"
-  mobileDuration?: number
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+  staggerDelay?: number;
+  mobileStaggerDelay?: number;
+  threshold?: number;
+  once?: boolean;
+  animation?: "fade" | "slide" | "scale" | "fade-slide" | "fade-scale";
+  direction?: "up" | "down" | "left" | "right";
+  mobileAnimation?: "fade" | "slide" | "scale" | "fade-slide" | "fade-scale";
+  mobileDirection?: "up" | "down" | "left" | "right";
+  mobileDuration?: number;
 }
 
 export function StaggerReveal({
@@ -39,12 +39,17 @@ export function StaggerReveal({
     threshold,
     once,
     delay,
-  })
+  });
 
   // Use mobile-specific animation and direction if provided and on mobile
-  const effectiveAnimation = isMobile && mobileAnimation ? mobileAnimation : animation
-  const effectiveDirection = isMobile && mobileDirection ? mobileDirection : direction
-  const effectiveStaggerDelay = isMobile && mobileStaggerDelay !== undefined ? mobileStaggerDelay : staggerDelay
+  const effectiveAnimation =
+    isMobile && mobileAnimation ? mobileAnimation : animation;
+  const effectiveDirection =
+    isMobile && mobileDirection ? mobileDirection : direction;
+  const effectiveStaggerDelay =
+    isMobile && mobileStaggerDelay !== undefined
+      ? mobileStaggerDelay
+      : staggerDelay;
 
   // Define animation variants based on the animation type and direction
   const getContainerVariants = () => {
@@ -57,14 +62,14 @@ export function StaggerReveal({
           delayChildren: delay,
         },
       },
-    }
-  }
+    };
+  };
 
   const getItemVariants = () => {
     // Adjust values for mobile
-    const slideDistance = isMobile ? 20 : 50
-    const scaleValue = isMobile ? 0.95 : 0.8
-    const duration = isMobile ? mobileDuration || 0.4 : 0.5
+    const slideDistance = isMobile ? 20 : 50;
+    const scaleValue = isMobile ? 0.95 : 0.8;
+    const duration = isMobile ? mobileDuration || 0.4 : 0.5;
 
     switch (effectiveAnimation) {
       case "fade":
@@ -74,19 +79,29 @@ export function StaggerReveal({
             opacity: 1,
             transition: { duration },
           },
-        }
+        };
       case "slide":
         return {
           hidden: {
-            x: effectiveDirection === "left" ? -slideDistance : effectiveDirection === "right" ? slideDistance : 0,
-            y: effectiveDirection === "up" ? slideDistance : effectiveDirection === "down" ? -slideDistance : 0,
+            x:
+              effectiveDirection === "left"
+                ? -slideDistance
+                : effectiveDirection === "right"
+                ? slideDistance
+                : 0,
+            y:
+              effectiveDirection === "up"
+                ? slideDistance
+                : effectiveDirection === "down"
+                ? -slideDistance
+                : 0,
           },
           visible: {
             x: 0,
             y: 0,
             transition: { duration },
           },
-        }
+        };
       case "scale":
         return {
           hidden: { scale: scaleValue, opacity: 0 },
@@ -95,7 +110,7 @@ export function StaggerReveal({
             opacity: 1,
             transition: { duration },
           },
-        }
+        };
       case "fade-scale":
         return {
           hidden: { opacity: 0, scale: isMobile ? 0.95 : 0.9 },
@@ -104,23 +119,28 @@ export function StaggerReveal({
             scale: 1,
             transition: { duration },
           },
-        }
+        };
       case "fade-slide":
       default:
         return {
           hidden: {
             opacity: 0,
-            x: effectiveDirection === "left" ? -30 : effectiveDirection === "right" ? 30 : 0,
+            x:
+              effectiveDirection === "left"
+                ? -30
+                : effectiveDirection === "right"
+                ? 30
+                : 0,
             y:
               effectiveDirection === "up"
                 ? isMobile
                   ? 20
                   : 30
                 : effectiveDirection === "down"
-                  ? isMobile
-                    ? -20
-                    : -30
-                  : 0,
+                ? isMobile
+                  ? -20
+                  : -30
+                : 0,
           },
           visible: {
             opacity: 1,
@@ -128,21 +148,27 @@ export function StaggerReveal({
             y: 0,
             transition: { duration },
           },
-        }
+        };
     }
-  }
+  };
 
-  const containerVariants = getContainerVariants()
-  const itemVariants = getItemVariants()
+  const containerVariants = getContainerVariants();
+  const itemVariants = getItemVariants();
 
   // Limit the number of animated children on mobile for performance
-  const childrenArray = React.Children.toArray(children)
-  const maxAnimatedItems = isMobile ? 6 : childrenArray.length
+  const childrenArray = React.Children.toArray(children);
+  const maxAnimatedItems = isMobile ? 6 : childrenArray.length;
 
   return (
-    <motion.div ref={ref} className={className} initial="hidden" animate={controls} variants={containerVariants}>
+    <motion.div
+      ref={ref}
+      className={className}
+      initial="hidden"
+      animate={controls}
+      variants={containerVariants}
+    >
       {React.Children.map(children, (child, index) => {
-        if (!React.isValidElement(child)) return child
+        if (!React.isValidElement(child)) return child;
 
         // For mobile, only animate the first few items for performance
         if (isMobile && index >= maxAnimatedItems) {
@@ -150,7 +176,7 @@ export function StaggerReveal({
             <motion.div key={index} initial={{ opacity: 1 }}>
               {child}
             </motion.div>
-          )
+          );
         }
 
         return (
@@ -162,8 +188,8 @@ export function StaggerReveal({
           >
             {child}
           </motion.div>
-        )
+        );
       })}
     </motion.div>
-  )
+  );
 }

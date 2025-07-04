@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker, DayPickerProps, ButtonProps } from "react-day-picker"
+import * as React from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { DayPicker, DayPickerProps, ButtonProps } from "react-day-picker";
 
-import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>
+export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
 function Calendar({
   className,
@@ -53,14 +53,18 @@ function Calendar({
         day_hidden: "invisible",
         ...classNames,
       }}
-      components={{
-        IconLeft: (props: ButtonProps) => <ChevronLeft className="h-4 w-4" />,
-        IconRight: (props: ButtonProps) => <ChevronRight className="h-4 w-4" />,
-      } as DayPickerProps["components"]}
+      components={
+        {
+          IconLeft: (props: ButtonProps) => <ChevronLeft className="h-4 w-4" />,
+          IconRight: (props: ButtonProps) => (
+            <ChevronRight className="h-4 w-4" />
+          ),
+        } as DayPickerProps["components"]
+      }
       {...props}
     />
-  )
+  );
 }
-Calendar.displayName = "Calendar"
+Calendar.displayName = "Calendar";
 
-export { Calendar }
+export { Calendar };

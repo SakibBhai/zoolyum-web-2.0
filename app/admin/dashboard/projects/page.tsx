@@ -1,73 +1,77 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { fetchProjects, deleteProject, Project } from "@/lib/project-operations"
-import { PageTransition } from "@/components/page-transition"
-import { Plus, Edit, Trash2, Eye, Search } from "lucide-react"
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+  fetchProjects,
+  deleteProject,
+  Project,
+} from "@/lib/project-operations";
+import { PageTransition } from "@/components/page-transition";
+import { Plus, Edit, Trash2, Eye, Search } from "lucide-react";
 
 export default function ProjectsManagementPage() {
-  const [projects, setProjects] = useState<Project[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
-  const router = useRouter()
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const loadProjects = async () => {
       try {
-        setIsLoading(true)
-        const data = await fetchProjects()
-        setProjects(data)
+        setIsLoading(true);
+        const data = await fetchProjects();
+        setProjects(data);
       } catch (error) {
-        console.error("Error loading projects:", error)
+        console.error("Error loading projects:", error);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    loadProjects()
-  }, [])
+    loadProjects();
+  }, []);
 
   // Filter projects based on search query
   const filteredProjects = projects.filter(
     (project: any) =>
       project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.slug.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.category?.toLowerCase().includes(searchQuery.toLowerCase()),
-  )
+      project.category?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
-    })
-  }
+    });
+  };
 
   const handleDelete = async (id: string) => {
     if (deleteConfirm !== id) {
-      setDeleteConfirm(id)
-      return
+      setDeleteConfirm(id);
+      return;
     }
 
     try {
-      await deleteProject(id)
-      setProjects(projects.filter((project: Project) => project.id !== id))
-      setDeleteConfirm(null)
+      await deleteProject(id);
+      setProjects(projects.filter((project: Project) => project.id !== id));
+      setDeleteConfirm(null);
     } catch (error) {
-      console.error("Error deleting project:", error)
+      console.error("Error deleting project:", error);
     }
-  }
+  };
 
   const handleEdit = (slug: string) => {
-    router.push(`/admin/dashboard/projects/edit/${slug}`)
-  }
+    router.push(`/admin/dashboard/projects/edit/${slug}`);
+  };
 
   const handleView = (slug: string) => {
-    window.open(`/work/${slug}`, "_blank")
-  }
+    window.open(`/work/${slug}`, "_blank");
+  };
 
   return (
     <PageTransition>
@@ -145,10 +149,14 @@ export default function ProjectsManagementPage() {
                   filteredProjects.map((project: any) => (
                     <tr key={project.id}>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium">{project.title}</div>
+                        <div className="text-sm font-medium">
+                          {project.title}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-[#E9E7E2]/70">{project.category || "—"}</div>
+                        <div className="text-sm text-[#E9E7E2]/70">
+                          {project.category || "—"}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
@@ -162,7 +170,9 @@ export default function ProjectsManagementPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-[#E9E7E2]/70">{formatDate(project.created_at)}</div>
+                        <div className="text-sm text-[#E9E7E2]/70">
+                          {formatDate(project.created_at)}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex justify-end space-x-2">
@@ -183,9 +193,15 @@ export default function ProjectsManagementPage() {
                           <button
                             onClick={() => handleDelete(project.id)}
                             className={`p-1 ${
-                              deleteConfirm === project.id ? "text-red-500" : "text-red-400 hover:text-red-300"
+                              deleteConfirm === project.id
+                                ? "text-red-500"
+                                : "text-red-400 hover:text-red-300"
                             }`}
-                            title={deleteConfirm === project.id ? "Click again to confirm" : "Delete project"}
+                            title={
+                              deleteConfirm === project.id
+                                ? "Click again to confirm"
+                                : "Delete project"
+                            }
                           >
                             <Trash2 className="h-5 w-5" />
                           </button>
@@ -195,7 +211,10 @@ export default function ProjectsManagementPage() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={5} className="px-6 py-4 text-center text-[#E9E7E2]/50">
+                    <td
+                      colSpan={5}
+                      className="px-6 py-4 text-center text-[#E9E7E2]/50"
+                    >
                       No projects found
                     </td>
                   </tr>
@@ -206,5 +225,5 @@ export default function ProjectsManagementPage() {
         </div>
       </div>
     </PageTransition>
-  )
+  );
 }

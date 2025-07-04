@@ -1,11 +1,11 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
-import { redirect } from 'next/navigation'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -13,7 +13,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -21,235 +21,247 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  Mail, 
-  Phone, 
-  Calendar, 
-  Eye, 
-  Trash2, 
-  Settings, 
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Mail,
+  Phone,
+  Calendar,
+  Eye,
+  Trash2,
+  Settings,
   Search,
   Filter,
   Download,
-  BarChart3
-} from 'lucide-react'
+  BarChart3,
+} from "lucide-react";
 
 // Helper function to format dates
-const formatDate = (date: Date, formatType: 'short' | 'full' = 'short') => {
-  if (formatType === 'short') {
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: '2-digit', 
-      year: 'numeric' 
-    })
+const formatDate = (date: Date, formatType: "short" | "full" = "short") => {
+  if (formatType === "short") {
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "2-digit",
+      year: "numeric",
+    });
   }
-  return date.toLocaleDateString('en-US', { 
-    month: 'short', 
-    day: '2-digit', 
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
 
 interface Contact {
-  id: string
-  name: string
-  email: string
-  phone?: string | null
-  subject?: string | null
-  message: string
-  status: string
-  ipAddress?: string | null
-  userAgent?: string | null
-  createdAt: string
-  updatedAt: string
+  id: string;
+  name: string;
+  email: string;
+  phone?: string | null;
+  subject?: string | null;
+  message: string;
+  status: string;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface ContactSettings {
-  id: string
-  email?: string | null
-  phone?: string | null
-  address?: string | null
-  workingHours?: string | null
-  twitterUrl?: string | null
-  linkedinUrl?: string | null
-  instagramUrl?: string | null
-  behanceUrl?: string | null
-  enablePhoneField: boolean
-  requirePhoneField: boolean
-  autoReplyEnabled: boolean
-  autoReplyMessage?: string | null
-  notificationEmail?: string | null
-  emailNotifications: boolean
+  id: string;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  workingHours?: string | null;
+  twitterUrl?: string | null;
+  linkedinUrl?: string | null;
+  instagramUrl?: string | null;
+  behanceUrl?: string | null;
+  enablePhoneField: boolean;
+  requirePhoneField: boolean;
+  autoReplyEnabled: boolean;
+  autoReplyMessage?: string | null;
+  notificationEmail?: string | null;
+  emailNotifications: boolean;
 }
 
 interface ContactStats {
-  total: number
-  new: number
-  read: number
-  replied: number
-  archived: number
+  total: number;
+  new: number;
+  read: number;
+  replied: number;
+  archived: number;
 }
 
 export default function ContactsAdminPage() {
-  const { data: session, status } = useSession()
-  const [contacts, setContacts] = useState<Contact[]>([])
-  const [settings, setSettings] = useState<ContactSettings | null>(null)
-  const [stats, setStats] = useState<ContactStats | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const [settingsForm, setSettingsForm] = useState<Partial<ContactSettings>>({})
+  const { data: session, status } = useSession();
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [settings, setSettings] = useState<ContactSettings | null>(null);
+  const [stats, setStats] = useState<ContactStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [settingsForm, setSettingsForm] = useState<Partial<ContactSettings>>(
+    {}
+  );
 
   // Redirect if not authenticated
-  if (status === 'loading') {
-    return <div>Loading...</div>
+  if (status === "loading") {
+    return <div>Loading...</div>;
   }
 
   if (!session) {
-    redirect('/auth/signin')
+    redirect("/auth/signin");
   }
 
   useEffect(() => {
-    fetchContacts()
-    fetchSettings()
-    fetchStats()
-  }, [])
+    fetchContacts();
+    fetchSettings();
+    fetchStats();
+  }, []);
 
   const fetchContacts = async () => {
     try {
-      const response = await fetch('/api/contacts')
+      const response = await fetch("/api/contacts");
       if (response.ok) {
-        const data = await response.json()
-        setContacts(data)
+        const data = await response.json();
+        setContacts(data);
       }
     } catch (error) {
-      console.error('Error fetching contacts:', error)
+      console.error("Error fetching contacts:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const fetchSettings = async () => {
     try {
-      const response = await fetch('/api/contacts/settings')
+      const response = await fetch("/api/contacts/settings");
       if (response.ok) {
-        const data = await response.json()
-        setSettings(data)
-        setSettingsForm(data)
+        const data = await response.json();
+        setSettings(data);
+        setSettingsForm(data);
       }
     } catch (error) {
-      console.error('Error fetching settings:', error)
+      console.error("Error fetching settings:", error);
     }
-  }
+  };
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('/api/contacts/stats')
+      const response = await fetch("/api/contacts/stats");
       if (response.ok) {
-        const data = await response.json()
-        setStats(data)
+        const data = await response.json();
+        setStats(data);
       }
     } catch (error) {
-      console.error('Error fetching stats:', error)
+      console.error("Error fetching stats:", error);
     }
-  }
+  };
 
   const updateContactStatus = async (contactId: string, newStatus: string) => {
     try {
       const response = await fetch(`/api/contacts/${contactId}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ status: newStatus }),
-      })
+      });
 
       if (response.ok) {
-        setContacts(contacts.map(contact => 
-          contact.id === contactId 
-            ? { ...contact, status: newStatus }
-            : contact
-        ))
-        fetchStats() // Refresh stats
+        setContacts(
+          contacts.map((contact) =>
+            contact.id === contactId
+              ? { ...contact, status: newStatus }
+              : contact
+          )
+        );
+        fetchStats(); // Refresh stats
       }
     } catch (error) {
-      console.error('Error updating contact status:', error)
+      console.error("Error updating contact status:", error);
     }
-  }
+  };
 
   const deleteContact = async (contactId: string) => {
-    if (!confirm('Are you sure you want to delete this contact?')) {
-      return
+    if (!confirm("Are you sure you want to delete this contact?")) {
+      return;
     }
 
     try {
       const response = await fetch(`/api/contacts/${contactId}`, {
-        method: 'DELETE',
-      })
+        method: "DELETE",
+      });
 
       if (response.ok) {
-        setContacts(contacts.filter(contact => contact.id !== contactId))
-        setSelectedContact(null)
-        fetchStats() // Refresh stats
+        setContacts(contacts.filter((contact) => contact.id !== contactId));
+        setSelectedContact(null);
+        fetchStats(); // Refresh stats
       }
     } catch (error) {
-      console.error('Error deleting contact:', error)
+      console.error("Error deleting contact:", error);
     }
-  }
+  };
 
   const updateSettings = async () => {
     try {
-      const response = await fetch('/api/contacts/settings', {
-        method: 'PUT',
+      const response = await fetch("/api/contacts/settings", {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(settingsForm),
-      })
+      });
 
       if (response.ok) {
-        const updatedSettings = await response.json()
-        setSettings(updatedSettings)
-        setIsSettingsOpen(false)
+        const updatedSettings = await response.json();
+        setSettings(updatedSettings);
+        setIsSettingsOpen(false);
       }
     } catch (error) {
-      console.error('Error updating settings:', error)
+      console.error("Error updating settings:", error);
     }
-  }
+  };
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
-      case 'new': return 'bg-blue-500'
-      case 'read': return 'bg-yellow-500'
-      case 'replied': return 'bg-green-500'
-      case 'archived': return 'bg-gray-500'
-      default: return 'bg-gray-500'
+      case "new":
+        return "bg-blue-500";
+      case "read":
+        return "bg-yellow-500";
+      case "replied":
+        return "bg-green-500";
+      case "archived":
+        return "bg-gray-500";
+      default:
+        return "bg-gray-500";
     }
-  }
+  };
 
-  const filteredContacts = contacts.filter(contact => {
-    const matchesSearch = contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (contact.subject && contact.subject.toLowerCase().includes(searchTerm.toLowerCase()))
-    const matchesStatus = statusFilter === 'all' || contact.status === statusFilter
-    return matchesSearch && matchesStatus
-  })
+  const filteredContacts = contacts.filter((contact) => {
+    const matchesSearch =
+      contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (contact.subject &&
+        contact.subject.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesStatus =
+      statusFilter === "all" || contact.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   if (loading) {
     return (
@@ -258,7 +270,7 @@ export default function ContactsAdminPage() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF5001]"></div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -268,7 +280,9 @@ export default function ContactsAdminPage() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold mb-2">Contact Management</h1>
-            <p className="text-[#E9E7E2]/70">Manage contact form submissions and settings</p>
+            <p className="text-[#E9E7E2]/70">
+              Manage contact form submissions and settings
+            </p>
           </div>
           <div className="flex gap-4">
             <Button
@@ -298,7 +312,9 @@ export default function ContactsAdminPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-[#E9E7E2]/70">New</p>
-                  <p className="text-2xl font-bold text-blue-400">{stats.new}</p>
+                  <p className="text-2xl font-bold text-blue-400">
+                    {stats.new}
+                  </p>
                 </div>
                 <Mail className="h-8 w-8 text-blue-400" />
               </div>
@@ -307,7 +323,9 @@ export default function ContactsAdminPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-[#E9E7E2]/70">Read</p>
-                  <p className="text-2xl font-bold text-yellow-400">{stats.read}</p>
+                  <p className="text-2xl font-bold text-yellow-400">
+                    {stats.read}
+                  </p>
                 </div>
                 <Eye className="h-8 w-8 text-yellow-400" />
               </div>
@@ -316,7 +334,9 @@ export default function ContactsAdminPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-[#E9E7E2]/70">Replied</p>
-                  <p className="text-2xl font-bold text-green-400">{stats.replied}</p>
+                  <p className="text-2xl font-bold text-green-400">
+                    {stats.replied}
+                  </p>
                 </div>
                 <Mail className="h-8 w-8 text-green-400" />
               </div>
@@ -325,7 +345,9 @@ export default function ContactsAdminPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-[#E9E7E2]/70">Archived</p>
-                  <p className="text-2xl font-bold text-gray-400">{stats.archived}</p>
+                  <p className="text-2xl font-bold text-gray-400">
+                    {stats.archived}
+                  </p>
                 </div>
                 <Calendar className="h-8 w-8 text-gray-400" />
               </div>
@@ -382,23 +404,35 @@ export default function ContactsAdminPage() {
             <TableBody>
               {filteredContacts.map((contact) => (
                 <TableRow key={contact.id} className="border-[#333333]">
-                  <TableCell className="text-[#E9E7E2]">{contact.name}</TableCell>
-                  <TableCell className="text-[#E9E7E2]">{contact.email}</TableCell>
-                  <TableCell className="text-[#E9E7E2]">{contact.phone || '-'}</TableCell>
+                  <TableCell className="text-[#E9E7E2]">
+                    {contact.name}
+                  </TableCell>
+                  <TableCell className="text-[#E9E7E2]">
+                    {contact.email}
+                  </TableCell>
+                  <TableCell className="text-[#E9E7E2]">
+                    {contact.phone || "-"}
+                  </TableCell>
                   <TableCell className="text-[#E9E7E2]">
                     {contact.subject ? (
-                      <span className="truncate max-w-[200px] block">{contact.subject}</span>
+                      <span className="truncate max-w-[200px] block">
+                        {contact.subject}
+                      </span>
                     ) : (
-                      '-'
+                      "-"
                     )}
                   </TableCell>
                   <TableCell>
-                    <Badge className={`${getStatusBadgeColor(contact.status)} text-white`}>
+                    <Badge
+                      className={`${getStatusBadgeColor(
+                        contact.status
+                      )} text-white`}
+                    >
                       {contact.status}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-[#E9E7E2]">
-                    {formatDate(new Date(contact.createdAt), 'short')}
+                    {formatDate(new Date(contact.createdAt), "short")}
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
@@ -409,9 +443,9 @@ export default function ContactsAdminPage() {
                             size="sm"
                             className="border-[#333333] text-[#E9E7E2] hover:bg-[#252525]"
                             onClick={() => {
-                              setSelectedContact(contact)
-                              if (contact.status === 'new') {
-                                updateContactStatus(contact.id, 'read')
+                              setSelectedContact(contact);
+                              if (contact.status === "new") {
+                                updateContactStatus(contact.id, "read");
                               }
                             }}
                           >
@@ -429,38 +463,66 @@ export default function ContactsAdminPage() {
                             <div className="space-y-6">
                               <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                  <Label className="text-sm font-medium">Name</Label>
-                                  <p className="text-[#E9E7E2] mt-1">{selectedContact.name}</p>
+                                  <Label className="text-sm font-medium">
+                                    Name
+                                  </Label>
+                                  <p className="text-[#E9E7E2] mt-1">
+                                    {selectedContact.name}
+                                  </p>
                                 </div>
                                 <div>
-                                  <Label className="text-sm font-medium">Email</Label>
-                                  <p className="text-[#E9E7E2] mt-1">{selectedContact.email}</p>
+                                  <Label className="text-sm font-medium">
+                                    Email
+                                  </Label>
+                                  <p className="text-[#E9E7E2] mt-1">
+                                    {selectedContact.email}
+                                  </p>
                                 </div>
                                 {selectedContact.phone && (
                                   <div>
-                                    <Label className="text-sm font-medium">Phone</Label>
-                                    <p className="text-[#E9E7E2] mt-1">{selectedContact.phone}</p>
+                                    <Label className="text-sm font-medium">
+                                      Phone
+                                    </Label>
+                                    <p className="text-[#E9E7E2] mt-1">
+                                      {selectedContact.phone}
+                                    </p>
                                   </div>
                                 )}
                                 {selectedContact.subject && (
                                   <div>
-                                    <Label className="text-sm font-medium">Subject</Label>
-                                    <p className="text-[#E9E7E2] mt-1">{selectedContact.subject}</p>
+                                    <Label className="text-sm font-medium">
+                                      Subject
+                                    </Label>
+                                    <p className="text-[#E9E7E2] mt-1">
+                                      {selectedContact.subject}
+                                    </p>
                                   </div>
                                 )}
                               </div>
                               <div>
-                                <Label className="text-sm font-medium">Message</Label>
-                                <p className="text-[#E9E7E2] mt-1 whitespace-pre-wrap">{selectedContact.message}</p>
+                                <Label className="text-sm font-medium">
+                                  Message
+                                </Label>
+                                <p className="text-[#E9E7E2] mt-1 whitespace-pre-wrap">
+                                  {selectedContact.message}
+                                </p>
                               </div>
                               <div className="flex gap-4">
                                 <div>
-                                  <Label className="text-sm font-medium">Status</Label>
+                                  <Label className="text-sm font-medium">
+                                    Status
+                                  </Label>
                                   <Select
                                     value={selectedContact.status}
                                     onValueChange={(value) => {
-                                      updateContactStatus(selectedContact.id, value)
-                                      setSelectedContact({ ...selectedContact, status: value })
+                                      updateContactStatus(
+                                        selectedContact.id,
+                                        value
+                                      );
+                                      setSelectedContact({
+                                        ...selectedContact,
+                                        status: value,
+                                      });
                                     }}
                                   >
                                     <SelectTrigger className="w-[180px] bg-[#252525] border-[#333333] text-[#E9E7E2] mt-1">
@@ -469,15 +531,24 @@ export default function ContactsAdminPage() {
                                     <SelectContent className="bg-[#252525] border-[#333333]">
                                       <SelectItem value="new">New</SelectItem>
                                       <SelectItem value="read">Read</SelectItem>
-                                      <SelectItem value="replied">Replied</SelectItem>
-                                      <SelectItem value="archived">Archived</SelectItem>
+                                      <SelectItem value="replied">
+                                        Replied
+                                      </SelectItem>
+                                      <SelectItem value="archived">
+                                        Archived
+                                      </SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </div>
                                 <div>
-                                  <Label className="text-sm font-medium">Submitted</Label>
+                                  <Label className="text-sm font-medium">
+                                    Submitted
+                                  </Label>
                                   <p className="text-[#E9E7E2] mt-1">
-                                    {formatDate(new Date(selectedContact.createdAt), 'full')}
+                                    {formatDate(
+                                      new Date(selectedContact.createdAt),
+                                      "full"
+                                    )}
                                   </p>
                                 </div>
                               </div>
@@ -517,19 +588,39 @@ export default function ContactsAdminPage() {
             </DialogHeader>
             <Tabs defaultValue="info" className="w-full">
               <TabsList className="grid w-full grid-cols-3 bg-[#252525]">
-                <TabsTrigger value="info" className="data-[state=active]:bg-[#FF5001]">Contact Info</TabsTrigger>
-                <TabsTrigger value="social" className="data-[state=active]:bg-[#FF5001]">Social Media</TabsTrigger>
-                <TabsTrigger value="form" className="data-[state=active]:bg-[#FF5001]">Form Settings</TabsTrigger>
+                <TabsTrigger
+                  value="info"
+                  className="data-[state=active]:bg-[#FF5001]"
+                >
+                  Contact Info
+                </TabsTrigger>
+                <TabsTrigger
+                  value="social"
+                  className="data-[state=active]:bg-[#FF5001]"
+                >
+                  Social Media
+                </TabsTrigger>
+                <TabsTrigger
+                  value="form"
+                  className="data-[state=active]:bg-[#FF5001]"
+                >
+                  Form Settings
+                </TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="info" className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="email">Email</Label>
                     <Input
                       id="email"
-                      value={settingsForm.email || ''}
-                      onChange={(e) => setSettingsForm({ ...settingsForm, email: e.target.value })}
+                      value={settingsForm.email || ""}
+                      onChange={(e) =>
+                        setSettingsForm({
+                          ...settingsForm,
+                          email: e.target.value,
+                        })
+                      }
                       className="bg-[#252525] border-[#333333] text-[#E9E7E2]"
                       placeholder="hello@company.com"
                     />
@@ -538,8 +629,13 @@ export default function ContactsAdminPage() {
                     <Label htmlFor="phone">Phone</Label>
                     <Input
                       id="phone"
-                      value={settingsForm.phone || ''}
-                      onChange={(e) => setSettingsForm({ ...settingsForm, phone: e.target.value })}
+                      value={settingsForm.phone || ""}
+                      onChange={(e) =>
+                        setSettingsForm({
+                          ...settingsForm,
+                          phone: e.target.value,
+                        })
+                      }
                       className="bg-[#252525] border-[#333333] text-[#E9E7E2]"
                       placeholder="+1 (555) 123-4567"
                     />
@@ -549,8 +645,13 @@ export default function ContactsAdminPage() {
                   <Label htmlFor="address">Address</Label>
                   <Textarea
                     id="address"
-                    value={settingsForm.address || ''}
-                    onChange={(e) => setSettingsForm({ ...settingsForm, address: e.target.value })}
+                    value={settingsForm.address || ""}
+                    onChange={(e) =>
+                      setSettingsForm({
+                        ...settingsForm,
+                        address: e.target.value,
+                      })
+                    }
                     className="bg-[#252525] border-[#333333] text-[#E9E7E2]"
                     placeholder="123 Main St, City, State 12345"
                   />
@@ -559,22 +660,32 @@ export default function ContactsAdminPage() {
                   <Label htmlFor="workingHours">Working Hours</Label>
                   <Input
                     id="workingHours"
-                    value={settingsForm.workingHours || ''}
-                    onChange={(e) => setSettingsForm({ ...settingsForm, workingHours: e.target.value })}
+                    value={settingsForm.workingHours || ""}
+                    onChange={(e) =>
+                      setSettingsForm({
+                        ...settingsForm,
+                        workingHours: e.target.value,
+                      })
+                    }
                     className="bg-[#252525] border-[#333333] text-[#E9E7E2]"
                     placeholder="Monday - Friday: 9:00 AM - 6:00 PM"
                   />
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="social" className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="twitterUrl">Twitter URL</Label>
                     <Input
                       id="twitterUrl"
-                      value={settingsForm.twitterUrl || ''}
-                      onChange={(e) => setSettingsForm({ ...settingsForm, twitterUrl: e.target.value })}
+                      value={settingsForm.twitterUrl || ""}
+                      onChange={(e) =>
+                        setSettingsForm({
+                          ...settingsForm,
+                          twitterUrl: e.target.value,
+                        })
+                      }
                       className="bg-[#252525] border-[#333333] text-[#E9E7E2]"
                       placeholder="https://twitter.com/username"
                     />
@@ -583,8 +694,13 @@ export default function ContactsAdminPage() {
                     <Label htmlFor="linkedinUrl">LinkedIn URL</Label>
                     <Input
                       id="linkedinUrl"
-                      value={settingsForm.linkedinUrl || ''}
-                      onChange={(e) => setSettingsForm({ ...settingsForm, linkedinUrl: e.target.value })}
+                      value={settingsForm.linkedinUrl || ""}
+                      onChange={(e) =>
+                        setSettingsForm({
+                          ...settingsForm,
+                          linkedinUrl: e.target.value,
+                        })
+                      }
                       className="bg-[#252525] border-[#333333] text-[#E9E7E2]"
                       placeholder="https://linkedin.com/company/name"
                     />
@@ -593,8 +709,13 @@ export default function ContactsAdminPage() {
                     <Label htmlFor="instagramUrl">Instagram URL</Label>
                     <Input
                       id="instagramUrl"
-                      value={settingsForm.instagramUrl || ''}
-                      onChange={(e) => setSettingsForm({ ...settingsForm, instagramUrl: e.target.value })}
+                      value={settingsForm.instagramUrl || ""}
+                      onChange={(e) =>
+                        setSettingsForm({
+                          ...settingsForm,
+                          instagramUrl: e.target.value,
+                        })
+                      }
                       className="bg-[#252525] border-[#333333] text-[#E9E7E2]"
                       placeholder="https://instagram.com/username"
                     />
@@ -603,15 +724,20 @@ export default function ContactsAdminPage() {
                     <Label htmlFor="behanceUrl">Behance URL</Label>
                     <Input
                       id="behanceUrl"
-                      value={settingsForm.behanceUrl || ''}
-                      onChange={(e) => setSettingsForm({ ...settingsForm, behanceUrl: e.target.value })}
+                      value={settingsForm.behanceUrl || ""}
+                      onChange={(e) =>
+                        setSettingsForm({
+                          ...settingsForm,
+                          behanceUrl: e.target.value,
+                        })
+                      }
                       className="bg-[#252525] border-[#333333] text-[#E9E7E2]"
                       placeholder="https://behance.net/username"
                     />
                   </div>
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="form" className="space-y-4">
                 <div className="space-y-4">
                   <div className="flex items-center space-x-2">
@@ -619,37 +745,65 @@ export default function ContactsAdminPage() {
                       type="checkbox"
                       id="enablePhoneField"
                       checked={settingsForm.enablePhoneField || false}
-                      onChange={(e) => setSettingsForm({ ...settingsForm, enablePhoneField: e.target.checked })}
+                      onChange={(e) =>
+                        setSettingsForm({
+                          ...settingsForm,
+                          enablePhoneField: e.target.checked,
+                        })
+                      }
                       className="rounded border-[#333333] bg-[#252525]"
                     />
-                    <Label htmlFor="enablePhoneField">Enable phone field in contact form</Label>
+                    <Label htmlFor="enablePhoneField">
+                      Enable phone field in contact form
+                    </Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <input
                       type="checkbox"
                       id="requirePhoneField"
                       checked={settingsForm.requirePhoneField || false}
-                      onChange={(e) => setSettingsForm({ ...settingsForm, requirePhoneField: e.target.checked })}
+                      onChange={(e) =>
+                        setSettingsForm({
+                          ...settingsForm,
+                          requirePhoneField: e.target.checked,
+                        })
+                      }
                       className="rounded border-[#333333] bg-[#252525]"
                     />
-                    <Label htmlFor="requirePhoneField">Make phone field required</Label>
+                    <Label htmlFor="requirePhoneField">
+                      Make phone field required
+                    </Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <input
                       type="checkbox"
                       id="emailNotifications"
                       checked={settingsForm.emailNotifications || false}
-                      onChange={(e) => setSettingsForm({ ...settingsForm, emailNotifications: e.target.checked })}
+                      onChange={(e) =>
+                        setSettingsForm({
+                          ...settingsForm,
+                          emailNotifications: e.target.checked,
+                        })
+                      }
                       className="rounded border-[#333333] bg-[#252525]"
                     />
-                    <Label htmlFor="emailNotifications">Enable email notifications</Label>
+                    <Label htmlFor="emailNotifications">
+                      Enable email notifications
+                    </Label>
                   </div>
                   <div>
-                    <Label htmlFor="notificationEmail">Notification Email</Label>
+                    <Label htmlFor="notificationEmail">
+                      Notification Email
+                    </Label>
                     <Input
                       id="notificationEmail"
-                      value={settingsForm.notificationEmail || ''}
-                      onChange={(e) => setSettingsForm({ ...settingsForm, notificationEmail: e.target.value })}
+                      value={settingsForm.notificationEmail || ""}
+                      onChange={(e) =>
+                        setSettingsForm({
+                          ...settingsForm,
+                          notificationEmail: e.target.value,
+                        })
+                      }
                       className="bg-[#252525] border-[#333333] text-[#E9E7E2]"
                       placeholder="admin@company.com"
                     />
@@ -657,7 +811,7 @@ export default function ContactsAdminPage() {
                 </div>
               </TabsContent>
             </Tabs>
-            
+
             <div className="flex justify-end gap-4 mt-6">
               <Button
                 variant="outline"
@@ -677,5 +831,5 @@ export default function ContactsAdminPage() {
         </Dialog>
       </div>
     </div>
-  )
+  );
 }

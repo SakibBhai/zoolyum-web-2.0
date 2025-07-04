@@ -1,35 +1,47 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Save } from 'lucide-react';
-import { toast } from 'sonner';
-import Link from 'next/link';
-import { ImageUploader } from '@/components/admin/image-uploader';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ArrowLeft, Save } from "lucide-react";
+import { toast } from "sonner";
+import Link from "next/link";
+import { ImageUploader } from "@/components/admin/image-uploader";
 
 export default function NewTeamMemberPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
-    position: '',
-    designation: '',
-    websiteTag: '',
-    bio: '',
-    imageUrl: '',
-    email: '',
-    linkedin: '',
-    twitter: '',
-    status: 'ACTIVE',
+    name: "",
+    position: "",
+    designation: "",
+    websiteTag: "",
+    bio: "",
+    imageUrl: "",
+    email: "",
+    linkedin: "",
+    twitter: "",
+    status: "ACTIVE",
     order: 0,
-    featured: false
+    featured: false,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,33 +49,35 @@ export default function NewTeamMemberPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/team', {
-        method: 'POST',
+      const response = await fetch("/api/team", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to create team member');
+        throw new Error(error.error || "Failed to create team member");
       }
 
-      toast.success('Team member created successfully');
-      router.push('/admin/team');
+      toast.success("Team member created successfully");
+      router.push("/admin/team");
     } catch (error) {
-      console.error('Error creating team member:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to create team member');
+      console.error("Error creating team member:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to create team member"
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -102,7 +116,9 @@ export default function NewTeamMemberPage() {
                     <Input
                       id="name"
                       value={formData.name}
-                      onChange={(e) => handleInputChange('name', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("name", e.target.value)
+                      }
                       placeholder="Enter full name"
                       required
                     />
@@ -112,19 +128,23 @@ export default function NewTeamMemberPage() {
                     <Input
                       id="position"
                       value={formData.position}
-                      onChange={(e) => handleInputChange('position', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("position", e.target.value)
+                      }
                       placeholder="e.g. Senior Developer"
                     />
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="designation">Designation *</Label>
                     <Input
                       id="designation"
                       value={formData.designation}
-                      onChange={(e) => handleInputChange('designation', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("designation", e.target.value)
+                      }
                       placeholder="e.g. Founder & Creative Director"
                       required
                     />
@@ -134,18 +154,20 @@ export default function NewTeamMemberPage() {
                     <Input
                       id="websiteTag"
                       value={formData.websiteTag}
-                      onChange={(e) => handleInputChange('websiteTag', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("websiteTag", e.target.value)
+                      }
                       placeholder="e.g. @vibestudio.com"
                     />
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="bio">Bio</Label>
                   <Textarea
                     id="bio"
                     value={formData.bio}
-                    onChange={(e) => handleInputChange('bio', e.target.value)}
+                    onChange={(e) => handleInputChange("bio", e.target.value)}
                     placeholder="Brief description about the team member"
                     rows={4}
                   />
@@ -167,18 +189,20 @@ export default function NewTeamMemberPage() {
                     id="email"
                     type="email"
                     value={formData.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
                     placeholder="email@example.com"
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="linkedin">LinkedIn URL</Label>
                     <Input
                       id="linkedin"
                       value={formData.linkedin}
-                      onChange={(e) => handleInputChange('linkedin', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("linkedin", e.target.value)
+                      }
                       placeholder="https://linkedin.com/in/username"
                     />
                   </div>
@@ -187,7 +211,9 @@ export default function NewTeamMemberPage() {
                     <Input
                       id="twitter"
                       value={formData.twitter}
-                      onChange={(e) => handleInputChange('twitter', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("twitter", e.target.value)
+                      }
                       placeholder="https://twitter.com/username"
                     />
                   </div>
@@ -201,15 +227,15 @@ export default function NewTeamMemberPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Profile Image</CardTitle>
-                <CardDescription>
-                  Upload a profile photo
-                </CardDescription>
+                <CardDescription>Upload a profile photo</CardDescription>
               </CardHeader>
               <CardContent>
                 <ImageUploader
                   label="Profile Image"
                   initialImageUrl={formData.imageUrl}
-                  onImageChangeAction={(url) => handleInputChange('imageUrl', url || '')}
+                  onImageChangeAction={(url) =>
+                    handleInputChange("imageUrl", url || "")
+                  }
                   folder="team"
                   helpText="Upload a square profile image (1:1 aspect ratio recommended). Accepted formats: JPG, PNG, WebP."
                 />
@@ -219,16 +245,16 @@ export default function NewTeamMemberPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Settings</CardTitle>
-                <CardDescription>
-                  Configure display options
-                </CardDescription>
+                <CardDescription>Configure display options</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="status">Status</Label>
                   <Select
                     value={formData.status}
-                    onValueChange={(value) => handleInputChange('status', value)}
+                    onValueChange={(value) =>
+                      handleInputChange("status", value)
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -246,7 +272,9 @@ export default function NewTeamMemberPage() {
                     id="order"
                     type="number"
                     value={formData.order}
-                    onChange={(e) => handleInputChange('order', parseInt(e.target.value) || 0)}
+                    onChange={(e) =>
+                      handleInputChange("order", parseInt(e.target.value) || 0)
+                    }
                     placeholder="0"
                     min="0"
                   />
@@ -256,7 +284,9 @@ export default function NewTeamMemberPage() {
                   <Switch
                     id="featured"
                     checked={formData.featured}
-                    onCheckedChange={(checked) => handleInputChange('featured', checked)}
+                    onCheckedChange={(checked) =>
+                      handleInputChange("featured", checked)
+                    }
                   />
                   <Label htmlFor="featured">Featured Member</Label>
                 </div>

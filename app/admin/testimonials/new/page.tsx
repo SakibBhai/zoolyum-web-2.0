@@ -1,87 +1,107 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ImageUploader } from '@/components/admin/image-uploader'
-import { ArrowLeft, Save } from 'lucide-react'
-import Link from 'next/link'
-import { useToast } from '@/hooks/use-toast'
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ImageUploader } from "@/components/admin/image-uploader";
+import { ArrowLeft, Save } from "lucide-react";
+import Link from "next/link";
+import { useToast } from "@/hooks/use-toast";
 
 const testimonialSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
+  name: z.string().min(1, "Name is required"),
   position: z.string().optional(),
   company: z.string().optional(),
-  content: z.string().min(10, 'Content must be at least 10 characters'),
+  content: z.string().min(10, "Content must be at least 10 characters"),
   rating: z.number().min(1).max(5).optional(),
   imageUrl: z.string().optional(),
   featured: z.boolean().default(false),
   order: z.number().optional(),
-})
+});
 
-type TestimonialFormData = z.infer<typeof testimonialSchema>
+type TestimonialFormData = z.infer<typeof testimonialSchema>;
 
 export default function NewTestimonialPage() {
-  const router = useRouter()
-  const { toast } = useToast()
-  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<TestimonialFormData>({
     resolver: zodResolver(testimonialSchema),
     defaultValues: {
-      name: '',
-      position: '',
-      company: '',
-      content: '',
+      name: "",
+      position: "",
+      company: "",
+      content: "",
       rating: 5,
-      imageUrl: '',
+      imageUrl: "",
       featured: false,
       order: 0,
     },
-  })
+  });
 
   const onSubmit = async (data: TestimonialFormData) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const response = await fetch('/api/testimonials', {
-        method: 'POST',
+      const response = await fetch("/api/testimonials", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error('Failed to create testimonial')
+        throw new Error("Failed to create testimonial");
       }
 
       toast({
-        title: 'Success',
-        description: 'Testimonial created successfully',
-      })
+        title: "Success",
+        description: "Testimonial created successfully",
+      });
 
-      router.push('/admin/testimonials')
+      router.push("/admin/testimonials");
     } catch (error) {
-      console.error('Error creating testimonial:', error)
+      console.error("Error creating testimonial:", error);
       toast({
-        title: 'Error',
-        description: 'Failed to create testimonial',
-        variant: 'destructive',
-      })
+        title: "Error",
+        description: "Failed to create testimonial",
+        variant: "destructive",
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -93,7 +113,9 @@ export default function NewTestimonialPage() {
         </Link>
         <div>
           <h1 className="text-3xl font-bold">Add New Testimonial</h1>
-          <p className="text-muted-foreground">Create a new client testimonial</p>
+          <p className="text-muted-foreground">
+            Create a new client testimonial
+          </p>
         </div>
       </div>
 
@@ -129,7 +151,10 @@ export default function NewTestimonialPage() {
                     <FormItem>
                       <FormLabel>Position/Title</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., CEO, Marketing Director" {...field} />
+                        <Input
+                          placeholder="e.g., CEO, Marketing Director"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -156,7 +181,12 @@ export default function NewTestimonialPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Rating</FormLabel>
-                      <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={field.value?.toString()}>
+                      <Select
+                        onValueChange={(value) =>
+                          field.onChange(parseInt(value))
+                        }
+                        defaultValue={field.value?.toString()}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select rating" />
@@ -183,7 +213,7 @@ export default function NewTestimonialPage() {
                   <FormItem>
                     <FormLabel>Testimonial Content *</FormLabel>
                     <FormControl>
-                      <Textarea 
+                      <Textarea
                         placeholder="Enter the testimonial content..."
                         className="min-h-[120px]"
                         {...field}
@@ -224,7 +254,9 @@ export default function NewTestimonialPage() {
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
-                        <FormLabel className="text-base">Featured Testimonial</FormLabel>
+                        <FormLabel className="text-base">
+                          Featured Testimonial
+                        </FormLabel>
                         <FormDescription>
                           Mark this testimonial as featured to highlight it
                         </FormDescription>
@@ -246,11 +278,13 @@ export default function NewTestimonialPage() {
                     <FormItem>
                       <FormLabel>Display Order</FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
-                          placeholder="0" 
+                        <Input
+                          type="number"
+                          placeholder="0"
                           {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          onChange={(e) =>
+                            field.onChange(parseInt(e.target.value) || 0)
+                          }
                         />
                       </FormControl>
                       <FormDescription>
@@ -265,7 +299,7 @@ export default function NewTestimonialPage() {
               <div className="flex gap-4">
                 <Button type="submit" disabled={isLoading}>
                   <Save className="mr-2 h-4 w-4" />
-                  {isLoading ? 'Creating...' : 'Create Testimonial'}
+                  {isLoading ? "Creating..." : "Create Testimonial"}
                 </Button>
                 <Link href="/admin/testimonials">
                   <Button type="button" variant="outline">
@@ -278,5 +312,5 @@ export default function NewTestimonialPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

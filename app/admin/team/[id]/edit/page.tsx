@@ -1,18 +1,30 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Save, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
-import Link from 'next/link';
-import { ImageUploader } from '@/components/admin/image-uploader';
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import Link from "next/link";
+import { ImageUploader } from "@/components/admin/image-uploader";
 
 interface TeamMember {
   id: string;
@@ -38,18 +50,18 @@ export default function EditTeamMemberPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
-    position: '',
-    designation: '',
-    websiteTag: '',
-    bio: '',
-    imageUrl: '',
-    email: '',
-    linkedin: '',
-    twitter: '',
-    status: 'ACTIVE',
+    name: "",
+    position: "",
+    designation: "",
+    websiteTag: "",
+    bio: "",
+    imageUrl: "",
+    email: "",
+    linkedin: "",
+    twitter: "",
+    status: "ACTIVE",
     order: 0,
-    featured: false
+    featured: false,
   });
 
   useEffect(() => {
@@ -57,27 +69,27 @@ export default function EditTeamMemberPage() {
       try {
         const response = await fetch(`/api/team/${params.id}`);
         if (!response.ok) {
-          throw new Error('Failed to fetch team member');
+          throw new Error("Failed to fetch team member");
         }
         const data = await response.json();
         setFormData({
-          name: data.name || '',
-          position: data.position || '',
-          designation: data.designation || '',
-          websiteTag: data.websiteTag || '',
-          bio: data.bio || '',
-          imageUrl: data.imageUrl || '',
-          email: data.email || '',
-          linkedin: data.linkedin || '',
-          twitter: data.twitter || '',
-          status: data.status || 'ACTIVE',
+          name: data.name || "",
+          position: data.position || "",
+          designation: data.designation || "",
+          websiteTag: data.websiteTag || "",
+          bio: data.bio || "",
+          imageUrl: data.imageUrl || "",
+          email: data.email || "",
+          linkedin: data.linkedin || "",
+          twitter: data.twitter || "",
+          status: data.status || "ACTIVE",
           order: data.order || 0,
-          featured: data.featured || false
+          featured: data.featured || false,
         });
       } catch (error) {
-        console.error('Error fetching team member:', error);
-        toast.error('Failed to load team member');
-        router.push('/admin/team');
+        console.error("Error fetching team member:", error);
+        toast.error("Failed to load team member");
+        router.push("/admin/team");
       } finally {
         setLoading(false);
       }
@@ -94,32 +106,34 @@ export default function EditTeamMemberPage() {
 
     try {
       const response = await fetch(`/api/team/${params.id}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to update team member');
+        throw new Error(error.error || "Failed to update team member");
       }
 
-      toast.success('Team member updated successfully');
-      router.push('/admin/team');
+      toast.success("Team member updated successfully");
+      router.push("/admin/team");
     } catch (error) {
-      console.error('Error updating team member:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to update team member');
+      console.error("Error updating team member:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to update team member"
+      );
     } finally {
       setSaving(false);
     }
   };
 
   const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -134,7 +148,9 @@ export default function EditTeamMemberPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Edit Team Member</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Edit Team Member
+            </h1>
             <p className="text-muted-foreground">
               Update team member information
             </p>
@@ -157,7 +173,9 @@ export default function EditTeamMemberPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Edit Team Member</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Edit Team Member
+          </h1>
           <p className="text-muted-foreground">
             Update team member information
           </p>
@@ -182,7 +200,9 @@ export default function EditTeamMemberPage() {
                     <Input
                       id="name"
                       value={formData.name}
-                      onChange={(e) => handleInputChange('name', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("name", e.target.value)
+                      }
                       placeholder="Enter full name"
                       required
                     />
@@ -192,19 +212,23 @@ export default function EditTeamMemberPage() {
                     <Input
                       id="position"
                       value={formData.position}
-                      onChange={(e) => handleInputChange('position', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("position", e.target.value)
+                      }
                       placeholder="e.g. Senior Developer"
                     />
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="designation">Designation *</Label>
                     <Input
                       id="designation"
                       value={formData.designation}
-                      onChange={(e) => handleInputChange('designation', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("designation", e.target.value)
+                      }
                       placeholder="e.g. Founder & Creative Director"
                       required
                     />
@@ -214,18 +238,20 @@ export default function EditTeamMemberPage() {
                     <Input
                       id="websiteTag"
                       value={formData.websiteTag}
-                      onChange={(e) => handleInputChange('websiteTag', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("websiteTag", e.target.value)
+                      }
                       placeholder="e.g. @vibestudio.com"
                     />
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="bio">Bio</Label>
                   <Textarea
                     id="bio"
                     value={formData.bio}
-                    onChange={(e) => handleInputChange('bio', e.target.value)}
+                    onChange={(e) => handleInputChange("bio", e.target.value)}
                     placeholder="Brief description about the team member"
                     rows={4}
                   />
@@ -247,18 +273,20 @@ export default function EditTeamMemberPage() {
                     id="email"
                     type="email"
                     value={formData.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
                     placeholder="email@example.com"
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="linkedin">LinkedIn URL</Label>
                     <Input
                       id="linkedin"
                       value={formData.linkedin}
-                      onChange={(e) => handleInputChange('linkedin', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("linkedin", e.target.value)
+                      }
                       placeholder="https://linkedin.com/in/username"
                     />
                   </div>
@@ -267,7 +295,9 @@ export default function EditTeamMemberPage() {
                     <Input
                       id="twitter"
                       value={formData.twitter}
-                      onChange={(e) => handleInputChange('twitter', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("twitter", e.target.value)
+                      }
                       placeholder="https://twitter.com/username"
                     />
                   </div>
@@ -281,15 +311,15 @@ export default function EditTeamMemberPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Profile Image</CardTitle>
-                <CardDescription>
-                  Upload a profile photo
-                </CardDescription>
+                <CardDescription>Upload a profile photo</CardDescription>
               </CardHeader>
               <CardContent>
                 <ImageUploader
                   label="Profile Image"
                   initialImageUrl={formData.imageUrl}
-                  onImageChangeAction={(url) => handleInputChange('imageUrl', url || '')}
+                  onImageChangeAction={(url) =>
+                    handleInputChange("imageUrl", url || "")
+                  }
                   folder="team"
                   helpText="Upload a square profile image (1:1 aspect ratio recommended). Accepted formats: JPG, PNG, WebP."
                 />
@@ -299,14 +329,17 @@ export default function EditTeamMemberPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Settings</CardTitle>
-                <CardDescription>
-                  Configure display options
-                </CardDescription>
+                <CardDescription>Configure display options</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="status">Status</Label>
-                  <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
+                  <Select
+                    value={formData.status}
+                    onValueChange={(value) =>
+                      handleInputChange("status", value)
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
@@ -317,24 +350,28 @@ export default function EditTeamMemberPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="order">Display Order</Label>
                   <Input
                     id="order"
                     type="number"
                     value={formData.order}
-                    onChange={(e) => handleInputChange('order', parseInt(e.target.value) || 0)}
+                    onChange={(e) =>
+                      handleInputChange("order", parseInt(e.target.value) || 0)
+                    }
                     placeholder="0"
                     min="0"
                   />
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="featured"
                     checked={formData.featured}
-                    onCheckedChange={(checked) => handleInputChange('featured', checked)}
+                    onCheckedChange={(checked) =>
+                      handleInputChange("featured", checked)
+                    }
                   />
                   <Label htmlFor="featured">Featured Member</Label>
                 </div>

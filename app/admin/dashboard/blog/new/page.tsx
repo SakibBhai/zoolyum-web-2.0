@@ -1,23 +1,23 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
-import { createBlogPost } from "../../../../../lib/blog-operations"
-import { PageTransition } from "@/components/page-transition"
-import { Save, X, InfoIcon, Loader2 } from "lucide-react"
-import { ImageUploader } from "@/components/admin/image-uploader"
-import { RichTextEditor } from "@/components/admin/rich-text-editor"
-import { useToast } from "@/hooks/use-toast"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { createBlogPost } from "../../../../../lib/blog-operations";
+import { PageTransition } from "@/components/page-transition";
+import { Save, X, InfoIcon, Loader2 } from "lucide-react";
+import { ImageUploader } from "@/components/admin/image-uploader";
+import { RichTextEditor } from "@/components/admin/rich-text-editor";
+import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function NewBlogPostPage() {
-  const { data: session, status } = useSession()
-  const { toast } = useToast()
-  const router = useRouter()
-  
+  const { data: session, status } = useSession();
+  const { toast } = useToast();
+  const router = useRouter();
+
   const [formData, setFormData] = useState({
     title: "",
     slug: "",
@@ -26,51 +26,55 @@ export default function NewBlogPostPage() {
     image_url: "",
     tags: "",
     status: "draft",
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (status === "loading") return
+    if (status === "loading") return;
     if (!session) {
-      router.push("/admin/login")
+      router.push("/admin/login");
     }
-  }, [session, status, router])
+  }, [session, status, router]);
 
   if (status === "loading") {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin" />
       </div>
-    )
+    );
   }
 
   if (!session) {
-    return null
+    return null;
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value } = e.target;
 
     // Auto-generate slug from title
     if (name === "title") {
       const slug = value
         .toLowerCase()
         .replace(/[^\w\s]/gi, "")
-        .replace(/\s+/g, "-")
+        .replace(/\s+/g, "-");
 
       setFormData({
         ...formData,
         title: value,
         slug,
-      })
+      });
     } else {
       setFormData({
         ...formData,
         [name]: value,
-      })
+      });
     }
-  }
+  };
 
   const handleContentChange = (content: string) => {
     setFormData((prev) => {
@@ -79,58 +83,60 @@ export default function NewBlogPostPage() {
         return {
           ...prev,
           content,
-        }
+        };
       }
-      return prev
-    })
-  }
+      return prev;
+    });
+  };
 
   const handleImageChange = (url: string | null) => {
     setFormData((prev) => ({
       ...prev,
       image_url: url || "",
-    }))
-  }
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setError(null)
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
 
     try {
       if (!session) {
-        throw new Error("You must be logged in to create a post")
+        throw new Error("You must be logged in to create a post");
       }
 
       const postData = {
         ...formData,
         imageUrl: formData.image_url,
-        tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : [],
-      }
+        tags: formData.tags
+          ? formData.tags.split(",").map((tag) => tag.trim())
+          : [],
+      };
 
       await createBlogPost({
         ...postData,
-        published: postData.status === 'published'
-      })
+        published: postData.status === "published",
+      });
       toast({
         title: "Success",
         description: "Blog post created successfully",
-      })
-      router.push("/admin/dashboard/blog")
+      });
+      router.push("/admin/dashboard/blog");
     } catch (err: any) {
-      setError(err.message || "An error occurred while creating the post")
+      setError(err.message || "An error occurred while creating the post");
       toast({
         title: "Error",
         description: err.message || "An error occurred while creating the post",
         variant: "destructive",
-      })
-      setIsSubmitting(false)
+      });
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleCancel = () => {
-    router.push("/admin/dashboard/blog")
-  }
+    router.push("/admin/dashboard/blog");
+  };
 
   return (
     <PageTransition>
@@ -158,19 +164,24 @@ export default function NewBlogPostPage() {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-900/20 border border-red-900/50 rounded-lg text-red-400">{error}</div>
+          <div className="mb-6 p-4 bg-red-900/20 border border-red-900/50 rounded-lg text-red-400">
+            {error}
+          </div>
         )}
 
         <Alert className="mb-6">
           <InfoIcon className="h-4 w-4" />
           <AlertTitle>Using External Images</AlertTitle>
           <AlertDescription>
-            Please use external image URLs for now. You can upload images
-            to services like Imgur, ImgBB, or PostImages and then use the URL.
+            Please use external image URLs for now. You can upload images to
+            services like Imgur, ImgBB, or PostImages and then use the URL.
           </AlertDescription>
         </Alert>
 
-        <form onSubmit={handleSubmit} className="bg-[#1A1A1A] rounded-xl border border-[#333333] p-6">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-[#1A1A1A] rounded-xl border border-[#333333] p-6"
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
               <label htmlFor="title" className="block text-sm font-medium mb-2">
@@ -276,5 +287,5 @@ export default function NewBlogPostPage() {
         </form>
       </div>
     </PageTransition>
-  )
+  );
 }
