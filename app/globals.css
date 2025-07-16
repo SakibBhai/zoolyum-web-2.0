@@ -124,16 +124,7 @@
     background: #ff6a30;
   }
 
-  /* 3D card optimizations */
-  .card-3d {
-    transform-style: preserve-3d;
-    backface-visibility: hidden;
-    will-change: transform;
-  }
 
-  .card-3d * {
-    transform-style: preserve-3d;
-  }
 
   /* Force hardware acceleration for smoother animations */
   .transform-gpu {

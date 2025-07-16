@@ -5,7 +5,18 @@ import Link from "next/link"
 import { PageTransition } from "@/components/page-transition"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { ServiceCard3D } from "@/components/service-card-3d"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  KeyIcon as Strategy,
+  Globe,
+  Compass,
+  Palette,
+  FileText,
+  Search,
+  Layout,
+  Share2,
+  Users,
+} from "lucide-react"
 import { ScrollReveal } from "@/components/scroll-animations/scroll-reveal"
 import { StaggerReveal } from "@/components/scroll-animations/stagger-reveal"
 import { PageHeadline } from "@/components/page-headline"
@@ -35,47 +46,47 @@ export default function ServicesPage() {
               animation="fade-slide"
               mobileAnimation="fade"
             >
-              <ServiceCard3D
+              <ServiceCard
                 title="Brand Strategy"
                 description="Developing comprehensive brand strategies that position your business for success in competitive markets."
                 icon="strategy"
               />
-              <ServiceCard3D
+              <ServiceCard
                 title="Digital Transformation"
                 description="Creating digital ecosystems that amplify your brand's presence and engage audiences across platforms."
                 icon="globe"
               />
-              <ServiceCard3D
+              <ServiceCard
                 title="Creative Direction"
                 description="Providing expert guidance to navigate complex brand challenges and identify growth opportunities."
                 icon="compass"
               />
-              <ServiceCard3D
+              <ServiceCard
                 title="Visual Identity"
                 description="Crafting distinctive visual systems that express your brand's personality and values across all touchpoints."
                 icon="palette"
               />
-              <ServiceCard3D
+              <ServiceCard
                 title="Content Strategy"
                 description="Developing strategic content frameworks that tell your brand story and engage your target audience."
                 icon="file-text"
               />
-              <ServiceCard3D
+              <ServiceCard
                 title="Market Research"
                 description="Conducting in-depth research to uncover insights that inform strategic decision-making and positioning."
                 icon="search"
               />
-              <ServiceCard3D
+              <ServiceCard
                 title="UX/UI Design"
                 description="Creating intuitive digital experiences that balance user needs with business objectives."
                 icon="layout"
               />
-              <ServiceCard3D
+              <ServiceCard
                 title="Social Media Strategy"
                 description="Building strategic social media approaches that build community and drive engagement."
                 icon="share-2"
               />
-              <ServiceCard3D
+              <ServiceCard
                 title="Brand Workshops"
                 description="Facilitating collaborative sessions to align stakeholders and define brand direction."
                 icon="users"
@@ -303,6 +314,57 @@ function ServiceDetail({ title, description, features, image, reverse = false }:
         </ul>
       </ScrollReveal>
     </div>
+  )
+}
+
+interface ServiceCardProps {
+  title: string
+  description: string
+  icon?: string
+}
+
+function ServiceCard({ title, description, icon }: ServiceCardProps) {
+  const getIcon = () => {
+    switch (icon) {
+      case "strategy":
+        return <Strategy className="w-6 h-6 text-[#FF5001]" />
+      case "globe":
+        return <Globe className="w-6 h-6 text-[#FF5001]" />
+      case "compass":
+        return <Compass className="w-6 h-6 text-[#FF5001]" />
+      case "palette":
+        return <Palette className="w-6 h-6 text-[#FF5001]" />
+      case "file-text":
+        return <FileText className="w-6 h-6 text-[#FF5001]" />
+      case "search":
+        return <Search className="w-6 h-6 text-[#FF5001]" />
+      case "layout":
+        return <Layout className="w-6 h-6 text-[#FF5001]" />
+      case "share-2":
+        return <Share2 className="w-6 h-6 text-[#FF5001]" />
+      case "users":
+        return <Users className="w-6 h-6 text-[#FF5001]" />
+      default:
+        return <Strategy className="w-6 h-6 text-[#FF5001]" />
+    }
+  }
+
+  return (
+    <Card className="h-full bg-[#1A1A1A] border-[#333333] hover:border-[#FF5001]/30 transition-all duration-300 group">
+      <CardHeader>
+        <div className="flex items-center gap-3 mb-2">
+          <div className="p-2 bg-[#FF5001]/10 rounded-lg group-hover:bg-[#FF5001]/20 transition-colors">
+            {getIcon()}
+          </div>
+        </div>
+        <CardTitle className="text-xl font-bold text-[#E9E7E2] group-hover:text-[#FF5001] transition-colors">
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-[#E9E7E2]/70 leading-relaxed">{description}</p>
+      </CardContent>
+    </Card>
   )
 }
 

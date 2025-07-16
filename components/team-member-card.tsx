@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { Card3D } from "./card-3d"
+import { Card, CardContent } from "@/components/ui/card"
 import { Linkedin, Twitter } from "lucide-react"
 
 interface TeamMemberCardProps {
@@ -20,10 +20,8 @@ interface TeamMemberCardProps {
 
 export function TeamMemberCard({ name, role, image, bio, social, featured = false }: TeamMemberCardProps) {
   return (
-    <Card3D depth={15} glareIntensity={0.15} cursorText="Team Member">
-      <div
-        className={`h-full flex flex-col bg-[#1A1A1A] rounded-xl overflow-hidden transform-gpu transition-all duration-300 ${featured ? "border border-[#FF5001]/30" : ""}`}
-      >
+    <Card className={`h-full bg-[#1A1A1A] border-[#333333] hover:border-[#FF5001]/30 transition-all duration-300 group overflow-hidden ${featured ? "border-[#FF5001]/30" : ""}`}>
+      <div className="h-full flex flex-col">
         <div className="overflow-hidden">
           <div className="transform-gpu transition-transform duration-700 group-hover:scale-110">
             <Image
@@ -67,6 +65,6 @@ export function TeamMemberCard({ name, role, image, bio, social, featured = fals
           )}
         </div>
       </div>
-    </Card3D>
+    </Card>
   )
 }

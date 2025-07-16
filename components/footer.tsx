@@ -44,6 +44,7 @@ export function Footer() {
             <div className="flex flex-col space-y-2">
               <FooterLink href="/about">About Us</FooterLink>
               <FooterLink href="/team">Our Team</FooterLink>
+              <FooterLink href="/testimonials">Testimonials</FooterLink>
               <FooterLink href="/careers">Careers</FooterLink>
               <FooterLink href="/contact">Contact Us</FooterLink>
             </div>

@@ -1,8 +1,0 @@
-<svg width="452" height="452" viewBox="0 0 452 452" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="452" height="452" fill="#FF5001"/>
-  <path d="M188 0L452 264V452H264L0 188V0H188Z" fill="white"/>
-  <path d="M188 188L264 112V188H188Z" fill="#FF5001"/>
-  <path d="M188 264L264 188V264H188Z" fill="#FF5001"/>
-  <path d="M264 264L340 188V340L188 492V340L264 264Z" fill="white"/>
-  <path d="M340 188L452 76V188H340Z" fill="#FF5001"/>
-</svg>

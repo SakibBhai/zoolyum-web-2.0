@@ -34,11 +34,11 @@ export function Header() {
           cursorText="Home"
         >
           <Image
-            src="/zoolyum-logo.svg"
+            src="/zoolyum-logo.png"
             alt="Zoolyum Logo"
-            width={40}
+            width={100}
             height={40}
-            className="w-8 h-8 md:w-10 md:h-10 transition-all duration-300 hover:scale-105"
+            className="w-20 h-8 md:w-24 md:h-10 transition-all duration-300 hover:scale-105"
             priority
           />
         </MagneticElement>

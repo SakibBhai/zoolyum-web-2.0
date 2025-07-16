@@ -7,8 +7,7 @@ import { PageTransition } from "@/components/page-transition";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 
-import { ServiceCard3D } from "@/components/service-card-3d";
-import { TestimonialCard3D } from "@/components/testimonial-card-3d";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ScrollReveal } from "@/components/scroll-animations/scroll-reveal";
 import { StaggerReveal } from "@/components/scroll-animations/stagger-reveal";
 import { TextReveal } from "@/components/scroll-animations/text-reveal";
@@ -377,16 +376,38 @@ export default function Home() {
                 mobileStaggerDelay={0.05}
                 mobileAnimation="fade"
               >
-                <TestimonialCard3D
-                  quote="Zoolyum's strategic approach completely transformed our brand positioning. Their insights helped us connect with our audience in ways we never thought possible."
-                  author="Sarah Johnson"
-                  company="CEO, Nexus Technologies"
-                />
-                <TestimonialCard3D
-                  quote="Working with Zoolyum was a game-changer for our digital presence. The strategic vision and creative execution exceeded our expectations at every turn."
-                  author="Michael Chen"
-                  company="Marketing Director, Elevate"
-                />
+                <Card className="h-full bg-[#1A1A1A] border-[#333333] hover:border-[#FF5001]/30 transition-all duration-300">
+                  <CardContent className="p-6">
+                    <blockquote className="text-lg text-[#E9E7E2]/90 mb-6 leading-relaxed">
+                      "Zoolyum's strategic approach completely transformed our brand positioning. Their insights helped us connect with our audience in ways we never thought possible."
+                    </blockquote>
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-[#FF5001]/20 rounded-full flex items-center justify-center">
+                        <span className="text-[#FF5001] font-bold text-lg">SJ</span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-[#E9E7E2]">Sarah Johnson</p>
+                        <p className="text-sm text-[#E9E7E2]/70">CEO, Nexus Technologies</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="h-full bg-[#1A1A1A] border-[#333333] hover:border-[#FF5001]/30 transition-all duration-300">
+                  <CardContent className="p-6">
+                    <blockquote className="text-lg text-[#E9E7E2]/90 mb-6 leading-relaxed">
+                      "Working with Zoolyum was a game-changer for our digital presence. The strategic vision and creative execution exceeded our expectations at every turn."
+                    </blockquote>
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-[#FF5001]/20 rounded-full flex items-center justify-center">
+                        <span className="text-[#FF5001] font-bold text-lg">MC</span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-[#E9E7E2]">Michael Chen</p>
+                        <p className="text-sm text-[#E9E7E2]/70">Marketing Director, Elevate</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </StaggerReveal>
 
               <ScrollReveal

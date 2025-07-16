@@ -6,7 +6,7 @@ import Image from "next/image"
 import { PageTransition } from "@/components/page-transition"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { TestimonialCard3D } from "@/components/testimonial-card-3d"
+import { Card, CardContent } from "@/components/ui/card"
 import { ScrollReveal } from "@/components/scroll-animations/scroll-reveal"
 import { StaggerReveal } from "@/components/scroll-animations/stagger-reveal"
 import { ImageReveal } from "@/components/scroll-animations/image-reveal"
@@ -81,12 +81,24 @@ export default function TestimonialsPage() {
             {/* Client Testimonials Grid */}
             <StaggerReveal className="grid md:grid-cols-2 gap-8 mb-16">
               {testimonials.map((testimonial, index) => (
-                <TestimonialCard3D
-                  key={index}
-                  quote={testimonial.quote}
-                  author={testimonial.author}
-                  company={testimonial.company}
-                />
+                <Card key={index} className="h-full bg-[#1A1A1A] border-[#333333] hover:border-[#FF5001]/30 transition-all duration-300">
+                  <CardContent className="p-6">
+                    <blockquote className="text-lg text-[#E9E7E2]/90 mb-6 leading-relaxed">
+                      "{testimonial.quote}"
+                    </blockquote>
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-[#FF5001]/20 rounded-full flex items-center justify-center">
+                        <span className="text-[#FF5001] font-bold text-lg">
+                          {testimonial.author.split(' ').map(name => name[0]).join('')}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-[#E9E7E2]">{testimonial.author}</p>
+                        <p className="text-sm text-[#E9E7E2]/70">{testimonial.company}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </StaggerReveal>
 
