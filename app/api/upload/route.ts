@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getCurrentUser } from '@/lib/stack-auth'
 import { uploadToR2 } from '@/lib/r2-client'
 
 // Maximum file size (5MB)
@@ -18,8 +17,8 @@ const ALLOWED_TYPES = [
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
-    const session = await getServerSession(authOptions)
-    if (!session?.user) {
+    const user = await getCurrentUser()
+    if (!user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }

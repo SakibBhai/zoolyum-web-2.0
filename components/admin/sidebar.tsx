@@ -12,7 +12,7 @@ import {
   LogOut,
   Megaphone
 } from "lucide-react"
-import { signOut } from "next-auth/react"
+import { useUser } from "@stackframe/stack"
 
 export function AdminSidebar() {
   const pathname = usePathname()
@@ -90,7 +90,7 @@ export function AdminSidebar() {
       
       <div className="mt-auto pt-4 border-t border-[#333333]">
         <button
-          onClick={() => signOut({ callbackUrl: "/admin/login" })}
+          onClick={() => window.location.href = "/handler/sign-out"}
           className="flex items-center gap-3 px-3 py-2 w-full text-left rounded-md text-[#E9E7E2]/70 hover:text-[#E9E7E2] hover:bg-[#252525] transition-colors"
         >
           <LogOut className="h-5 w-5" />

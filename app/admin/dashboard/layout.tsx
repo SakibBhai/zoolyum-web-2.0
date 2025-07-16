@@ -4,31 +4,31 @@ import { type ReactNode, useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { LayoutDashboard, FileText, Briefcase, MessageSquare, Settings, LogOut, Menu, X, User } from "lucide-react"
-import { signOut, useSession } from "next-auth/react"
+import { useUser } from "@stackframe/stack"
 import { AdminLoading } from "@/components/admin/admin-loading"
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
-  const { data: session, status } = useSession()
+  const user = useUser()
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/admin/login")
+    if (user === null) {
+      router.push("/handler/sign-in")
     }
-  }, [status, router])
+  }, [user, router])
 
-  if (status === "loading") {
+  if (user === undefined) {
     return <AdminLoading />
   }
 
-  if (!session || !session.user) {
+  if (!user) {
     return null // Or a loading spinner, or redirect
   }
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/admin/login" })
+    window.location.href = "/handler/sign-out"
   }
 
   const navItems = [
@@ -91,15 +91,15 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         </div>
 
         {/* Admin user info */}
-        {session.user && (
+        {user && (
           <div className="p-4 border-b border-[#333333]">
             <div className="flex items-center">
               <div className="w-10 h-10 rounded-full bg-[#252525] flex items-center justify-center text-[#FF5001]">
                 <User className="h-6 w-6" />
               </div>
               <div className="ml-3">
-                <p className="font-medium">{session.user.name}</p>
-                <p className="text-xs text-[#E9E7E2]/50">{session.user.email}</p>
+                <p className="font-medium">{user.displayName}</p>
+                <p className="text-xs text-[#E9E7E2]/50">{user.primaryEmail}</p>
               </div>
             </div>
           </div>

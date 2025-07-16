@@ -26,7 +26,6 @@ import { Plus, Trash2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { updateCampaign } from "@/lib/campaign-operations";
-import { prisma } from "@/lib/prisma";
 
 interface CTA {
   label: string;
@@ -57,21 +56,27 @@ export default function EditCampaignPage({
 
   useEffect(() => {
     async function fetchCampaign() {
-      const campaign = await prisma.campaign.findUnique({
-        where: { id: params.id },
-      });
-      setFormData(campaign);
-      if (campaign && campaign.ctas) {
-        const ctasArray = Array.isArray(campaign.ctas)
-          ? (campaign.ctas as unknown as CTA[])
-          : [];
-        setCtas(ctasArray);
-      }
-      if (campaign && campaign.formFields) {
-        const formFieldsArray = Array.isArray(campaign.formFields)
-          ? (campaign.formFields as unknown as FormField[])
-          : [];
-        setFormFields(formFieldsArray);
+      try {
+        const response = await fetch(`/api/campaigns/${params.id}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch campaign');
+        }
+        const campaign = await response.json();
+        setFormData(campaign);
+        if (campaign && campaign.ctas) {
+          const ctasArray = Array.isArray(campaign.ctas)
+            ? (campaign.ctas as unknown as CTA[])
+            : [];
+          setCtas(ctasArray);
+        }
+        if (campaign && campaign.formFields) {
+          const formFieldsArray = Array.isArray(campaign.formFields)
+            ? (campaign.formFields as unknown as FormField[])
+            : [];
+          setFormFields(formFieldsArray);
+        }
+      } catch (error) {
+        console.error('Error fetching campaign:', error);
       }
     }
     fetchCampaign();

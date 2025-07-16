@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/stack-auth';
 import { pool } from '@/lib/postgres';
 
 // GET /api/blog-posts/[id] - Get a specific blog post
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     
     // Try to get by ID first, then by slug
     let result;
@@ -63,19 +62,19 @@ export async function GET(
 // PUT /api/blog-posts/[id] - Update a specific blog post
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const user = await getCurrentUser();
     
-    if (!session?.user?.email) {
+    if (!user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       );
     }
     
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const { title, slug, excerpt, content, imageUrl, published, tags } = body;
     
@@ -160,19 +159,19 @@ export async function PUT(
 // DELETE /api/blog-posts/[id] - Delete a specific blog post
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const user = await getCurrentUser();
     
-    if (!session?.user?.email) {
+    if (!user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       );
     }
     
-    const { id } = params;
+    const { id } = await params;
     
     // Check if the blog post exists
     const existingPost = await pool.query(

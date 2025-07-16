@@ -23,12 +23,11 @@ import {
 } from '@/components/ui/alert-dialog'
 
 interface ServicePageProps {
-  params: {
-    id: string
-  }
+  params: Promise<{ id: string }>;
 }
 
-export default function ServicePage({ params }: ServicePageProps) {
+export default async function ServicePage({ params }: ServicePageProps) {
+  const { id } = await params;
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -37,7 +36,7 @@ export default function ServicePage({ params }: ServicePageProps) {
   useEffect(() => {
     const loadService = async () => {
       try {
-        const serviceData = await fetchService(params.id)
+        const serviceData = await fetchService(id)
         if (!serviceData) {
           toast({
             title: 'Error',
@@ -62,14 +61,14 @@ export default function ServicePage({ params }: ServicePageProps) {
     }
 
     loadService()
-  }, [params.id, router])
+  }, [id, router])
 
   const handleDelete = async () => {
     if (!service) return
 
     setIsDeleting(true)
     try {
-      await deleteService(service.id)
+      await deleteService(id)
       toast({
         title: 'Success',
         description: 'Service deleted successfully.',
@@ -135,7 +134,7 @@ export default function ServicePage({ params }: ServicePageProps) {
         </div>
         
         <div className="flex items-center gap-2">
-          <Link href={`/admin/services/${service.id}/edit`}>
+          <Link href={`/admin/services/${id}/edit`}>
             <Button variant="outline">
               <Edit className="h-4 w-4 mr-2" />
               Edit

@@ -103,9 +103,7 @@ function StatusCell({ testimonial }: { testimonial: Testimonial }) {
 
   return (
     <div className="flex items-center space-x-2">
-      <Badge variant={getStatusVariant(statusDisplay)}>
-        {statusDisplay}
-      </Badge>
+      <Badge variant={getStatusVariant(statusDisplay)}>{statusDisplay}</Badge>
       {testimonial.featured && (
         <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
       )}
@@ -221,10 +219,5 @@ export function TestimonialsTable({ testimonials }: TestimonialsTableProps) {
     []
   );
 
-  return (
-    <DataTable
-      data={testimonials}
-      columns={columns}
-    />
-  );
+  return <DataTable data={testimonials} columns={columns} />;
 }

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAllTeamMembers, createTeamMember } from "@/lib/team-operations";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { createTeamMember, getTeamMembers } from "@/lib/team-operations";
+import { getCurrentUser } from "@/lib/stack-auth";
 
 interface ApiError {
   message: string;
@@ -66,9 +65,8 @@ export async function GET() {
 // POST /api/team - Create new team member
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

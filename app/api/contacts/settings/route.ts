@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { fetchContactSettings, updateContactSettings } from '@/lib/contact-operations'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getCurrentUser } from '@/lib/stack-auth'
 
 // GET /api/contacts/settings - Fetch contact settings
 export async function GET() {
@@ -41,9 +40,9 @@ export async function GET() {
 // PUT /api/contacts/settings - Update contact settings (Admin only)
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const user = await getCurrentUser()
     
-    if (!session?.user) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     

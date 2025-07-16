@@ -4,7 +4,7 @@ import type React from "react";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useUser } from "@stackframe/stack";
 import { createBlogPost } from "../../../../../lib/blog-operations";
 import { PageTransition } from "@/components/page-transition";
 import { Save, X, InfoIcon, Loader2 } from "lucide-react";
@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function NewBlogPostPage() {
-  const { data: session, status } = useSession();
+  const user = useUser();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -31,21 +31,12 @@ export default function NewBlogPostPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (status === "loading") return;
-    if (!session) {
+    if (!user) {
       router.push("/admin/login");
     }
-  }, [session, status, router]);
+  }, [user, router]);
 
-  if (status === "loading") {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin" />
-      </div>
-    );
-  }
-
-  if (!session) {
+  if (!user) {
     return null;
   }
 
@@ -102,7 +93,7 @@ export default function NewBlogPostPage() {
     setError(null);
 
     try {
-      if (!session) {
+      if (!user) {
         throw new Error("You must be logged in to create a post");
       }
 

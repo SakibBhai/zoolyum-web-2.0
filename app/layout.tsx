@@ -1,10 +1,16 @@
 import type React from "react"
+import { StackProvider, StackTheme } from "@stackframe/stack";
+import { stackServerApp } from "../stack";
 import "./globals.css"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Providers } from "./providers"
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ 
+  subsets: ["latin"],
+  display: 'swap',
+  fallback: ['system-ui', 'arial']
+})
 
 export const metadata = {
   title: "Zoolyum | Brand Strategy & Digital Innovation Agency",
@@ -30,13 +36,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={inter.className}><StackProvider app={stackServerApp}><StackTheme>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <Providers>
             {children}
           </Providers>
         </ThemeProvider>
-      </body>
+      </StackTheme></StackProvider></body>
     </html>
   )
 }

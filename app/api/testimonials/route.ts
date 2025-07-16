@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createTestimonial, fetchTestimonials, validateTestimonialData } from '@/lib/testimonial-operations'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getCurrentUser } from '@/lib/stack-auth'
 
 // GET /api/testimonials - Fetch testimonials
 export async function GET(request: NextRequest) {
@@ -13,8 +12,8 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0')
     
     // For public access, only return approved testimonials
-    const session = await getServerSession(authOptions)
-    const isAdmin = !!session?.user
+    const user = await getCurrentUser()
+    const isAdmin = !!user
     
     const options: any = {
       limit: Math.min(limit, 100), // Cap at 100

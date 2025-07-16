@@ -4,7 +4,7 @@ import type React from "react";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useUser } from "@stackframe/stack";
 import { getBlogPostBySlug, updateBlogPost } from "@/lib/blog-operations";
 import { PageTransition } from "@/components/page-transition";
 import { Save, X, Loader2 } from "lucide-react";
@@ -15,9 +15,9 @@ import { useToast } from "@/hooks/use-toast";
 export default function EditBlogPostPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const { data: session } = useSession();
+  const user = useUser();
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     id: "", // Change id to string
@@ -38,7 +38,8 @@ export default function EditBlogPostPage({
     const loadPost = async () => {
       try {
         setIsLoading(true);
-        const post = await getBlogPostBySlug(params.slug);
+        const { slug } = await params;
+        const post = await getBlogPostBySlug(slug);
 
         if (!post) {
           throw new Error("Blog post not found");
@@ -73,7 +74,7 @@ export default function EditBlogPostPage({
     };
 
     loadPost();
-  }, [params.slug, toast]);
+  }, [params, toast]);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -107,7 +108,7 @@ export default function EditBlogPostPage({
     setError(null);
 
     try {
-      if (!session || !session.user) {
+      if (!user) {
         throw new Error("You must be logged in to update a post");
       }
 

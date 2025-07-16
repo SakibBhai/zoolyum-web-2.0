@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/stack-auth";
 import {
   getTestimonialById,
   updateTestimonial,
@@ -27,8 +26,8 @@ export async function GET(request: NextRequest, context: RouteContext) {
     }
 
     // Check if user is admin for non-approved testimonials
-    const session = await getServerSession(authOptions);
-    const isAdmin = !!session?.user;
+    const user = await getCurrentUser();
+    const isAdmin = !!user;
 
     if (!testimonial.approved && !isAdmin) {
       return NextResponse.json(
@@ -50,8 +49,8 @@ export async function GET(request: NextRequest, context: RouteContext) {
 // PUT /api/testimonials/[id] - Update testimonial
 export async function PUT(request: NextRequest, context: RouteContext) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -92,8 +91,8 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 // DELETE /api/testimonials/[id] - Delete testimonial
 export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

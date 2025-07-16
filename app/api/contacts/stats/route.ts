@@ -1,16 +1,15 @@
-import { NextResponse } from 'next/server'
-import { getContactStats } from '@/lib/contact-operations'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { NextRequest, NextResponse } from 'next/server'
+import { fetchContactStats } from '@/lib/contact-operations'
+import { getCurrentUser } from '@/lib/stack-auth'
 
 // GET /api/contacts/stats - Get contact statistics (Admin only)
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    const user = await getCurrentUser()
+  
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
     
     const stats = await getContactStats()
     return NextResponse.json(stats)
