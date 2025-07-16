@@ -11,9 +11,9 @@ import { TextReveal } from "@/components/scroll-animations/text-reveal"
 import { ImageReveal } from "@/components/scroll-animations/image-reveal"
 
 interface ServicePageProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
 const serviceData: Record<string, any> = {
@@ -487,8 +487,9 @@ const serviceData: Record<string, any> = {
   }
 }
 
-export default function ServicePage({ params }: ServicePageProps) {
-  const service = serviceData[params.slug]
+export default async function ServicePage({ params }: ServicePageProps) {
+  const { slug } = await params
+  const service = serviceData[slug]
 
   if (!service) {
     notFound()

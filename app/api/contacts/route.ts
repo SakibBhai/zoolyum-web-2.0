@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createContact, fetchContacts, validateContactData } from '@/lib/contact-operations'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getCurrentUser } from '@/lib/stack-auth'
 
 // GET /api/contacts - Fetch all contacts (Admin only)
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
+    const user = await getCurrentUser()
     
-    if (!session?.user) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     

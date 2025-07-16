@@ -9,6 +9,7 @@ import { PageTransition } from "@/components/page-transition";
 import { motion } from "framer-motion";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { Project, fetchProjectBySlug, fetchProjects, ProcessStep, GalleryImage, Result, Testimonial } from "@/lib/project-operations";
 
 interface NavLinkProps {
   href: string;
@@ -34,32 +35,68 @@ export default function ProjectDetailPage() {
   const [project, setProject] = useState<Project | null>(null);
   const [nextProject, setNextProject] = useState<Project | null>(null);
   const [prevProject, setPrevProject] = useState<Project | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Find the current project based on the slug
-    const currentProjectIndex = projects.findIndex((p) => p.slug === slug);
+    const loadProject = async () => {
+      if (!slug) return;
+      
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch the current project by slug
+        const currentProject = await fetchProjectBySlug(slug);
+        
+        if (!currentProject) {
+          router.push("/work");
+          return;
+        }
+        
+        setProject(currentProject);
+        
+        // Fetch all projects for navigation
+        const allProjects = await fetchProjects({ published: true });
+        const currentProjectIndex = allProjects.findIndex((p) => p.id === currentProject.id);
+        
+        if (currentProjectIndex !== -1) {
+          // Set next and previous projects for navigation
+          const nextIndex = (currentProjectIndex + 1) % allProjects.length;
+          const prevIndex = (currentProjectIndex - 1 + allProjects.length) % allProjects.length;
+          
+          setNextProject(allProjects[nextIndex]);
+          setPrevProject(allProjects[prevIndex]);
+        }
+      } catch (err) {
+        console.error('Error loading project:', err);
+        setError('Failed to load project');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    if (currentProjectIndex === -1) {
-      // Project not found, redirect to work page
-      router.push("/work");
-      return;
-    }
-
-    setProject(projects[currentProjectIndex]);
-
-    // Set next and previous projects for navigation
-    const nextIndex = (currentProjectIndex + 1) % projects.length;
-    const prevIndex =
-      (currentProjectIndex - 1 + projects.length) % projects.length;
-
-    setNextProject(projects[nextIndex]);
-    setPrevProject(projects[prevIndex]);
+    loadProject();
   }, [slug, router]);
 
-  if (!project) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-[#161616] text-[#E9E7E2] flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-[#FF5001] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (error || !project) {
+    return (
+      <div className="min-h-screen bg-[#161616] text-[#E9E7E2] flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Project Not Found</h1>
+          <p className="text-[#E9E7E2]/70 mb-6">{error || 'The project you are looking for does not exist.'}</p>
+          <Link href="/work" className="bg-[#FF5001] text-white px-6 py-3 rounded-lg hover:bg-[#FF5001]/90 transition-colors">
+            Back to Projects
+          </Link>
+        </div>
       </div>
     );
   }
@@ -82,7 +119,7 @@ export default function ProjectDetailPage() {
               <div className="h-[50vh] md:h-[70vh] w-full relative overflow-hidden">
                 <Image
                   src={
-                    project.heroImage ||
+                    project.heroImageUrl ||
                     "/placeholder.svg?height=800&width=1600"
                   }
                   alt={project.title}
@@ -164,13 +201,13 @@ export default function ProjectDetailPage() {
                           Services
                         </h4>
                         <div className="flex flex-wrap gap-2 mt-2">
-                          {project.services.map(
-                            (service: Service, index: number) => (
+                          {project.services?.map(
+                            (service: string, index: number) => (
                               <span
                                 key={index}
                                 className="px-3 py-1 bg-[#252525] rounded-full text-xs"
                               >
-                                {service.name}
+                                {service}
                               </span>
                             )
                           )}
@@ -210,9 +247,9 @@ export default function ProjectDetailPage() {
                 Our Approach
               </h2>
               <div className="grid md:grid-cols-3 gap-8">
-                {project.process.map((step: ProcessStep, index: number) => (
+                {project.process?.map((step: ProcessStep, index: number) => (
                   <ProcessCard key={index} step={step} index={index} />
-                ))}
+                )) || []}
               </div>
             </div>
           </section>
@@ -224,7 +261,7 @@ export default function ProjectDetailPage() {
                 Project Gallery
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {project.gallery.map((image: GalleryImage, index: number) => (
+                {project.gallery?.map((image: GalleryImage, index: number) => (
                   <motion.div
                     key={index}
                     initial={{ opacity: 0, y: 20 }}
@@ -235,13 +272,13 @@ export default function ProjectDetailPage() {
                   >
                     <Image
                       src={image.url || "/placeholder.svg?height=600&width=800"}
-                      alt={image.alt || "Project image"}
+                      alt={image.caption || "Project image"}
                       width={800}
                       height={600}
                       className="w-full aspect-[4/3] object-cover hover:scale-105 transition-transform duration-500"
                     />
                   </motion.div>
-                ))}
+                )) || []}
               </div>
             </div>
           </section>
@@ -253,9 +290,9 @@ export default function ProjectDetailPage() {
                 Results & Impact
               </h2>
               <div className="grid md:grid-cols-3 gap-8">
-                {project.results.map((result: Result, index: number) => (
+                {project.results?.map((result: Result, index: number) => (
                   <ResultCard key={index} result={result} index={index} />
-                ))}
+                )) || []}
               </div>
             </div>
           </section>
@@ -347,57 +384,9 @@ export default function ProjectDetailPage() {
   );
 }
 
-interface Service {
-  name: string;
-  description: string;
-}
+// Interfaces are now imported from project-operations.ts
 
-interface ProcessStep {
-  title: string;
-  description: string;
-  icon?: string;
-}
 
-interface GalleryImage {
-  url: string;
-  alt: string;
-  width: number;
-  height: number;
-}
-
-interface Result {
-  title: string;
-  value: string;
-  description: string;
-}
-
-interface Testimonial {
-  quote: string;
-  author: string;
-  position: string;
-  company: string;
-}
-
-interface Project {
-  slug: string;
-  title: string;
-  description: string;
-  category: string;
-  image: string;
-  heroImage: string;
-  year: string;
-  client: string;
-  duration: string;
-  overview: string;
-  challenge: string;
-  solution: string;
-  testimonial: Testimonial;
-  services: Service[];
-  process: ProcessStep[];
-  gallery: GalleryImage[];
-  results: Result[];
-  // Add other project fields as needed
-}
 
 interface ProcessCardProps {
   step: ProcessStep;
@@ -439,8 +428,7 @@ function ResultCard({ result, index }: ResultCardProps) {
       <div className="text-[#FF5001] text-4xl font-bold mb-2">
         {result.value}
       </div>
-      <h3 className="text-xl font-bold mb-4">{result.title}</h3>
-      <p className="text-[#E9E7E2]/70">{result.description}</p>
+      <h3 className="text-xl font-bold mb-4">{result.metric}</h3>
     </motion.div>
   );
 }
@@ -477,7 +465,7 @@ function ProjectNavigation({
               <div className="relative aspect-video overflow-hidden rounded-lg mb-4">
                 <Image
                   src={
-                    prevProject.image || "/placeholder.svg?height=400&width=600"
+                    prevProject.imageUrl || "/placeholder.svg?height=400&width=600"
                   }
                   alt={prevProject.title}
                   fill
@@ -499,7 +487,7 @@ function ProjectNavigation({
               <div className="relative aspect-video overflow-hidden rounded-lg mb-4">
                 <Image
                   src={
-                    nextProject.image || "/placeholder.svg?height=400&width=600"
+                    nextProject.imageUrl || "/placeholder.svg?height=400&width=600"
                   }
                   alt={nextProject.title}
                   fill
@@ -518,808 +506,3 @@ function ProjectNavigation({
     </section>
   );
 }
-
-// Expanded project data with detailed case study information
-const projects: Project[] = [
-  {
-    title: "Nexus Rebrand",
-    slug: "nexus-rebrand",
-    category: "Brand Strategy",
-    description:
-      "Complete brand transformation for a tech company entering new markets.",
-    image: "/placeholder.svg?height=400&width=600",
-    heroImage: "/placeholder.svg?height=800&width=1600",
-    year: "2023",
-    client: "Nexus Technologies",
-    duration: "3 months",
-    services: [
-      {
-        name: "Brand Strategy",
-        description: "Defining the brand's core message and positioning.",
-      },
-      {
-        name: "Visual Identity",
-        description: "Creating the logo, color palette, and typography.",
-      },
-      {
-        name: "Brand Guidelines",
-        description: "Documenting how to use brand assets.",
-      },
-      {
-        name: "Marketing Collateral",
-        description:
-          "Designing brochures, business cards, and other materials.",
-      },
-    ],
-    overview:
-      "Nexus Technologies was at a pivotal moment in their growth journey. As they prepared to expand into new international markets and launch innovative product lines, their existing brand no longer reflected their vision and ambitions. We partnered with Nexus to completely reimagine their brand identity, creating a cohesive system that would position them as industry leaders and support their expansion goals.",
-    challenge:
-      "Nexus had built a strong reputation in their home market, but their brand lacked the sophistication and clarity needed to compete on a global scale. Their visual identity was inconsistent across touchpoints, and their messaging failed to communicate their unique value proposition effectively. Additionally, internal teams lacked clear guidelines for brand implementation, resulting in fragmented customer experiences.",
-    solution:
-      "We developed a comprehensive brand strategy that clarified Nexus's positioning, values, and voice. This foundation informed the creation of a bold new visual identity system, including a dynamic logo that symbolized connectivity and innovation. We created detailed brand guidelines and templates for all key touchpoints, ensuring consistency across digital and physical environments. The rebrand was launched with an integrated campaign that introduced the new Nexus to existing customers and target markets.",
-    process: [
-      {
-        title: "Discovery & Research",
-        description:
-          "Conducted stakeholder interviews, market analysis, competitor research, and customer surveys to understand perceptions and opportunities.",
-      },
-      {
-        title: "Strategy Development",
-        description:
-          "Defined brand positioning, value proposition, personality, and messaging framework to guide all creative decisions.",
-      },
-      {
-        title: "Identity Creation",
-        description:
-          "Designed a comprehensive visual system including logo, color palette, typography, imagery style, and graphic elements.",
-      },
-      {
-        title: "Implementation",
-        description:
-          "Developed brand guidelines, templates, and assets for digital platforms, marketing materials, and product packaging.",
-      },
-      {
-        title: "Launch & Activation",
-        description:
-          "Created launch strategy and campaign materials to introduce the new brand internally and externally.",
-      },
-      {
-        title: "Measurement & Refinement",
-        description:
-          "Established metrics to track brand performance and made adjustments based on initial market response.",
-      },
-    ],
-    gallery: [
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Nexus logo design process",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Brand guidelines",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Digital application",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Marketing materials",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Office environment",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Product packaging",
-        width: 800,
-        height: 600,
-      },
-    ],
-    results: [
-      {
-        value: "42%",
-        title: "Increase in Brand Recognition",
-        description:
-          "Post-launch surveys showed significant improvement in brand recall and recognition in target markets.",
-      },
-      {
-        value: "3.5x",
-        title: "Growth in International Inquiries",
-        description:
-          "The new brand positioning attracted substantially more interest from international prospects.",
-      },
-      {
-        value: "87%",
-        title: "Employee Brand Alignment",
-        description:
-          "Internal surveys revealed strong understanding and embodiment of the new brand values.",
-      },
-    ],
-    testimonial: {
-      quote:
-        "The rebrand has been transformative for our business. Not only do we have a visual identity that truly represents our vision, but the strategic foundation has aligned our entire organization and clarified our market position. Since launching, we've seen tangible business results and received overwhelmingly positive feedback from clients and partners.",
-      author: "Sarah Johnson",
-      position: "CEO, Nexus Technologies",
-      company: "Nexus Technologies",
-    },
-  },
-  {
-    title: "Elevate Digital Transformation",
-    slug: "elevate-digital",
-    category: "Digital Strategy",
-    description: "Digital ecosystem development for a growing lifestyle brand.",
-    image: "/placeholder.svg?height=400&width=600",
-    heroImage: "/placeholder.svg?height=800&width=1600",
-    year: "2022",
-    client: "Elevate Lifestyle",
-    duration: "6 months",
-    services: [
-      {
-        name: "Digital Strategy",
-        description: "Developing a comprehensive digital strategy.",
-      },
-      {
-        name: "UX/UI Design",
-        description: "Designing user-friendly and engaging interfaces.",
-      },
-      {
-        name: "Content Strategy",
-        description: "Planning and creating valuable content.",
-      },
-      {
-        name: "E-commerce Optimization",
-        description: "Improving online store performance.",
-      },
-    ],
-    overview:
-      "Elevate, a premium lifestyle brand with a strong physical retail presence, needed to accelerate their digital transformation to meet changing consumer behaviors and expand their market reach. We partnered with them to develop a comprehensive digital strategy and reimagine their online presence, creating a cohesive ecosystem that would drive e-commerce growth while maintaining their premium brand experience.",
-    challenge:
-      "Elevate's digital presence was fragmented and underperforming. Their website offered a poor user experience with low conversion rates, and their digital marketing efforts lacked strategic direction. The brand experience online failed to capture the premium feel of their physical stores, and they struggled to effectively engage with their audience across digital touchpoints. Additionally, they lacked the internal capabilities and processes to manage a sophisticated digital ecosystem.",
-    solution:
-      "We developed a holistic digital transformation strategy that addressed both customer-facing experiences and internal capabilities. This included a complete redesign of their e-commerce platform with an emphasis on storytelling and seamless shopping, a content strategy to engage their audience across channels, and a roadmap for building internal digital capabilities. The transformation was implemented in phases to ensure sustainable change and measurable results at each stage.",
-    process: [
-      {
-        title: "Digital Audit",
-        description:
-          "Comprehensive assessment of existing digital touchpoints, performance metrics, and capabilities.",
-      },
-      {
-        title: "Customer Journey Mapping",
-        description:
-          "Detailed mapping of current and ideal customer journeys across online and offline touchpoints.",
-      },
-      {
-        title: "Digital Strategy Development",
-        description:
-          "Creation of a roadmap covering platform architecture, content, marketing, and organizational capabilities.",
-      },
-      {
-        title: "Experience Design",
-        description:
-          "Redesign of the e-commerce platform with a focus on brand storytelling and conversion optimization.",
-      },
-      {
-        title: "Content Strategy",
-        description:
-          "Development of a content framework to engage audiences across the customer journey.",
-      },
-      {
-        title: "Implementation & Training",
-        description:
-          "Phased implementation of the new digital ecosystem and capability building for internal teams.",
-      },
-    ],
-    gallery: [
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Website redesign",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Mobile experience",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Content strategy framework",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Email marketing templates",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Social media content",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Analytics dashboard",
-        width: 800,
-        height: 600,
-      },
-    ],
-    results: [
-      {
-        value: "156%",
-        title: "Increase in E-commerce Revenue",
-        description:
-          "Year-over-year growth following the implementation of the new digital ecosystem.",
-      },
-      {
-        value: "4.2x",
-        title: "Improvement in Conversion Rate",
-        description:
-          "Significant increase in website conversion rate through improved UX and content strategy.",
-      },
-      {
-        value: "68%",
-        title: "Growth in Email Engagement",
-        description:
-          "Higher open and click-through rates with the new content strategy and design approach.",
-      },
-    ],
-    testimonial: {
-      quote:
-        "Working with Zoolyum transformed not just our digital presence but our entire approach to customer engagement. The strategic vision and execution excellence delivered results far beyond our expectations. Our team now has both the tools and the capabilities to continue evolving our digital ecosystem as our business grows.",
-      author: "Michael Chen",
-      position: "Marketing Director, Elevate",
-      company: "Elevate Lifestyle",
-    },
-  },
-  {
-    title: "Horizon Market Entry",
-    slug: "horizon-market",
-    category: "Consultancy",
-    description:
-      "Strategic positioning for a startup entering a competitive market.",
-    image: "/placeholder.svg?height=400&width=600",
-    heroImage: "/placeholder.svg?height=800&width=1600",
-    year: "2023",
-    client: "Horizon",
-    duration: "4 months",
-    services: [
-      {
-        name: "Market Analysis",
-        description: "Researching market dynamics and competitor positioning.",
-      },
-      {
-        name: "Brand Positioning",
-        description:
-          "Defining a distinctive market position and value proposition.",
-      },
-      {
-        name: "Go-to-Market Strategy",
-        description: "Planning the market entry strategy and tactics.",
-      },
-      {
-        name: "Pitch Development",
-        description: "Creating a compelling pitch for investors and partners.",
-      },
-    ],
-    overview:
-      "Horizon, an innovative fintech startup with a unique solution for sustainable investing, needed to establish a distinctive position in a crowded market dominated by established players. We provided strategic consultancy to help them define their market entry strategy, develop a compelling brand narrative, and create a roadmap for growth that would attract both customers and investors.",
-    challenge:
-      "As a newcomer in the competitive fintech space, Horizon faced significant challenges in gaining visibility and credibility. Their innovative approach to sustainable investing offered genuine value, but they struggled to articulate their unique selling proposition in a way that resonated with target audiences. Additionally, they needed to identify the most effective channels and partnerships to gain initial traction with limited resources.",
-    solution:
-      "We developed a comprehensive market entry strategy that positioned Horizon at the intersection of financial technology and sustainable impact. This included a distinctive brand narrative that highlighted their unique approach, a targeted go-to-market plan focusing on high-potential customer segments, and a compelling investor pitch that articulated their vision and growth potential. The strategy was designed to maximize impact with limited resources while building foundations for scale.",
-    process: [
-      {
-        title: "Market Analysis",
-        description:
-          "In-depth research of market dynamics, competitor positioning, and customer needs in sustainable fintech.",
-      },
-      {
-        title: "Positioning Development",
-        description:
-          "Creation of a distinctive market position and value proposition that highlighted Horizon's unique approach.",
-      },
-      {
-        title: "Audience Segmentation",
-        description:
-          "Identification and prioritization of customer segments based on potential value and acquisition efficiency.",
-      },
-      {
-        title: "Go-to-Market Planning",
-        description:
-          "Development of channel strategy, partnership approach, and launch roadmap to maximize initial impact.",
-      },
-      {
-        title: "Narrative Development",
-        description:
-          "Creation of compelling brand story and messaging framework aligned with the positioning strategy.",
-      },
-      {
-        title: "Pitch & Presentation",
-        description:
-          "Design of investor materials and customer presentations to articulate the vision and value proposition.",
-      },
-    ],
-    gallery: [
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Market analysis",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Positioning framework",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Brand narrative",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Go-to-market strategy",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Investor pitch deck",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Launch event",
-        width: 800,
-        height: 600,
-      },
-    ],
-    results: [
-      {
-        value: "$4.2M",
-        title: "Seed Funding Secured",
-        description:
-          "Successfully raised seed round from top-tier investors based on the strategic vision.",
-      },
-      {
-        value: "12K+",
-        title: "Early Adopters",
-        description:
-          "Exceeded user acquisition targets in the first quarter after launch.",
-      },
-      {
-        value: "8",
-        title: "Strategic Partnerships",
-        description:
-          "Secured key partnerships with established financial institutions and sustainability organizations.",
-      },
-    ],
-    testimonial: {
-      quote:
-        "Sakib's strategic guidance was instrumental in our successful market entry. His ability to identify our unique value proposition and translate it into a compelling narrative gave us clarity and confidence. The positioning strategy and go-to-market plan provided a roadmap that helped us secure funding and gain early traction in a highly competitive space.",
-      author: "Jessica Williams",
-      position: "Founder, Horizon",
-      company: "Horizon",
-    },
-  },
-  {
-    title: "Pulse E-commerce",
-    slug: "pulse-ecommerce",
-    category: "Digital Strategy",
-    description:
-      "E-commerce strategy and implementation for a fashion retailer.",
-    image: "/placeholder.svg?height=400&width=600",
-    heroImage: "/placeholder.svg?height=800&width=1600",
-    year: "2022",
-    client: "Pulse Fashion",
-    duration: "5 months",
-    services: [
-      {
-        name: "E-commerce Strategy",
-        description: "Developing a comprehensive e-commerce strategy.",
-      },
-      {
-        name: "UX/UI Design",
-        description:
-          "Designing user-friendly and engaging online shopping experiences.",
-      },
-      {
-        name: "Conversion Optimization",
-        description: "Improving the conversion rate of the e-commerce site.",
-      },
-      {
-        name: "Analytics Setup",
-        description:
-          "Implementing analytics to track and optimize performance.",
-      },
-    ],
-    overview:
-      "Pulse, an established fashion retailer with a strong brick-and-mortar presence, needed to transform their underperforming e-commerce platform into a growth driver for the business. We developed a comprehensive e-commerce strategy and redesigned their digital shopping experience to increase online sales, improve customer engagement, and create a seamless omnichannel experience that complemented their physical stores.",
-    challenge:
-      "Despite having a loyal customer base in their physical stores, Pulse struggled to translate this success online. Their e-commerce platform suffered from poor user experience, low conversion rates, and high cart abandonment. The digital experience failed to capture the brand's unique aesthetic and shopping experience, and they lacked the data infrastructure to effectively measure performance and optimize the customer journey.",
-    solution:
-      "We created a holistic e-commerce transformation strategy that addressed both the customer-facing experience and the underlying business operations. This included a complete redesign of the online shopping experience with a focus on brand storytelling and conversion, implementation of a robust analytics framework, and development of an omnichannel strategy that connected the online and offline customer journeys. The solution was implemented in phases to allow for testing and optimization throughout the process.",
-    process: [
-      {
-        title: "E-commerce Audit",
-        description:
-          "Comprehensive analysis of the existing platform, identifying usability issues and conversion barriers.",
-      },
-      {
-        title: "Customer Research",
-        description:
-          "Interviews and surveys with existing customers to understand shopping preferences and pain points.",
-      },
-      {
-        title: "Experience Design",
-        description:
-          "Creation of a new user experience that balanced brand storytelling with conversion optimization.",
-      },
-      {
-        title: "Technical Implementation",
-        description:
-          "Platform development with focus on performance, mobile optimization, and integration with existing systems.",
-      },
-      {
-        title: "Analytics Framework",
-        description:
-          "Implementation of comprehensive tracking and reporting to enable data-driven optimization.",
-      },
-      {
-        title: "Launch & Optimization",
-        description:
-          "Phased rollout with continuous testing and refinement based on performance data.",
-      },
-    ],
-    gallery: [
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "E-commerce homepage",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Product detail page",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Mobile shopping experience",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Checkout flow",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Email marketing",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Analytics dashboard",
-        width: 800,
-        height: 600,
-      },
-    ],
-    results: [
-      {
-        value: "187%",
-        title: "Increase in Online Revenue",
-        description:
-          "Year-over-year growth in e-commerce sales following the platform relaunch.",
-      },
-      {
-        value: "3.2x",
-        title: "Improvement in Conversion Rate",
-        description:
-          "Significant increase in the percentage of visitors completing purchases.",
-      },
-      {
-        value: "-42%",
-        title: "Reduction in Cart Abandonment",
-        description:
-          "Substantial decrease in the rate of abandoned shopping carts through improved UX.",
-      },
-    ],
-    testimonial: {
-      quote:
-        "The e-commerce transformation has been a game-changer for our business. What started as a website redesign evolved into a complete rethinking of how we engage with customers across channels. The strategic approach and attention to detail resulted in an online experience that truly captures our brand essence while driving significant business results.",
-      author: "David Rodriguez",
-      position: "COO, Pulse",
-      company: "Pulse Fashion",
-    },
-  },
-  {
-    title: "Vertex Brand Identity",
-    slug: "vertex-identity",
-    category: "Brand Strategy",
-    description: "Complete visual identity system for an architectural firm.",
-    image: "/placeholder.svg?height=400&width=600",
-    heroImage: "/placeholder.svg?height=800&width=1600",
-    year: "2023",
-    client: "Vertex Architecture",
-    duration: "4 months",
-    services: [
-      {
-        name: "Brand Strategy",
-        description: "Defining the brand's core message and positioning.",
-      },
-      {
-        name: "Visual Identity",
-        description: "Creating the logo, color palette, and typography.",
-      },
-      {
-        name: "Brand Guidelines",
-        description: "Documenting how to use brand assets.",
-      },
-      {
-        name: "Marketing Collateral",
-        description:
-          "Designing brochures, business cards, and other materials.",
-      },
-    ],
-    overview:
-      "Vertex Architecture, an award-winning firm with a growing international portfolio, needed a brand identity that would reflect their innovative approach and position them for continued growth. We developed a comprehensive brand strategy and visual identity system that captured their unique perspective on architectural design and created a distinctive presence in a competitive market.",
-    challenge:
-      "Despite their impressive portfolio and reputation for innovative design, Vertex's brand identity failed to communicate their unique approach and vision. Their existing visual identity was inconsistent and outdated, lacking the sophistication expected of a leading architectural practice. As they expanded into new markets and pursued larger projects, they needed a brand that would effectively communicate their capabilities and design philosophy to diverse audiences.",
-    solution:
-      "We created a comprehensive brand identity system rooted in Vertex's design philosophy of 'purposeful innovation.' The visual system featured a dynamic logo that represented the intersection of creativity and precision, supported by a sophisticated color palette, typography, and graphic elements that reflected architectural principles. The identity was implemented across all touchpoints, from digital platforms to project proposals, creating a cohesive and memorable brand experience.",
-    process: [
-      {
-        title: "Brand Discovery",
-        description:
-          "Workshops and interviews with leadership and team members to uncover the firm's values and vision.",
-      },
-      {
-        title: "Competitive Analysis",
-        description:
-          "Research into positioning and visual approaches of leading architectural practices globally.",
-      },
-      {
-        title: "Strategy Development",
-        description:
-          "Creation of brand positioning, narrative, and personality to guide the visual identity.",
-      },
-      {
-        title: "Visual Identity Design",
-        description:
-          "Development of logo, color palette, typography, and graphic system reflecting architectural principles.",
-      },
-      {
-        title: "Application Development",
-        description:
-          "Design of key touchpoints including website, portfolio presentations, and marketing materials.",
-      },
-      {
-        title: "Guidelines & Implementation",
-        description:
-          "Creation of comprehensive brand guidelines and templates for consistent application.",
-      },
-    ],
-    gallery: [
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Logo design",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Brand guidelines",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Website design",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Project portfolio",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Business cards",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Office signage",
-        width: 800,
-        height: 600,
-      },
-    ],
-    results: [
-      {
-        value: "3",
-        title: "Major International Projects",
-        description:
-          "Secured significant new commissions following the rebrand launch.",
-      },
-      {
-        value: "86%",
-        title: "Positive Client Feedback",
-        description:
-          "Overwhelmingly positive response from existing clients and industry peers.",
-      },
-      {
-        value: "52%",
-        title: "Increase in Press Coverage",
-        description:
-          "Greater media interest and coverage of the firm and their projects.",
-      },
-    ],
-    testimonial: {
-      quote:
-        "Our new brand identity perfectly captures the essence of our practice and has elevated our presence in the industry. The strategic thinking behind the visual system has given us a powerful platform to communicate our approach and vision. Since launching, we've seen tangible benefits in terms of client engagement and new business opportunities.",
-      author: "Alexandra Torres",
-      position: "Principal, Vertex Architecture",
-      company: "Vertex Architecture",
-    },
-  },
-  {
-    title: "Quantum Positioning",
-    slug: "quantum-positioning",
-    category: "Consultancy",
-    description:
-      "Market positioning strategy for a financial services provider.",
-    image: "/placeholder.svg?height=400&width=600",
-    heroImage: "/placeholder.svg?height=800&width=1600",
-    year: "2022",
-    client: "Quantum Financial",
-    duration: "3 months",
-    services: [
-      {
-        name: "Market Analysis",
-        description: "Researching market trends and customer insights.",
-      },
-      {
-        name: "Brand Positioning",
-        description: "Defining a unique brand position and messaging.",
-      },
-      {
-        name: "Messaging Strategy",
-        description: "Developing messaging frameworks for target audiences.",
-      },
-      {
-        name: "Internal Alignment",
-        description: "Ensuring internal teams understand and embody the brand.",
-      },
-    ],
-    overview:
-      "Quantum Financial, an established financial services provider, was facing increasing competition and commoditization in their core markets. We developed a distinctive positioning strategy that identified untapped opportunities, differentiated their offerings, and aligned their organization around a compelling vision for the future. This strategic foundation enabled them to revitalize their brand and drive new growth.",
-    challenge:
-      "After years of steady growth, Quantum was experiencing market saturation and pressure from both traditional competitors and fintech disruptors. Their positioning had become generic, making it difficult to differentiate their offerings and command premium pricing. Internally, there was a lack of clarity about strategic direction, resulting in fragmented marketing efforts and inconsistent customer experiences across business units.",
-    solution:
-      "We developed a comprehensive positioning strategy that identified a distinctive space Quantum could own at the intersection of personalized service and technological innovation. This positioning was supported by a messaging framework that articulated their unique value proposition for different audience segments, and an internal alignment program to ensure consistent delivery across the organization. The strategy provided a foundation for revitalizing their brand and developing targeted growth initiatives.",
-    process: [
-      {
-        title: "Market Analysis",
-        description:
-          "In-depth research into market trends, competitive positioning, and emerging customer needs.",
-      },
-      {
-        title: "Customer Insights",
-        description:
-          "Interviews and surveys with current and prospective customers to understand perceptions and priorities.",
-      },
-      {
-        title: "Positioning Development",
-        description:
-          "Creation of distinctive positioning options and testing with key stakeholders and customers.",
-      },
-      {
-        title: "Messaging Framework",
-        description:
-          "Development of core narrative and tailored messaging for different audience segments and touchpoints.",
-      },
-      {
-        title: "Internal Alignment",
-        description:
-          "Workshops and tools to ensure understanding and buy-in across the organization.",
-      },
-      {
-        title: "Implementation Planning",
-        description:
-          "Creation of roadmap for activating the positioning across marketing, product, and customer experience.",
-      },
-    ],
-    gallery: [
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Market analysis",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Positioning framework",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Customer journey map",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Messaging architecture",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Internal workshop",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "/placeholder.svg?height=600&width=800",
-        alt: "Implementation roadmap",
-        width: 800,
-        height: 600,
-      },
-    ],
-    results: [
-      {
-        value: "24%",
-        title: "Growth in High-Value Segments",
-        description:
-          "Increased acquisition and retention in strategically important customer segments.",
-      },
-      {
-        value: "18%",
-        title: "Improvement in Price Realization",
-        description:
-          "Ability to command premium pricing based on clearer value differentiation.",
-      },
-      {
-        value: "92%",
-        title: "Employee Understanding",
-        description:
-          "High level of internal clarity about positioning and individual role in delivering it.",
-      },
-    ],
-    testimonial: {
-      quote:
-        "The positioning work gave us the strategic clarity we needed to revitalize our business in a challenging market. The process was rigorous yet practical, resulting in a positioning that is both distinctive and authentic to who we are. Most importantly, it has united our organization around a compelling vision and provided a clear direction for our growth initiatives.",
-      author: "Robert Chen",
-      position: "CEO, Quantum Financial",
-      company: "Quantum Financial",
-    },
-  },
-];

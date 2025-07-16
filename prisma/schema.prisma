@@ -112,3 +112,39 @@ model Campaign {
 
   @@map("campaigns")
 }
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String
+  content     String?
+  category    String
+  imageUrl    String?  @map("image_url")
+  heroImageUrl String? @map("hero_image_url")
+  year        String?
+  client      String?
+  duration    String?
+  services    String[] // Array of service names
+  overview    String?
+  challenge   String?
+  solution    String?
+  process     Json?    // JSON for process steps
+  gallery     Json?    // JSON for gallery images
+  results     Json?    // JSON for results data
+  testimonial Json?    // JSON for project testimonial
+  technologies String[] @default([])
+  projectUrl  String?  @map("project_url")
+  githubUrl   String?  @map("github_url")
+  published   Boolean  @default(false)
+  featured    Boolean  @default(false)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([slug])
+  @@index([published])
+  @@index([featured])
+  @@index([category])
+  @@map("projects")
+}

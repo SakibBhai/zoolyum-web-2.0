@@ -4,8 +4,7 @@ import {
   updateTeamMember,
   deleteTeamMember,
 } from "@/lib/team-operations";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/stack-auth";
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -29,8 +28,8 @@ export async function GET(request: NextRequest, context: RouteContext) {
 // PUT /api/team/[id] - Update team member
 export async function PUT(request: NextRequest, context: RouteContext) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -65,8 +64,8 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 // DELETE /api/team/[id] - Delete team member
 export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

@@ -3,6 +3,9 @@ import { SettingsPageHeader } from "./settings-page-header";
 import { SettingsContent } from "./settings-content";
 import { SettingsSkeleton } from "./settings-skeleton";
 
+// Force dynamic rendering for admin pages
+export const dynamic = 'force-dynamic';
+
 // Server Component - Main page wrapper
 export default function SettingsPage() {
   return (
@@ -28,7 +31,7 @@ async function getSettings() {
   try {
     // Fetch settings from API route
     const response = await fetch(
-      `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/settings`,
+      `/api/settings`,
       {
         headers: {
           "Content-Type": "application/json",

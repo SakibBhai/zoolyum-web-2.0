@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/stack-auth';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -63,9 +62,9 @@ export async function GET(request: NextRequest) {
 // POST /api/blog-posts - Create a new blog post
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const user = await getCurrentUser();
     
-    if (!session?.user?.email) {
+    if (!user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -105,7 +104,7 @@ export async function POST(request: NextRequest) {
         imageUrl: imageUrl || null,
         published: published || false,
         tags: tags || [],
-        authorId: session.user.email
+        authorId: user.primaryEmail || user.id
       }
     });
     

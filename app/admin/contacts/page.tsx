@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useUser } from "@stackframe/stack";
 import { redirect } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -105,7 +105,7 @@ interface ContactStats {
 }
 
 export default function ContactsAdminPage() {
-  const { data: session, status } = useSession();
+  const user = useUser();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [settings, setSettings] = useState<ContactSettings | null>(null);
   const [stats, setStats] = useState<ContactStats | null>(null);
@@ -119,12 +119,8 @@ export default function ContactsAdminPage() {
   );
 
   // Redirect if not authenticated
-  if (status === "loading") {
-    return <div>Loading...</div>;
-  }
-
-  if (!session) {
-    redirect("/auth/signin");
+  if (!user) {
+    redirect("/handler/sign-in");
   }
 
   useEffect(() => {

@@ -44,9 +44,27 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
 // Fetch a single blog post by slug
 export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
   try {
-    // TODO: Implement actual database fetch
-    // For now, return null to prevent build errors
-    return null;
+    const response = await fetch(`/api/blog-posts/${slug}`);
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null;
+      }
+      throw new Error('Failed to fetch blog post');
+    }
+    const post = await response.json();
+    return {
+      id: post.id,
+      title: post.title,
+      content: post.content,
+      excerpt: post.excerpt,
+      slug: post.slug,
+      published: post.published,
+      createdAt: new Date(post.createdAt),
+      updatedAt: new Date(post.updatedAt),
+      author: post.authorId,
+      tags: post.tags,
+      imageUrl: post.imageUrl
+    };
   } catch (error) {
     console.error('Error fetching blog post:', error);
     throw new Error('Failed to fetch blog post');

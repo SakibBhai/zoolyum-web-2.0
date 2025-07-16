@@ -1,17 +1,62 @@
 "use client"
 
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, Calendar } from "lucide-react"
 import Link from "next/link"
 import { PageTransition } from "@/components/page-transition"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import Image from "next/image"
-import { Calendar } from "lucide-react"
 import { ScrollReveal } from "@/components/scroll-animations/scroll-reveal"
 import { StaggerReveal } from "@/components/scroll-animations/stagger-reveal"
 import { PageHeadline } from "@/components/page-headline"
+import { useState, useEffect } from "react"
+
+interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  imageUrl?: string;
+  published: boolean;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+  authorId?: string;
+}
 
 export default function BlogPage() {
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchBlogPosts = async () => {
+      try {
+        const response = await fetch('/api/blog-posts?published=true');
+        if (!response.ok) {
+          throw new Error('Failed to fetch blog posts');
+        }
+        const posts = await response.json();
+        setBlogPosts(posts);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlogPosts();
+  }, []);
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
   return (
     <PageTransition>
       <div className="min-h-screen bg-[#161616] text-[#E9E7E2]">
@@ -26,40 +71,76 @@ export default function BlogPage() {
               titleGradient={true}
             />
 
-            <StaggerReveal className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {blogPosts.map((post, index) => (
+            {loading ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {[...Array(6)].map((_, index) => (
+                  <div key={index} className="bg-[#1A1A1A] rounded-xl overflow-hidden animate-pulse">
+                    <div className="w-full aspect-[3/2] bg-[#252525]"></div>
+                    <div className="p-6">
+                      <div className="h-4 bg-[#252525] rounded mb-2"></div>
+                      <div className="h-6 bg-[#252525] rounded mb-2"></div>
+                      <div className="h-4 bg-[#252525] rounded mb-4"></div>
+                      <div className="flex gap-2">
+                        <div className="h-6 w-16 bg-[#252525] rounded-full"></div>
+                        <div className="h-6 w-20 bg-[#252525] rounded-full"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : error ? (
+              <div className="text-center py-12">
+                <p className="text-red-400 mb-4">Error loading blog posts: {error}</p>
+                <button 
+                  onClick={() => window.location.reload()} 
+                  className="px-6 py-2 bg-[#FF5001] text-[#161616] rounded-lg hover:bg-[#FF5001]/90 transition-colors"
+                >
+                  Try Again
+                </button>
+              </div>
+            ) : blogPosts.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-[#E9E7E2]/60 text-lg">No blog posts published yet.</p>
+              </div>
+            ) : (
+              <StaggerReveal className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {blogPosts.map((post, index) => (
                 <div key={index} className="group">
                   <Link href={`/blog/${post.slug}`} className="block">
-                    <div className="h-full flex flex-col bg-[#1A1A1A] rounded-xl overflow-hidden transition-all duration-300 hover:bg-[#252525]">
-                      <div className="overflow-hidden">
-                        <Image
-                          src={post.image || "/placeholder.svg"}
-                          alt={post.title}
-                          width={600}
-                          height={400}
-                          className="w-full aspect-[3/2] object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                      </div>
-                      <div className="p-6 flex-grow flex flex-col">
-                        <div className="flex items-center text-[#E9E7E2]/60 text-sm mb-2">
-                          <Calendar className="w-4 h-4 mr-2" />
-                          <span>{post.date}</span>
+                    <div className="bg-[#1A1A1A] rounded-xl overflow-hidden hover:bg-[#252525] transition-colors group">
+                      {post.imageUrl && (
+                        <div className="aspect-[16/9] overflow-hidden">
+                          <Image
+                            src={post.imageUrl}
+                            alt={post.title}
+                            width={600}
+                            height={400}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
                         </div>
-                        <h3 className="text-xl font-bold group-hover:text-[#FF5001] transition-colors">{post.title}</h3>
-                        <p className="text-[#E9E7E2]/70 mt-2 flex-grow">{post.excerpt}</p>
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          {post.tags.map((tag, i) => (
-                            <span key={i} className="px-3 py-1 bg-[#252525] rounded-full text-xs">
-                              {tag}
-                            </span>
-                          ))}
+                      )}
+                      <div className="p-6">
+                        <div className="flex items-center text-sm text-[#E9E7E2]/60 mb-3">
+                          <Calendar className="w-4 h-4 mr-2" />
+                          <span>{formatDate(post.createdAt)}</span>
+                        </div>
+                        <h3 className="text-xl font-semibold mb-3 group-hover:text-[#FF5001] transition-colors">
+                          {post.title}
+                        </h3>
+                        <p className="text-[#E9E7E2]/80 mb-4 line-clamp-3">
+                          {post.excerpt}
+                        </p>
+                        <div className="flex items-center text-[#FF5001] font-medium">
+                          Read More
+                          <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                         </div>
                       </div>
                     </div>
                   </Link>
                 </div>
               ))}
-            </StaggerReveal>
+              </StaggerReveal>
+            )}
 
             <ScrollReveal className="mt-16 flex justify-center" delay={0.4}>
               <Link
@@ -78,54 +159,3 @@ export default function BlogPage() {
     </PageTransition>
   )
 }
-
-const blogPosts = [
-  {
-    title: "The Art of Strategic Brand Positioning",
-    slug: "strategic-brand-positioning",
-    date: "May 15, 2023",
-    excerpt: "How to position your brand effectively in a crowded marketplace and stand out from competitors.",
-    image: "/placeholder.svg?height=400&width=600",
-    tags: ["Brand Strategy", "Positioning", "Marketing"],
-  },
-  {
-    title: "Digital Transformation: Beyond the Buzzword",
-    slug: "digital-transformation-beyond-buzzword",
-    date: "April 22, 2023",
-    excerpt: "What digital transformation really means for businesses and how to implement it successfully.",
-    image: "/placeholder.svg?height=400&width=600",
-    tags: ["Digital Strategy", "Transformation", "Technology"],
-  },
-  {
-    title: "Building Brand Narratives That Resonate",
-    slug: "brand-narratives-that-resonate",
-    date: "March 10, 2023",
-    excerpt: "The power of storytelling in brand development and how to craft narratives that connect with audiences.",
-    image: "/placeholder.svg?height=400&width=600",
-    tags: ["Storytelling", "Brand Development", "Communication"],
-  },
-  {
-    title: "The Psychology of Color in Brand Identity",
-    slug: "psychology-color-brand-identity",
-    date: "February 28, 2023",
-    excerpt: "How color choices impact brand perception and influence consumer behavior.",
-    image: "/placeholder.svg?height=400&width=600",
-    tags: ["Design", "Psychology", "Brand Identity"],
-  },
-  {
-    title: "Measuring Brand Success: Beyond Metrics",
-    slug: "measuring-brand-success",
-    date: "January 15, 2023",
-    excerpt: "Holistic approaches to evaluating brand performance that go beyond traditional KPIs.",
-    image: "/placeholder.svg?height=400&width=600",
-    tags: ["Analytics", "Brand Strategy", "Performance"],
-  },
-  {
-    title: "The Future of Digital Brand Experiences",
-    slug: "future-digital-brand-experiences",
-    date: "December 5, 2022",
-    excerpt: "Emerging technologies and trends shaping how brands connect with audiences online.",
-    image: "/placeholder.svg?height=400&width=600",
-    tags: ["Innovation", "Digital Experience", "Trends"],
-  },
-]

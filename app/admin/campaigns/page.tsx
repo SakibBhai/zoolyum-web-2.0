@@ -1,19 +1,53 @@
 import { revalidatePath } from 'next/cache'
-import { prisma } from '../../../lib/prisma'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 
+// Force dynamic rendering for admin pages
+export const dynamic = 'force-dynamic';
+
+interface Campaign {
+  id: string;
+  title: string;
+  slug: string;
+  status: string;
+  createdAt: string;
+}
+
 async function deleteCampaign(id: string) {
   'use server'
-  await prisma.campaign.delete({ where: { id } })
-  revalidatePath('/admin/campaigns')
+  try {
+    const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/campaigns/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete campaign');
+    }
+    revalidatePath('/admin/campaigns');
+  } catch (error) {
+    console.error('Error deleting campaign:', error);
+  }
+}
+
+async function getCampaigns(): Promise<Campaign[]> {
+  try {
+    const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/campaigns`, {
+      cache: 'no-store'
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch campaigns');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching campaigns:', error);
+    return [];
+  }
 }
 
 export default async function CampaignsPage() {
-  const campaigns = await prisma.campaign.findMany({
-    orderBy: { createdAt: 'desc' },
-  })
+  const campaigns = await getCampaigns();
 
   return (
     <div className="space-y-6">

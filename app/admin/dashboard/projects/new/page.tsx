@@ -57,10 +57,10 @@ export default function NewProjectPage() {
 
     try {
       // Validate required fields
-      if (!title || !slug || !category || !description || !thumbnailUrl) {
+      if (!title || !slug || !category || !description) {
         toast({
           title: "Missing required fields",
-          description: "Please fill in all required fields",
+          description: "Please fill in all required fields: title, slug, category, description",
           variant: "destructive",
         });
         setIsSubmitting(false);
@@ -98,8 +98,8 @@ export default function NewProjectPage() {
         overview,
         challenge,
         solution,
-        thumbnail_url: thumbnailUrl,
-        hero_image_url: heroImageUrl,
+        imageUrl: thumbnailUrl,
+        heroImageUrl: heroImageUrl,
         process: processStepsArray,
         gallery: galleryImages,
         results: resultsArray,
@@ -315,7 +315,7 @@ export default function NewProjectPage() {
           </CardHeader>
           <CardContent className="space-y-6">
             <ImageUploader
-              label="Thumbnail Image *"
+              label="Thumbnail Image"
               initialImageUrl={thumbnailUrl || undefined}
               onImageChangeAction={setThumbnailUrl}
               helpText="This image will be displayed in project cards (recommended: 16:9 ratio)"
