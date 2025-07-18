@@ -1,20 +1,29 @@
-"use client"
-
+import { Suspense } from "react"
+import { motion } from "framer-motion"
 import { ArrowRight } from "lucide-react"
 import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { ProjectsGrid } from "@/components/portfolio/projects-grid"
+import { CategoryFilter } from "@/components/portfolio/category-filter"
+import { FeaturedProject } from "@/components/portfolio/featured-project"
+import { ProjectGridSkeleton, ProjectSkeleton } from "@/components/ui/project-skeleton"
+import { getProjectCategories } from "@/lib/actions/portfolio"
 import { PageTransition } from "@/components/page-transition"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { Card, CardContent } from "@/components/ui/card"
-import Image from "next/image"
-import { motion } from "framer-motion"
 import { ScrollReveal } from "@/components/scroll-animations/scroll-reveal"
-import { StaggerReveal } from "@/components/scroll-animations/stagger-reveal"
 import { PageHeadline } from "@/components/page-headline"
-import { TextReveal } from "@/components/scroll-animations/text-reveal"
-import { ImageReveal } from "@/components/scroll-animations/image-reveal"
 
-export default function PortfolioPage() {
+interface PortfolioPageProps {
+  searchParams: Promise<{
+    category?: string
+  }>
+}
+
+export default async function PortfolioPage({ searchParams }: PortfolioPageProps) {
+  const resolvedSearchParams = await searchParams
+  const currentCategory = resolvedSearchParams.category || "all"
+  const categories = await getProjectCategories()
   return (
     <PageTransition>
       <div className="min-h-screen bg-[#161616] text-[#E9E7E2]">
@@ -31,61 +40,14 @@ export default function PortfolioPage() {
             />
 
             {/* Filter Categories */}
-            <ScrollReveal className="flex flex-wrap justify-center gap-3 mt-8 mb-12" delay={0.2}>
-              <button className="px-4 py-2 bg-[#FF5001] text-[#161616] font-medium rounded-full">All Projects</button>
-              <button className="px-4 py-2 bg-[#1A1A1A] text-[#E9E7E2] font-medium rounded-full hover:bg-[#252525] transition-colors">
-                Brand Strategy
-              </button>
-              <button className="px-4 py-2 bg-[#1A1A1A] text-[#E9E7E2] font-medium rounded-full hover:bg-[#252525] transition-colors">
-                Digital Transformation
-              </button>
-              <button className="px-4 py-2 bg-[#1A1A1A] text-[#E9E7E2] font-medium rounded-full hover:bg-[#252525] transition-colors">
-                Creative Direction
-              </button>
-              <button className="px-4 py-2 bg-[#1A1A1A] text-[#E9E7E2] font-medium rounded-full hover:bg-[#252525] transition-colors">
-                Visual Identity
-              </button>
+            <ScrollReveal className="mt-8 mb-12" delay={0.2}>
+              <CategoryFilter categories={categories} currentCategory={currentCategory} />
             </ScrollReveal>
 
             {/* Projects Grid */}
-            <StaggerReveal className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {projects.map((project, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1, duration: 0.5 }}
-                  className="group"
-                >
-                  <Link href={`/work/${project.slug}`} className="block">
-                    <Card className="h-full bg-[#1A1A1A] border-[#333333] overflow-hidden transform-gpu transition-all duration-300 hover:scale-105">
-                      <div className="overflow-hidden">
-                        <div className="transform-gpu transition-transform duration-700 group-hover:scale-110">
-                          <Image
-                            src={project.image || "/placeholder.svg"}
-                            alt={project.title}
-                            width={600}
-                            height={400}
-                            className="w-full aspect-[3/2] object-cover"
-                          />
-                        </div>
-                      </div>
-                      <CardContent className="p-6">
-                        <span className="text-[#FF5001] text-sm">{project.category}</span>
-                        <h3 className="text-xl font-bold mt-1 group-hover:text-[#FF5001] transition-colors">{project.title}</h3>
-                        <p className="text-[#E9E7E2]/70 mt-2">{project.description}</p>
-                        <div className="mt-4 pt-4 border-t border-[#333333]">
-                          <span className="text-[#FF5001] font-medium inline-flex items-center group/link">
-                            View Project
-                            <ArrowRight className="ml-2 w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
-                          </span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                </motion.div>
-              ))}
-            </StaggerReveal>
+            <Suspense fallback={<ProjectGridSkeleton />}>
+              <ProjectsGrid category={resolvedSearchParams.category} />
+            </Suspense>
           </section>
 
           {/* Featured Project Section */}
@@ -93,91 +55,33 @@ export default function PortfolioPage() {
             <div className="container mx-auto px-4">
               <PageHeadline
                 eyebrow="Featured Project"
-                title="Nexus Rebrand"
-                description="A complete brand transformation for a tech company entering new markets."
+                title="Featured Work"
+                description="Highlighting our most impactful work that showcases our expertise and creativity."
                 size="medium"
               />
 
               <div className="mt-12 md:mt-16">
-                <div className="relative rounded-2xl overflow-hidden">
-                  <ImageReveal
-                    src="/placeholder.svg?height=600&width=1200"
-                    alt="Nexus Rebrand Project"
-                    width={1200}
-                    height={600}
-                    className="w-full"
-                  />
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-12 mt-12">
-                  <ScrollReveal animation="fade-slide" direction="right" mobileAnimation="fade">
-                    <TextReveal
-                      className="text-2xl md:text-3xl font-bold mb-4"
-                      mobileType="words"
-                      mobileStaggerDelay={0.02}
-                    >
-                      The Challenge
-                    </TextReveal>
-                    <p className="text-base md:text-lg text-[#E9E7E2]/80">
-                      Nexus Technologies was a well-established tech company looking to expand into new markets. Their
-                      existing brand identity no longer reflected their innovative solutions and future vision. They
-                      needed a complete brand transformation that would position them as industry leaders while
-                      maintaining recognition among their existing customer base.
-                    </p>
-                  </ScrollReveal>
-
-                  <ScrollReveal animation="fade-slide" direction="left" delay={0.2} mobileAnimation="fade">
-                    <TextReveal
-                      className="text-2xl md:text-3xl font-bold mb-4"
-                      mobileType="words"
-                      mobileStaggerDelay={0.02}
-                    >
-                      Our Approach
-                    </TextReveal>
-                    <p className="text-base md:text-lg text-[#E9E7E2]/80">
-                      We conducted extensive market research and stakeholder interviews to understand Nexus's unique
-                      position in the market. Our strategic approach focused on evolving their brand identity rather
-                      than completely reinventing it, ensuring we maintained valuable brand equity while positioning
-                      them for future growth.
-                    </p>
-                  </ScrollReveal>
-                </div>
-
-                <div className="grid md:grid-cols-3 gap-8 mt-12">
-                  <div className="bg-[#212121] p-6 rounded-xl">
-                    <h3 className="text-xl font-bold mb-3">Brand Strategy</h3>
-                    <p className="text-[#E9E7E2]/80">
-                      We developed a comprehensive brand strategy that positioned Nexus as innovative problem-solvers in
-                      their industry, with a clear value proposition and messaging framework.
-                    </p>
+                <Suspense fallback={
+                  <div className="relative overflow-hidden rounded-lg bg-[#1A1A1A] border border-[#333333]">
+                    <div className="grid lg:grid-cols-2 gap-0">
+                      <div className="animate-pulse bg-[#333333] aspect-[4/3] lg:aspect-auto lg:h-96" />
+                      <div className="p-8 lg:p-12 animate-pulse">
+                        <div className="h-6 bg-[#333333] rounded w-32 mb-4" />
+                        <div className="h-4 bg-[#333333] rounded w-20 mb-2" />
+                        <div className="h-8 bg-[#333333] rounded w-3/4 mb-4" />
+                        <div className="space-y-2 mb-6">
+                          <div className="h-4 bg-[#333333] rounded w-full" />
+                          <div className="h-4 bg-[#333333] rounded w-2/3" />
+                        </div>
+                        <div className="h-4 bg-[#333333] rounded w-32" />
+                      </div>
+                    </div>
                   </div>
-                  <div className="bg-[#212121] p-6 rounded-xl">
-                    <h3 className="text-xl font-bold mb-3">Visual Identity</h3>
-                    <p className="text-[#E9E7E2]/80">
-                      We created a modern visual identity system that reflected Nexus's technological expertise while
-                      feeling approachable and human-centered.
-                    </p>
-                  </div>
-                  <div className="bg-[#212121] p-6 rounded-xl">
-                    <h3 className="text-xl font-bold mb-3">Digital Presence</h3>
-                    <p className="text-[#E9E7E2]/80">
-                      We redesigned their website and digital touchpoints to create a cohesive brand experience that
-                      effectively communicated their new positioning.
-                    </p>
-                  </div>
-                </div>
+                }>
+                  <FeaturedProject />
+                </Suspense>
 
-                <div className="mt-12 text-center">
-                  <Link
-                    href="/portfolio/nexus-rebrand"
-                    className="px-6 py-3 md:px-8 md:py-4 bg-[#FF5001] text-[#161616] font-bold rounded-full hover:bg-[#FF5001]/90 transition-all duration-300 inline-flex items-center group"
-                    data-cursor="button"
-                    data-cursor-text="View Project"
-                  >
-                    View Full Case Study
-                    <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                </div>
+
               </div>
             </div>
           </section>
@@ -231,69 +135,3 @@ export default function PortfolioPage() {
     </PageTransition>
   )
 }
-
-const projects = [
-  {
-    title: "Nexus Rebrand",
-    slug: "nexus-rebrand",
-    category: "Brand Strategy",
-    description: "Complete brand transformation for a tech company entering new markets.",
-    image: "/placeholder.svg?height=400&width=600",
-  },
-  {
-    title: "Elevate Digital Transformation",
-    slug: "elevate-digital",
-    category: "Digital Strategy",
-    description: "Digital ecosystem development for a growing lifestyle brand.",
-    image: "/placeholder.svg?height=400&width=600",
-  },
-  {
-    title: "Horizon Market Entry",
-    slug: "horizon-market",
-    category: "Consultancy",
-    description: "Strategic positioning for a startup entering a competitive market.",
-    image: "/placeholder.svg?height=400&width=600",
-  },
-  {
-    title: "Pulse E-commerce",
-    slug: "pulse-ecommerce",
-    category: "Digital Strategy",
-    description: "E-commerce strategy and implementation for a fashion retailer.",
-    image: "/placeholder.svg?height=400&width=600",
-  },
-  {
-    title: "Vertex Brand Identity",
-    slug: "vertex-identity",
-    category: "Brand Strategy",
-    description: "Complete visual identity system for an architectural firm.",
-    image: "/placeholder.svg?height=400&width=600",
-  },
-  {
-    title: "Quantum Positioning",
-    slug: "quantum-positioning",
-    category: "Consultancy",
-    description: "Market positioning strategy for a financial services provider.",
-    image: "/placeholder.svg?height=400&width=600",
-  },
-  {
-    title: "Fusion Digital Campaign",
-    slug: "fusion-campaign",
-    category: "Digital Strategy",
-    description: "Integrated digital campaign for a consumer tech product launch.",
-    image: "/placeholder.svg?height=400&width=600",
-  },
-  {
-    title: "Meridian Brand Evolution",
-    slug: "meridian-evolution",
-    category: "Brand Strategy",
-    description: "Brand evolution for a healthcare provider expanding services.",
-    image: "/placeholder.svg?height=400&width=600",
-  },
-  {
-    title: "Catalyst Web Platform",
-    slug: "catalyst-platform",
-    category: "Digital Strategy",
-    description: "Web platform development for an educational technology company.",
-    image: "/placeholder.svg?height=400&width=600",
-  },
-]

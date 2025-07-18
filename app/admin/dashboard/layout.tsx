@@ -3,7 +3,7 @@
 import { type ReactNode, useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { LayoutDashboard, FileText, Briefcase, MessageSquare, Settings, LogOut, Menu, X, User } from "lucide-react"
+import { LayoutDashboard, FileText, Briefcase, MessageSquare, Settings, LogOut, Menu, X, User, Mail, Megaphone } from "lucide-react"
 import { useUser } from "@stackframe/stack"
 import { AdminLoading } from "@/components/admin/admin-loading"
 
@@ -39,32 +39,42 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     },
     {
       name: "Blog Posts",
-      href: "/admin/dashboard/blog",
+      href: "/admin/blog-posts",
       icon: FileText
     },
     {
       name: "Projects",
-      href: "/admin/dashboard/projects",
+      href: "/admin/projects",
       icon: Briefcase
     },
     {
       name: "Services",
-      href: "/admin/dashboard/services",
+      href: "/admin/services",
       icon: FileText
     },
     {
-      name: "Team",
-      href: "/admin/dashboard/team",
+      name: "Team Members",
+      href: "/admin/team",
       icon: User
     },
     {
       name: "Testimonials",
-      href: "/admin/dashboard/testimonials",
+      href: "/admin/testimonials",
       icon: MessageSquare
     },
     {
+      name: "Contacts",
+      href: "/admin/contacts",
+      icon: Mail
+    },
+    {
+      name: "Campaigns",
+      href: "/admin/campaigns",
+      icon: Megaphone
+    },
+    {
       name: "Settings",
-      href: "/admin/dashboard/settings",
+      href: "/admin/settings",
       icon: Settings
     }
   ]

@@ -134,9 +134,10 @@ export async function fetchProject(id: string): Promise<Project | null> {
 }
 
 // Fetch a single project by slug
-export async function fetchProjectBySlug(slug: string): Promise<Project | null> {
+export async function fetchProjectBySlug(slug: string, isAdmin: boolean = false): Promise<Project | null> {
   try {
-    const response = await fetch(`/api/projects/slug/${slug}`);
+    const url = `/api/projects/slug/${slug}${isAdmin ? '?admin=true' : ''}`;
+    const response = await fetch(url);
     
     if (response.status === 404) {
       return null;

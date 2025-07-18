@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast'
 import { ArrowLeft, Edit, Trash, Calendar, User, Tag, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { MarkdownRenderer } from '@/components/ui/markdown-renderer'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -112,19 +113,7 @@ export default function BlogPostViewPage() {
     })
   }
 
-  // Simple markdown to HTML converter for display
-  const renderMarkdown = (content: string) => {
-    return content
-      .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mb-3 text-[#E9E7E2]">$1</h1>')
-      .replace(/^## (.*$)/gim, '<h2 class="text-xl font-semibold mb-2 text-[#E9E7E2]">$1</h2>')
-      .replace(/^### (.*$)/gim, '<h3 class="text-lg font-medium mb-2 text-[#E9E7E2]">$1</h3>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
-      .replace(/^- (.*$)/gim, '<li class="ml-4 mb-1">$1</li>')
-      .replace(/^\d+\. (.*$)/gim, '<li class="ml-4 mb-1">$1</li>')
-      .replace(/\n\n/g, '</p><p class="mb-3 text-[#E9E7E2]/80">')
-      .replace(/\n/g, '<br />')
-  }
+
 
   if (loading) {
     return (
@@ -265,12 +254,9 @@ export default function BlogPostViewPage() {
               <CardTitle className="text-[#E9E7E2]">Content</CardTitle>
             </CardHeader>
             <CardContent>
-              <div 
-                className="prose prose-invert max-w-none text-[#E9E7E2]/80"
-                dangerouslySetInnerHTML={{
-                  __html: `<p class="mb-3 text-[#E9E7E2]/80">${renderMarkdown(blogPost.content)}</p>`
-                }}
-              />
+              <div className="prose prose-invert max-w-none">
+                <MarkdownRenderer content={blogPost.content} />
+              </div>
             </CardContent>
           </Card>
         </div>

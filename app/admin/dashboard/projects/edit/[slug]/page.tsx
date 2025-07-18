@@ -4,7 +4,7 @@ import type React from "react";
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { fetchProject, updateProject } from "@/lib/project-operations";
+import { fetchProjectBySlug, updateProject } from "@/lib/project-operations";
 import { PageTransition } from "@/components/page-transition";
 import { ImageUploader } from "@/components/admin/image-uploader";
 import { Save, X, Loader2 } from "lucide-react";
@@ -44,7 +44,7 @@ export default function EditProjectPage() {
     const loadProject = async () => {
       try {
         setIsLoading(true);
-        const project = await fetchProject(slug);
+        const project = await fetchProjectBySlug(slug, true);
 
         // Format JSON fields for display in textarea
         const jsonFields = ["process", "gallery", "results", "testimonial"];
@@ -76,7 +76,7 @@ export default function EditProjectPage() {
           description: formattedProject.description || "",
           image_url: (formattedProject as any).imageUrl || "",
           image_path: (formattedProject as any).image_path || "",
-          hero_image_url: (formattedProject as any).hero_image_url || "",
+          hero_image_url: (formattedProject as any).heroImageUrl || "",
           hero_image_path: (formattedProject as any).hero_image_path || "",
           year: (formattedProject as any).year || "",
           client: (formattedProject as any).client || "",
@@ -129,7 +129,63 @@ export default function EditProjectPage() {
     setError(null);
 
     try {
-      await updateProject(formData);
+      // Parse JSON fields back to objects
+      const jsonFields = ["process", "gallery", "results", "testimonial"];
+      const processedData = { ...formData };
+      
+      jsonFields.forEach((field) => {
+        if (processedData[field as keyof typeof processedData]) {
+          try {
+            (processedData as any)[field] = JSON.parse(
+              processedData[field as keyof typeof processedData] as string
+            );
+          } catch {
+            // If parsing fails, keep as string
+          }
+        }
+      });
+      
+      // Convert services string back to array
+      if (processedData.services !== undefined) {
+        if (typeof processedData.services === 'string') {
+          (processedData as any).services = processedData.services.trim() === '' 
+            ? [] 
+            : processedData.services
+                .split(",")
+                .map((s: string) => s.trim())
+                .filter((s: string) => s.length > 0);
+        } else {
+          // If it's already an array or other type, keep it as is
+          (processedData as any).services = processedData.services || [];
+        }
+      } else {
+        // If services is undefined, set to empty array
+        (processedData as any).services = [];
+      }
+      
+      // Map form data to API format
+      const updateData = {
+        title: processedData.title,
+        slug: processedData.slug,
+        description: processedData.description,
+        category: processedData.category,
+        imageUrl: processedData.image_url,
+        heroImageUrl: processedData.hero_image_url,
+        year: processedData.year,
+        client: processedData.client,
+        duration: processedData.duration,
+        services: (processedData as any).services,
+        overview: processedData.overview,
+        challenge: processedData.challenge,
+        solution: processedData.solution,
+        process: (processedData as any).process,
+        gallery: (processedData as any).gallery,
+        results: (processedData as any).results,
+        testimonial: (processedData as any).testimonial,
+        published: processedData.status === "published"
+      };
+      
+      await updateProject(formData.id, updateData);
       router.push("/admin/dashboard/projects");
     } catch (err: any) {
       setError(err.message || "An error occurred while updating the project");

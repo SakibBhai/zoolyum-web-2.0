@@ -19,9 +19,11 @@ export async function GET(
       );
     }
 
+    // Allow admin access to unpublished projects via query parameter
+    const isAdmin = request.nextUrl.searchParams.get('admin') === 'true';
+    
     // Only return published projects for public access
-    // Remove this check if you want to allow preview of unpublished projects
-    if (!project.published) {
+    if (!project.published && !isAdmin) {
       return NextResponse.json(
         { error: 'Project not found' },
         { status: 404 }

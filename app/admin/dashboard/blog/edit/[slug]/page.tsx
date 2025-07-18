@@ -2,10 +2,11 @@
 
 import type React from "react";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useActionState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@stackframe/stack";
-import { getBlogPostBySlug, updateBlogPost } from "@/lib/blog-operations";
+import { getBlogPostBySlug } from "@/lib/blog-operations";
+import { updateBlogPostAction, redirectToBlogDashboard } from "@/app/actions/blog-actions";
 import { PageTransition } from "@/components/page-transition";
 import { Save, X, Loader2 } from "lucide-react";
 import { ImageUploader } from "@/components/admin/image-uploader";
@@ -30,9 +31,38 @@ export default function EditBlogPostPage({
     status: "draft",
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  
+  // React 19 useActionState for update action
+  const [updateState, updateAction, isUpdating] = useActionState(
+    async (prevState: any, formData: FormData) => {
+      const result = await updateBlogPostAction(formData.get('id') as string, prevState, formData);
+      
+      if (result.success) {
+        toast({
+          title: "Success",
+          description: result.message,
+        });
+        
+        // Refresh and redirect after successful update
+        startTransition(() => {
+          router.refresh();
+          router.push('/admin/dashboard/blog');
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
+      
+      return result;
+    },
+    { success: false, message: '', errors: {} }
+  );
 
   useEffect(() => {
     const loadPost = async () => {
@@ -104,41 +134,37 @@ export default function EditBlogPostPage({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setError(null);
 
-    try {
-      if (!user) {
-        throw new Error("You must be logged in to update a post");
-      }
-
-      const dataToUpdate = {
-        ...formData,
-        id: String(formData.id), // Ensure id is string
-        tags: formData.tags
-          ? formData.tags.split(",").map((tag) => tag.trim())
-          : [],
-      };
-
-      await updateBlogPost(dataToUpdate);
-      toast({
-        title: "Success",
-        description: "Blog post updated successfully",
-      });
-      router.push("/admin/dashboard/blog");
-    } catch (err: any) {
-      setError(err.message || "An error occurred while updating the post");
+    if (!user) {
+      setError("You must be logged in to update a post");
       toast({
         title: "Error",
-        description: err.message || "An error occurred while updating the post",
+        description: "You must be logged in to update a post",
         variant: "destructive",
       });
-      setIsSubmitting(false);
+      return;
     }
+
+    // Create FormData for server action
+    const formDataToSubmit = new FormData();
+    formDataToSubmit.append('id', formData.id);
+    formDataToSubmit.append('title', formData.title);
+    formDataToSubmit.append('slug', formData.slug);
+    formDataToSubmit.append('excerpt', formData.excerpt);
+    formDataToSubmit.append('content', formData.content);
+    formDataToSubmit.append('imageUrl', formData.image_url);
+    formDataToSubmit.append('published', formData.status === 'published' ? 'true' : 'false');
+    formDataToSubmit.append('tags', formData.tags);
+
+    // Call server action
+    updateAction(formDataToSubmit);
   };
 
   const handleCancel = () => {
-    router.push("/admin/dashboard/blog");
+    startTransition(() => {
+      router.push("/admin/dashboard/blog");
+    });
   };
 
   if (isLoading) {
@@ -160,7 +186,7 @@ export default function EditBlogPostPage({
             <button
               onClick={handleCancel}
               className="px-4 py-2 border border-[#333333] rounded-lg text-[#E9E7E2]/70 hover:bg-[#252525] transition-colors flex items-center"
-              disabled={isSubmitting}
+              disabled={isUpdating || isPending}
             >
               <X className="mr-2 h-5 w-5" />
               Cancel
@@ -168,10 +194,14 @@ export default function EditBlogPostPage({
             <button
               onClick={handleSubmit}
               className="px-4 py-2 bg-[#FF5001] text-[#161616] font-medium rounded-lg hover:bg-[#FF5001]/90 transition-colors flex items-center disabled:opacity-50"
-              disabled={isSubmitting}
+              disabled={isUpdating || isPending}
             >
-              <Save className="mr-2 h-5 w-5" />
-              {isSubmitting ? "Saving..." : "Save Changes"}
+              {isUpdating ? (
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              ) : (
+                <Save className="mr-2 h-5 w-5" />
+              )}
+              {isUpdating ? "Saving..." : "Save Changes"}
             </button>
           </div>
         </div>
@@ -181,10 +211,18 @@ export default function EditBlogPostPage({
             {error}
           </div>
         )}
+        
+        {updateState.message && !updateState.success && (
+          <div className="mb-6 p-4 bg-red-900/20 border border-red-900/50 rounded-lg text-red-400">
+            {updateState.message}
+          </div>
+        )}
 
         <form
           onSubmit={handleSubmit}
-          className="bg-[#1A1A1A] rounded-xl border border-[#333333] p-6"
+          className={`bg-[#1A1A1A] rounded-xl border border-[#333333] p-6 ${
+            isUpdating || isPending ? 'opacity-75 pointer-events-none' : ''
+          }`}
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
@@ -197,10 +235,15 @@ export default function EditBlogPostPage({
                 type="text"
                 value={formData.title}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2]"
+                className={`w-full px-4 py-3 bg-[#252525] border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2] ${
+                  updateState.errors?.title ? 'border-red-500' : 'border-[#333333]'
+                }`}
                 placeholder="Post title"
                 required
               />
+              {updateState.errors?.title && (
+                <p className="mt-1 text-sm text-red-400">{updateState.errors.title[0]}</p>
+              )}
             </div>
             <div>
               <label htmlFor="slug" className="block text-sm font-medium mb-2">
@@ -212,10 +255,15 @@ export default function EditBlogPostPage({
                 type="text"
                 value={formData.slug}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2]"
+                className={`w-full px-4 py-3 bg-[#252525] border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2] ${
+                  updateState.errors?.slug ? 'border-red-500' : 'border-[#333333]'
+                }`}
                 placeholder="post-slug"
                 required
               />
+              {updateState.errors?.slug && (
+                <p className="mt-1 text-sm text-red-400">{updateState.errors.slug[0]}</p>
+              )}
             </div>
           </div>
 
@@ -229,10 +277,15 @@ export default function EditBlogPostPage({
               value={formData.excerpt}
               onChange={handleChange}
               rows={2}
-              className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2]"
+              className={`w-full px-4 py-3 bg-[#252525] border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2] ${
+                updateState.errors?.excerpt ? 'border-red-500' : 'border-[#333333]'
+              }`}
               placeholder="Brief description of the post"
               required
             />
+            {updateState.errors?.excerpt && (
+              <p className="mt-1 text-sm text-red-400">{updateState.errors.excerpt[0]}</p>
+            )}
           </div>
 
           <div className="mb-6">
@@ -242,6 +295,9 @@ export default function EditBlogPostPage({
               onImageChangeAction={handleImageChange}
               helpText="Upload a featured image for your blog post (16:9 ratio recommended)"
             />
+            {updateState.errors?.imageUrl && (
+              <p className="mt-1 text-sm text-red-400">{updateState.errors.imageUrl[0]}</p>
+            )}
           </div>
 
           <div className="mb-6">
@@ -254,6 +310,9 @@ export default function EditBlogPostPage({
               placeholder="Write your post content here..."
               minHeight="400px"
             />
+            {updateState.errors?.content && (
+              <p className="mt-1 text-sm text-red-400">{updateState.errors.content[0]}</p>
+            )}
           </div>
 
           <div className="mb-6">

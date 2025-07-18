@@ -120,6 +120,7 @@ export default function ProjectDetailPage() {
                 <Image
                   src={
                     project.heroImageUrl ||
+                    project.imageUrl ||
                     "/placeholder.svg?height=800&width=1600"
                   }
                   alt={project.title}

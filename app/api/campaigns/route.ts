@@ -34,16 +34,16 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { title, slug, shortDescription, description, status, startDate, endDate } = body;
+    const { title, slug, shortDescription, content, status, startDate, endDate } = body;
 
     const campaign = await prisma.campaign.create({
       data: {
         title,
         slug,
         shortDescription,
-        description,
+        content,
         status: status || 'DRAFT',
-        startDate: new Date(startDate),
+        startDate: startDate ? new Date(startDate) : null,
         endDate: endDate ? new Date(endDate) : null,
       },
     });

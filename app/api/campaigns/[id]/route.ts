@@ -9,12 +9,11 @@ export async function GET(
     const { id } = await params;
 
     // Try to find by ID first, then by slug
-    let campaign;
-    if (!isNaN(Number(id))) {
-      campaign = await prisma.campaign.findUnique({
-        where: { id },
-      });
-    } else {
+    let campaign = await prisma.campaign.findUnique({
+      where: { id },
+    });
+    
+    if (!campaign) {
       campaign = await prisma.campaign.findUnique({
         where: { slug: id },
       });
@@ -44,7 +43,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { title, slug, shortDescription, description, status, startDate, endDate } = body;
+    const { title, slug, shortDescription, content, status, startDate, endDate } = body;
 
     const campaign = await prisma.campaign.update({
       where: { id },
@@ -52,7 +51,7 @@ export async function PUT(
         title,
         slug,
         shortDescription,
-        description,
+        content,
         status,
         startDate: startDate ? new Date(startDate) : undefined,
         endDate: endDate ? new Date(endDate) : null,

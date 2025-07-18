@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createTeamMember, getTeamMembers } from "@/lib/team-operations";
-import { getCurrentUser } from "@/lib/stack-auth";
+import { createTeamMember, getAllTeamMembers } from "@/lib/team-operations";
+import { stackServerApp } from "@/stack";
 
 interface ApiError {
   message: string;
@@ -65,7 +65,7 @@ export async function GET() {
 // POST /api/team - Create new team member
 export async function POST(request: NextRequest) {
   try {
-    const user = await getCurrentUser();
+    const user = await stackServerApp.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

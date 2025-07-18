@@ -10,7 +10,8 @@ import {
   MessageSquare,
   Settings,
   LogOut,
-  Megaphone
+  Megaphone,
+  Mail
 } from "lucide-react"
 import { useUser } from "@stackframe/stack"
 
@@ -47,6 +48,11 @@ export function AdminSidebar() {
       name: "Testimonials",
       href: "/admin/testimonials",
       icon: <MessageSquare className="h-5 w-5" />
+    },
+    {
+      name: "Contacts",
+      href: "/admin/contacts",
+      icon: <Mail className="h-5 w-5" />
     },
     {
       name: "Campaigns",

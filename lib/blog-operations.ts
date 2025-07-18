@@ -32,9 +32,24 @@ export interface UpdateBlogPostData extends Partial<CreateBlogPostData> {
 // Fetch all blog posts
 export async function getBlogPosts(): Promise<BlogPost[]> {
   try {
-    // TODO: Implement actual database fetch
-    // For now, return empty array to prevent build errors
-    return [];
+    const response = await fetch('/api/blog-posts');
+    if (!response.ok) {
+      throw new Error('Failed to fetch blog posts');
+    }
+    const posts = await response.json();
+    return posts.map((post: any) => ({
+      id: post.id,
+      title: post.title,
+      content: post.content,
+      excerpt: post.excerpt,
+      slug: post.slug,
+      published: post.published,
+      createdAt: new Date(post.createdAt),
+      updatedAt: new Date(post.updatedAt),
+      author: post.authorId,
+      tags: post.tags,
+      imageUrl: post.imageUrl
+    }));
   } catch (error) {
     console.error('Error fetching blog posts:', error);
     throw new Error('Failed to fetch blog posts');
@@ -104,21 +119,41 @@ export async function createBlogPost(data: CreateBlogPostData): Promise<BlogPost
 // Update an existing blog post
 export async function updateBlogPost(data: UpdateBlogPostData): Promise<BlogPost> {
   try {
-    // TODO: Implement actual database update
-    // For now, return a mock object to prevent build errors
-    const mockPost: BlogPost = {
-      id: data.id,
-      title: data.title || '',
-      content: data.content || '',
-      excerpt: data.excerpt,
-      slug: data.slug || '',
-      published: data.published || false,
-      author: data.author,
-      tags: data.tags,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+    const response = await fetch(`/api/blog-posts/${data.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        title: data.title,
+        slug: data.slug,
+        excerpt: data.excerpt,
+        content: data.content,
+        imageUrl: data.imageUrl,
+        published: data.published,
+        tags: data.tags
+      }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to update blog post');
+    }
+    
+    const post = await response.json();
+    return {
+      id: post.id,
+      title: post.title,
+      content: post.content,
+      excerpt: post.excerpt,
+      slug: post.slug,
+      published: post.published,
+      createdAt: new Date(post.createdAt),
+      updatedAt: new Date(post.updatedAt),
+      author: post.authorId,
+      tags: post.tags,
+      imageUrl: post.imageUrl
     };
-    return mockPost;
   } catch (error) {
     console.error('Error updating blog post:', error);
     throw new Error('Failed to update blog post');
@@ -128,9 +163,12 @@ export async function updateBlogPost(data: UpdateBlogPostData): Promise<BlogPost
 // Delete a blog post
 export async function deleteBlogPost(id: string): Promise<void> {
   try {
-    // TODO: Implement actual database deletion
-    // For now, just log to prevent build errors
-    console.log('Deleting blog post:', id);
+    const response = await fetch(`/api/blog-posts/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete blog post');
+    }
   } catch (error) {
     console.error('Error deleting blog post:', error);
     throw new Error('Failed to delete blog post');

@@ -112,7 +112,16 @@ export default function ProjectsManagementPage() {
                     Category
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-[#E9E7E2]/50 uppercase tracking-wider">
+                    Client
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[#E9E7E2]/50 uppercase tracking-wider">
+                    Year
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[#E9E7E2]/50 uppercase tracking-wider">
                     Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[#E9E7E2]/50 uppercase tracking-wider">
+                    Order
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-[#E9E7E2]/50 uppercase tracking-wider">
                     Date
@@ -135,7 +144,16 @@ export default function ProjectsManagementPage() {
                           <div className="h-5 bg-[#252525] rounded w-1/2 animate-pulse"></div>
                         </td>
                         <td className="px-6 py-4">
+                          <div className="h-5 bg-[#252525] rounded w-1/3 animate-pulse"></div>
+                        </td>
+                        <td className="px-6 py-4">
                           <div className="h-5 bg-[#252525] rounded w-16 animate-pulse"></div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="h-5 bg-[#252525] rounded w-20 animate-pulse"></div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="h-5 bg-[#252525] rounded w-12 animate-pulse"></div>
                         </td>
                         <td className="px-6 py-4">
                           <div className="h-5 bg-[#252525] rounded w-24 animate-pulse"></div>
@@ -159,19 +177,41 @@ export default function ProjectsManagementPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 py-1 text-xs rounded-full ${
-                            project.status === "published"
-                              ? "bg-green-500/20 text-green-400"
-                              : "bg-yellow-500/20 text-yellow-400"
-                          }`}
-                        >
-                          {project.status}
-                        </span>
+                        <div className="text-sm text-[#E9E7E2]/70">
+                          {project.client || "—"}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-[#E9E7E2]/70">
-                          {formatDate(project.created_at)}
+                          {project.year || "—"}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center space-x-2">
+                          <span
+                            className={`px-2 py-1 text-xs rounded-full ${
+                              project.published
+                                ? "bg-green-500/20 text-green-400"
+                                : "bg-yellow-500/20 text-yellow-400"
+                            }`}
+                          >
+                            {project.published ? "Published" : "Draft"}
+                          </span>
+                          {project.featured && (
+                            <span className="px-2 py-1 text-xs rounded-full bg-blue-500/20 text-blue-400">
+                              Featured
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-[#E9E7E2]/70">
+                          {project.order || 0}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-[#E9E7E2]/70">
+                          {formatDate(project.createdAt)}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -212,7 +252,7 @@ export default function ProjectsManagementPage() {
                 ) : (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={8}
                       className="px-6 py-4 text-center text-[#E9E7E2]/50"
                     >
                       No projects found

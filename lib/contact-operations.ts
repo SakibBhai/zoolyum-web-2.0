@@ -66,11 +66,16 @@ export function validateContactData(data: any) {
 export async function createContact(
   data: Omit<Contact, "id" | "createdAt" | "updatedAt">
 ): Promise<Contact> {
+  // Generate a CUID for the ID to match Prisma's default
+  const { createId } = await import('@paralleldrive/cuid2');
+  const id = createId();
+  
   const result = await query(
-    `INSERT INTO contacts (name, email, phone, subject, message, status, ip_address, user_agent, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
+    `INSERT INTO contacts (id, name, email, phone, subject, message, status, ip_address, user_agent, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())
      RETURNING *`,
     [
+      id,
       data.name,
       data.email,
       data.phone,

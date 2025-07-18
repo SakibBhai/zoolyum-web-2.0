@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/stack-auth';
-import { pool } from '@/lib/postgres';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 // GET /api/blog-posts/[id] - Get a specific blog post
 export async function GET(
@@ -11,51 +13,51 @@ export async function GET(
     const { id } = await params;
     
     // Try to get by ID first, then by slug
-    let result;
-    if (isNaN(Number(id))) {
-      // If id is not a number, treat it as a slug
-      result = await pool.query(
-        'SELECT * FROM blog_posts WHERE slug = $1',
-        [id]
-      );
-    } else {
-      // If id is a number, treat it as an ID
-      result = await pool.query(
-        'SELECT * FROM blog_posts WHERE id = $1',
-        [parseInt(id)]
-      );
+    let blogPost;
+    
+    // First try to find by ID (string)
+    blogPost = await prisma.blogPost.findUnique({
+      where: { id }
+    });
+    
+    // If not found by ID, try to find by slug
+    if (!blogPost) {
+      blogPost = await prisma.blogPost.findUnique({
+        where: { slug: id }
+      });
     }
     
-    if (result.rows.length === 0) {
+    if (!blogPost) {
       return NextResponse.json(
         { error: 'Blog post not found' },
         { status: 404 }
       );
     }
     
-    const post = result.rows[0];
-    
-    const blogPost = {
-      id: post.id,
-      title: post.title,
-      slug: post.slug,
-      excerpt: post.excerpt,
-      content: post.content,
-      imageUrl: post.image_url,
-      published: post.published,
-      tags: JSON.parse(post.tags || '[]'),
-      createdAt: post.created_at,
-      updatedAt: post.updated_at,
-      authorId: post.author_id
+    // Format the response to match the expected structure
+    const formattedPost = {
+      id: blogPost.id,
+      title: blogPost.title,
+      slug: blogPost.slug,
+      excerpt: blogPost.excerpt,
+      content: blogPost.content,
+      imageUrl: blogPost.imageUrl,
+      published: blogPost.published,
+      tags: blogPost.tags,
+      createdAt: blogPost.createdAt.toISOString(),
+      updatedAt: blogPost.updatedAt.toISOString(),
+      authorId: blogPost.authorId
     };
     
-    return NextResponse.json(blogPost);
+    return NextResponse.json(formattedPost);
   } catch (error) {
     console.error('Error fetching blog post:', error);
     return NextResponse.json(
       { error: 'Failed to fetch blog post' },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
@@ -79,12 +81,11 @@ export async function PUT(
     const { title, slug, excerpt, content, imageUrl, published, tags } = body;
     
     // Check if the blog post exists
-    const existingPost = await pool.query(
-      'SELECT * FROM blog_posts WHERE id = $1',
-      [parseInt(id)]
-    );
+    const existingPost = await prisma.blogPost.findUnique({
+      where: { id }
+    });
     
-    if (existingPost.rows.length === 0) {
+    if (!existingPost) {
       return NextResponse.json(
         { error: 'Blog post not found' },
         { status: 404 }
@@ -92,13 +93,12 @@ export async function PUT(
     }
     
     // If slug is being updated, check if it's unique
-    if (slug && slug !== existingPost.rows[0].slug) {
-      const slugCheck = await pool.query(
-        'SELECT id FROM blog_posts WHERE slug = $1 AND id != $2',
-        [slug, parseInt(id)]
-      );
+    if (slug && slug !== existingPost.slug) {
+      const slugCheck = await prisma.blogPost.findUnique({
+        where: { slug }
+      });
       
-      if (slugCheck.rows.length > 0) {
+      if (slugCheck && slugCheck.id !== id) {
         return NextResponse.json(
           { error: 'A blog post with this slug already exists' },
           { status: 409 }
@@ -106,53 +106,46 @@ export async function PUT(
       }
     }
     
+    // Prepare update data - only include fields that are provided
+    const updateData: any = {};
+    if (title !== undefined) updateData.title = title;
+    if (slug !== undefined) updateData.slug = slug;
+    if (excerpt !== undefined) updateData.excerpt = excerpt;
+    if (content !== undefined) updateData.content = content;
+    if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
+    if (published !== undefined) updateData.published = published;
+    if (tags !== undefined) updateData.tags = tags;
+    
     // Update the blog post
-    const result = await pool.query(
-      `UPDATE blog_posts 
-       SET title = COALESCE($1, title),
-           slug = COALESCE($2, slug),
-           excerpt = COALESCE($3, excerpt),
-           content = COALESCE($4, content),
-           image_url = COALESCE($5, image_url),
-           published = COALESCE($6, published),
-           tags = COALESCE($7, tags)
-       WHERE id = $8
-       RETURNING *`,
-      [
-        title,
-        slug,
-        excerpt,
-        content,
-        imageUrl,
-        published,
-        JSON.stringify(tags),
-        parseInt(id)
-      ]
-    );
+    const updatedPost = await prisma.blogPost.update({
+      where: { id },
+      data: updateData
+    });
     
-    const updatedPost = result.rows[0];
-    
-    const blogPost = {
+    // Format the response to match the expected structure
+    const formattedPost = {
       id: updatedPost.id,
       title: updatedPost.title,
       slug: updatedPost.slug,
       excerpt: updatedPost.excerpt,
       content: updatedPost.content,
-      imageUrl: updatedPost.image_url,
+      imageUrl: updatedPost.imageUrl,
       published: updatedPost.published,
-      tags: JSON.parse(updatedPost.tags || '[]'),
-      createdAt: updatedPost.created_at,
-      updatedAt: updatedPost.updated_at,
-      authorId: updatedPost.author_id
+      tags: updatedPost.tags,
+      createdAt: updatedPost.createdAt.toISOString(),
+      updatedAt: updatedPost.updatedAt.toISOString(),
+      authorId: updatedPost.authorId
     };
     
-    return NextResponse.json(blogPost);
+    return NextResponse.json(formattedPost);
   } catch (error) {
     console.error('Error updating blog post:', error);
     return NextResponse.json(
       { error: 'Failed to update blog post' },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
@@ -174,12 +167,11 @@ export async function DELETE(
     const { id } = await params;
     
     // Check if the blog post exists
-    const existingPost = await pool.query(
-      'SELECT * FROM blog_posts WHERE id = $1',
-      [parseInt(id)]
-    );
+    const existingPost = await prisma.blogPost.findUnique({
+      where: { id }
+    });
     
-    if (existingPost.rows.length === 0) {
+    if (!existingPost) {
       return NextResponse.json(
         { error: 'Blog post not found' },
         { status: 404 }
@@ -187,10 +179,9 @@ export async function DELETE(
     }
     
     // Delete the blog post
-    await pool.query(
-      'DELETE FROM blog_posts WHERE id = $1',
-      [parseInt(id)]
-    );
+    await prisma.blogPost.delete({
+      where: { id }
+    });
     
     return NextResponse.json(
       { message: 'Blog post deleted successfully' },
@@ -202,5 +193,7 @@ export async function DELETE(
       { error: 'Failed to delete blog post' },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }

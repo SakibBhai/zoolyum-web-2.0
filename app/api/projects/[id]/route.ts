@@ -90,6 +90,33 @@ export async function PUT(
       }
     }
 
+    // Process services field to ensure it's an array
+    let processedServices = services;
+    if (services !== undefined) {
+      if (typeof services === 'string') {
+        // Convert string to array, handling empty strings
+        processedServices = services.trim() === '' ? [] : services.split(',').map(s => s.trim()).filter(s => s.length > 0);
+      } else if (Array.isArray(services)) {
+        // If it's already an array, filter out empty strings
+        processedServices = services.filter(s => s && s.trim().length > 0);
+      } else {
+        // If it's neither string nor array, default to empty array
+        processedServices = [];
+      }
+    }
+
+    // Process technologies field similarly
+    let processedTechnologies = technologies;
+    if (technologies !== undefined) {
+      if (typeof technologies === 'string') {
+        processedTechnologies = technologies.trim() === '' ? [] : technologies.split(',').map(s => s.trim()).filter(s => s.length > 0);
+      } else if (Array.isArray(technologies)) {
+        processedTechnologies = technologies.filter(s => s && s.trim().length > 0);
+      } else {
+        processedTechnologies = [];
+      }
+    }
+
     const updatedProject = await prisma.project.update({
       where: { id },
       data: {
@@ -103,7 +130,7 @@ export async function PUT(
         ...(year !== undefined && { year }),
         ...(client !== undefined && { client }),
         ...(duration !== undefined && { duration }),
-        ...(services !== undefined && { services }),
+        ...(processedServices !== undefined && { services: processedServices }),
         ...(overview !== undefined && { overview }),
         ...(challenge !== undefined && { challenge }),
         ...(solution !== undefined && { solution }),
@@ -111,7 +138,7 @@ export async function PUT(
         ...(gallery !== undefined && { gallery }),
         ...(results !== undefined && { results }),
         ...(testimonial !== undefined && { testimonial }),
-        ...(technologies !== undefined && { technologies }),
+        ...(processedTechnologies !== undefined && { technologies: processedTechnologies }),
         ...(projectUrl !== undefined && { projectUrl }),
         ...(githubUrl !== undefined && { githubUrl }),
         ...(published !== undefined && { published }),

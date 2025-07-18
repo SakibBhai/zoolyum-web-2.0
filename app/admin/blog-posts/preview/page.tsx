@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
 import Image from 'next/image'
+import { MarkdownRenderer } from '@/components/ui/markdown-renderer'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,19 +36,7 @@ export default function BlogPostPreviewPage() {
     }
   }, [])
 
-  // Simple markdown to HTML converter for preview
-  const renderMarkdown = (content: string) => {
-    return content
-      .replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold mb-4 text-[#E9E7E2]">$1</h1>')
-      .replace(/^## (.*$)/gim, '<h2 class="text-2xl font-semibold mb-3 text-[#E9E7E2]">$1</h2>')
-      .replace(/^### (.*$)/gim, '<h3 class="text-xl font-medium mb-2 text-[#E9E7E2]">$1</h3>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
-      .replace(/^- (.*$)/gim, '<li class="ml-4">$1</li>')
-      .replace(/^\d+\. (.*$)/gim, '<li class="ml-4">$1</li>')
-      .replace(/\n\n/g, '</p><p class="mb-4 text-[#E9E7E2]/80 leading-relaxed">')
-      .replace(/\n/g, '<br />')
-  }
+
 
   if (!previewData) {
     return (
@@ -159,12 +148,7 @@ export default function BlogPostPreviewPage() {
 
           {/* Content */}
           <div className="prose prose-invert prose-lg max-w-none">
-            <div 
-              className="space-y-4 text-[#E9E7E2]/80 leading-relaxed"
-              dangerouslySetInnerHTML={{
-                __html: `<p class="mb-4 text-[#E9E7E2]/80 leading-relaxed">${renderMarkdown(previewData.content)}</p>`
-              }}
-            />
+            <MarkdownRenderer content={previewData.content} />
           </div>
         </article>
 

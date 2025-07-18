@@ -3,7 +3,7 @@ import { stackServerApp } from './stack'
 
 export async function middleware(request: NextRequest) {
   // Get the user from Stack Auth
-  const user = await stackServerApp.getUser({ request })
+  const user = await stackServerApp.getUser()
   
   // Check if the request is for admin routes
   if (request.nextUrl.pathname.startsWith('/admin')) {

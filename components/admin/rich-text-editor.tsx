@@ -21,6 +21,10 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Bold,
   Italic,
+  Strikethrough,
+  Code,
+  Quote,
+  Minus,
   List,
   ListOrdered,
   ImageIcon,
@@ -166,6 +170,25 @@ export function RichTextEditor({
               .map((line, i) => `${i + 1}. ${line}`)
               .join("\n")
           : "1. List item\n2. Another item";
+        break;
+      case "strikethrough":
+        formattedText = `~~${selectedText || "strikethrough text"}~~`;
+        break;
+      case "code":
+        formattedText = selectedText.includes("\n")
+          ? `\n\`\`\`\n${selectedText || "code block"}\n\`\`\`\n`
+          : `\`${selectedText || "inline code"}\``;
+        break;
+      case "blockquote":
+        formattedText = selectedText
+          ? selectedText
+              .split("\n")
+              .map((line) => `> ${line}`)
+              .join("\n")
+          : "> Blockquote text";
+        break;
+      case "hr":
+        formattedText = "\n---\n";
         break;
       default:
         formattedText = selectedText;
@@ -347,6 +370,42 @@ export function RichTextEditor({
         >
           <ListOrdered className="h-4 w-4" />
           <span className="sr-only">Numbered List</span>
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => formatText("strikethrough")}
+        >
+          <Strikethrough className="h-4 w-4" />
+          <span className="sr-only">Strikethrough</span>
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => formatText("code")}
+        >
+          <Code className="h-4 w-4" />
+          <span className="sr-only">Code</span>
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => formatText("blockquote")}
+        >
+          <Quote className="h-4 w-4" />
+          <span className="sr-only">Blockquote</span>
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => formatText("hr")}
+        >
+          <Minus className="h-4 w-4" />
+          <span className="sr-only">Horizontal Rule</span>
         </Button>
 
         <Dialog open={imageDialogOpen} onOpenChange={setImageDialogOpen}>

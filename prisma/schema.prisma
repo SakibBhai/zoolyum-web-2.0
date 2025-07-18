@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -47,12 +44,40 @@ model Contact {
   email     String
   phone     String?
   company   String?
+  subject   String?
   message   String
   status    String   @default("NEW")
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@index([createdAt(sort: Desc)], map: "idx_contacts_created_at")
+  @@index([email], map: "idx_contacts_email")
+  @@index([status], map: "idx_contacts_status")
   @@map("contacts")
+}
+
+model ContactSettings {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email              String    @db.VarChar(255)
+  phone              String    @db.VarChar(50)
+  address            String
+  workingHours       String    @map("working_hours") @db.VarChar(255)
+  twitterUrl         String?   @map("twitter_url") @db.VarChar(255)
+  linkedinUrl        String?   @map("linkedin_url") @db.VarChar(255)
+  instagramUrl       String?   @map("instagram_url") @db.VarChar(255)
+  behanceUrl         String?   @map("behance_url") @db.VarChar(255)
+  enablePhoneField   Boolean   @default(true) @map("enable_phone_field")
+  requirePhoneField  Boolean   @default(false) @map("require_phone_field")
+  autoReplyEnabled   Boolean   @default(false) @map("auto_reply_enabled")
+  autoReplyMessage   String?   @map("auto_reply_message")
+  notificationEmail  String?   @map("notification_email") @db.VarChar(255)
+  emailNotifications Boolean   @default(true) @map("email_notifications")
+  createdAt          DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("contact_settings")
 }
 
 model Testimonial {
@@ -75,8 +100,8 @@ model TeamMember {
   id          String   @id @default(cuid())
   name        String
   position    String?
-  designation String?  // New field for official designation
-  websiteTag  String?  @map("website_tag") // New field for website tag
+  designation String?
+  websiteTag  String?  @map("website_tag")
   bio         String?
   imageUrl    String?  @map("image_url")
   email       String?
@@ -92,55 +117,55 @@ model TeamMember {
 }
 
 model Campaign {
-  id                String    @id @default(cuid())
-  title             String
-  slug              String    @unique
-  shortDescription  String?
-  content           String?
-  startDate         DateTime? @map("start_date")
-  endDate           DateTime? @map("end_date")
-  status            String    @default("DRAFT")
-  imageUrls         String[]  @map("image_urls")
-  videoUrls         String[]  @map("video_urls")
-  enableForm        Boolean   @default(false) @map("enable_form")
-  successMessage    String?   @map("success_message")
-  redirectUrl       String?   @map("redirect_url")
-  ctas              Json?     @map("ctas")
-  formFields        Json?     @map("form_fields")
-  createdAt         DateTime  @default(now()) @map("created_at")
-  updatedAt         DateTime  @updatedAt @map("updated_at")
+  id               String    @id @default(cuid())
+  title            String
+  slug             String    @unique
+  shortDescription String?
+  content          String?
+  startDate        DateTime? @map("start_date")
+  endDate          DateTime? @map("end_date")
+  status           String    @default("DRAFT")
+  imageUrls        String[]  @map("image_urls")
+  videoUrls        String[]  @map("video_urls")
+  enableForm       Boolean   @default(false) @map("enable_form")
+  successMessage   String?   @map("success_message")
+  redirectUrl      String?   @map("redirect_url")
+  ctas             Json?     @map("ctas")
+  formFields       Json?     @map("form_fields")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
 
   @@map("campaigns")
 }
 
 model Project {
-  id          String   @id @default(cuid())
-  title       String
-  slug        String   @unique
-  description String
-  content     String?
-  category    String
-  imageUrl    String?  @map("image_url")
-  heroImageUrl String? @map("hero_image_url")
-  year        String?
-  client      String?
-  duration    String?
-  services    String[] // Array of service names
-  overview    String?
-  challenge   String?
-  solution    String?
-  process     Json?    // JSON for process steps
-  gallery     Json?    // JSON for gallery images
-  results     Json?    // JSON for results data
-  testimonial Json?    // JSON for project testimonial
+  id           String   @id @default(cuid())
+  title        String
+  slug         String   @unique
+  description  String
+  content      String?
+  category     String
+  imageUrl     String?  @map("image_url")
+  heroImageUrl String?  @map("hero_image_url")
+  year         String?
+  client       String?
+  duration     String?
+  services     String[]
+  overview     String?
+  challenge    String?
+  solution     String?
+  process      Json?
+  gallery      Json?
+  results      Json?
+  testimonial  Json?
   technologies String[] @default([])
-  projectUrl  String?  @map("project_url")
-  githubUrl   String?  @map("github_url")
-  published   Boolean  @default(false)
-  featured    Boolean  @default(false)
-  order       Int      @default(0)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  projectUrl   String?  @map("project_url")
+  githubUrl    String?  @map("github_url")
+  published    Boolean  @default(false)
+  featured     Boolean  @default(false)
+  order        Int      @default(0)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
   @@index([slug])
   @@index([published])
