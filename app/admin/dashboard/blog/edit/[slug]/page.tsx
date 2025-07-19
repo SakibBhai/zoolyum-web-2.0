@@ -4,7 +4,7 @@ import type React from "react";
 
 import { useState, useEffect, useActionState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useUser } from "@stackframe/stack";
+import { useConditionalUser } from "@/hooks/use-conditional-user";
 import { getBlogPostBySlug } from "@/lib/blog-operations";
 import { updateBlogPostAction, redirectToBlogDashboard } from "@/app/actions/blog-actions";
 import { PageTransition } from "@/components/page-transition";
@@ -18,7 +18,7 @@ export default function EditBlogPostPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const user = useUser();
+  const user = useConditionalUser();
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     id: "", // Change id to string

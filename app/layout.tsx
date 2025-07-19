@@ -6,6 +6,7 @@ import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Providers } from "./providers"
 import { Toaster } from "@/components/ui/toaster"
+import ConditionalStackProvider from "@/components/conditional-stack-provider"
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -37,14 +38,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}><StackProvider app={stackServerApp}><StackTheme>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-          <Providers>
-            {children}
-          </Providers>
-          <Toaster />
-        </ThemeProvider>
-      </StackTheme></StackProvider></body>
+      <body className={inter.className}>
+        <ConditionalStackProvider>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+            <Providers>
+              {children}
+            </Providers>
+            <Toaster />
+          </ThemeProvider>
+        </ConditionalStackProvider>
+      </body>
     </html>
   )
 }

@@ -7,6 +7,21 @@ import { NextRequest } from "next/server";
  * @returns Promise<{ isAuthenticated: boolean; user?: any }>
  */
 export async function verifyStackAuth(request?: NextRequest) {
+  // Development bypass
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  
+  if (isDevelopment) {
+    console.log('Development mode: Bypassing Stack Auth verification');
+    return {
+      isAuthenticated: true,
+      user: {
+        id: 'dev-user',
+        email: 'admin@zoolyum.com',
+        displayName: 'Development Admin'
+      }
+    };
+  }
+  
   try {
     const user = await stackServerApp.getUser();
     
@@ -28,6 +43,17 @@ export async function verifyStackAuth(request?: NextRequest) {
  * @returns Promise<User | null>
  */
 export async function getCurrentUser() {
+  // Development bypass
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  
+  if (isDevelopment) {
+    return {
+      id: 'dev-user',
+      email: 'admin@zoolyum.com',
+      displayName: 'Development Admin'
+    };
+  }
+  
   try {
     const user = await stackServerApp.getUser();
     return user;
@@ -44,6 +70,13 @@ export async function getCurrentUser() {
  * @returns Promise<boolean>
  */
 export async function isAdmin() {
+  // Development bypass
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  
+  if (isDevelopment) {
+    return true; // Always admin in development
+  }
+  
   try {
     const user = await stackServerApp.getUser();
     return !!user; // For now, any authenticated user is admin

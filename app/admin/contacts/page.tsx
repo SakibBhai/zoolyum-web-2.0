@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useUser } from "@stackframe/stack";
+import { useConditionalUser } from "@/hooks/use-conditional-user";
 import { redirect } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -105,7 +105,7 @@ interface ContactStats {
 }
 
 export default function ContactsAdminPage() {
-  const user = useUser();
+  const user = useConditionalUser();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [settings, setSettings] = useState<ContactSettings | null>(null);
   const [stats, setStats] = useState<ContactStats | null>(null);

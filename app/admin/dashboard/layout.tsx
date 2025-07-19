@@ -4,26 +4,49 @@ import { type ReactNode, useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { LayoutDashboard, FileText, Briefcase, MessageSquare, Settings, LogOut, Menu, X, User, Mail, Megaphone } from "lucide-react"
-import { useUser } from "@stackframe/stack"
+import { useConditionalUser } from "@/hooks/use-conditional-user"
 import { AdminLoading } from "@/components/admin/admin-loading"
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isDevelopment, setIsDevelopment] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
-  const user = useUser()
+  const user = useConditionalUser()
 
   useEffect(() => {
+    // Check if we're in development mode
+    const isDevMode = window.location.hostname === 'localhost' || 
+                     window.location.hostname === '127.0.0.1' ||
+                     window.location.hostname.includes('192.168') ||
+                     window.location.port === '3000' ||
+                     window.location.port === '3001'
+    setIsDevelopment(isDevMode)
+  }, [])
+
+  useEffect(() => {
+    // Skip authentication check in development
+    if (isDevelopment) {
+      console.log('Development mode: Bypassing Stack Auth in dashboard layout')
+      return
+    }
+    
     if (user === null) {
       router.push("/handler/sign-in")
     }
-  }, [user, router])
+  }, [user, router, isDevelopment])
 
-  if (user === undefined) {
+  // In development, create a mock user
+  const effectiveUser = isDevelopment ? {
+    displayName: 'Development Admin',
+    primaryEmail: 'admin@zoolyum.com'
+  } : user
+
+  if (!isDevelopment && user === undefined) {
     return <AdminLoading />
   }
 
-  if (!user) {
+  if (!isDevelopment && !user) {
     return null // Or a loading spinner, or redirect
   }
 
@@ -101,15 +124,15 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         </div>
 
         {/* Admin user info */}
-        {user && (
+        {effectiveUser && (
           <div className="p-4 border-b border-[#333333]">
             <div className="flex items-center">
               <div className="w-10 h-10 rounded-full bg-[#252525] flex items-center justify-center text-[#FF5001]">
                 <User className="h-6 w-6" />
               </div>
               <div className="ml-3">
-                <p className="font-medium">{user.displayName}</p>
-                <p className="text-xs text-[#E9E7E2]/50">{user.primaryEmail}</p>
+                <p className="font-medium">{effectiveUser.displayName}</p>
+                <p className="text-xs text-[#E9E7E2]/50">{effectiveUser.primaryEmail}</p>
               </div>
             </div>
           </div>

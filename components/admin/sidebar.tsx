@@ -13,7 +13,7 @@ import {
   Megaphone,
   Mail
 } from "lucide-react"
-import { useUser } from "@stackframe/stack"
+import { useConditionalUser } from "@/hooks/use-conditional-user"
 
 export function AdminSidebar() {
   const pathname = usePathname()

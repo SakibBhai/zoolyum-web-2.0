@@ -2,11 +2,11 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useUser } from "@stackframe/stack"
+import { useConditionalUser } from "@/hooks/use-conditional-user"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function AdminLogin() {
-  const user = useUser()
+  const user = useConditionalUser()
   const router = useRouter()
 
   useEffect(() => {

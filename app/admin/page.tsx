@@ -1,14 +1,32 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { useUser } from "@stackframe/stack"
+import { useConditionalUser } from "@/hooks/use-conditional-user"
 
 export default function AdminPage() {
-  const user = useUser()
+  const user = useConditionalUser()
   const router = useRouter()
+  const [isDevelopment, setIsDevelopment] = useState(false)
 
   useEffect(() => {
+    // Check if we're in development mode
+    const isDevMode = window.location.hostname === 'localhost' || 
+                     window.location.hostname === '127.0.0.1' ||
+                     window.location.hostname.includes('192.168') ||
+                     window.location.port === '3000' ||
+                     window.location.port === '3001'
+    setIsDevelopment(isDevMode)
+  }, [])
+
+  useEffect(() => {
+    // In development, always redirect to dashboard
+    if (isDevelopment) {
+      console.log('Development mode: Bypassing Stack Auth in admin page')
+      router.push("/admin/dashboard")
+      return
+    }
+    
     if (user === undefined) return // Still loading
     
     if (!user) {
@@ -17,7 +35,7 @@ export default function AdminPage() {
       // Redirect authenticated users to dashboard
       router.push("/admin/dashboard")
     }
-  }, [user, router])
+  }, [user, router, isDevelopment])
 
   if (user === undefined) {
     return (

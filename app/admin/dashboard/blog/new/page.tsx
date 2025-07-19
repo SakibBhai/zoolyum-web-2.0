@@ -4,7 +4,7 @@ import type React from "react";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useUser } from "@stackframe/stack";
+import { useConditionalUser } from "@/hooks/use-conditional-user";
 import { createBlogPost } from "../../../../../lib/blog-operations";
 import { PageTransition } from "@/components/page-transition";
 import { Save, X, InfoIcon, Loader2 } from "lucide-react";
@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function NewBlogPostPage() {
-  const user = useUser();
+  const user = useConditionalUser();
   const { toast } = useToast();
   const router = useRouter();
 
