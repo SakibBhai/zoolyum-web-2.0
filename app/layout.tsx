@@ -1,6 +1,5 @@
 import type React from "react"
-import { StackProvider, StackTheme } from "@stackframe/stack";
-import { stackServerApp } from "../stack";
+// Stack Auth imports removed - handled by ConditionalStackProvider
 import "./globals.css"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"

@@ -21,7 +21,17 @@ export interface ContactSettings {
   email: string;
   phone: string;
   address: string;
-  hours: string;
+  workingHours: string;
+  twitterUrl?: string;
+  linkedinUrl?: string;
+  instagramUrl?: string;
+  behanceUrl?: string;
+  enablePhoneField: boolean;
+  requirePhoneField: boolean;
+  autoReplyEnabled: boolean;
+  autoReplyMessage?: string;
+  notificationEmail?: string;
+  emailNotifications: boolean;
   updatedAt: Date;
 }
 
@@ -181,7 +191,14 @@ function handleDatabaseError(error: unknown): never {
 export async function fetchContactSettings(): Promise<ContactSettings | null> {
   try {
     const result = await query(
-      `SELECT * FROM contact_settings ORDER BY id DESC LIMIT 1`
+      `SELECT 
+        id, email, phone, address, working_hours, 
+        twitter_url, linkedin_url, instagram_url, behance_url,
+        enable_phone_field, require_phone_field, auto_reply_enabled,
+        auto_reply_message, notification_email, email_notifications,
+        updated_at
+      FROM contact_settings 
+      ORDER BY id DESC LIMIT 1`
     );
 
     return result.rows[0] ? mapContactSettingsFromDb(result.rows[0]) : null;
@@ -202,15 +219,30 @@ export async function updateContactSettings(
 
     const result = await query(
       `
-      INSERT INTO contact_settings (email, phone, address, hours)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO contact_settings (
+        email, phone, address, working_hours, 
+        twitter_url, linkedin_url, instagram_url, behance_url,
+        enable_phone_field, require_phone_field, auto_reply_enabled,
+        auto_reply_message, notification_email, email_notifications
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
       RETURNING *
       `,
       [
         settings.email.trim(),
         settings.phone?.trim() || "",
         settings.address?.trim() || "",
-        settings.hours?.trim() || "",
+        settings.workingHours?.trim() || "",
+        settings.twitterUrl?.trim() || null,
+        settings.linkedinUrl?.trim() || null,
+        settings.instagramUrl?.trim() || null,
+        settings.behanceUrl?.trim() || null,
+        settings.enablePhoneField ?? true,
+        settings.requirePhoneField ?? false,
+        settings.autoReplyEnabled ?? false,
+        settings.autoReplyMessage?.trim() || null,
+        settings.notificationEmail?.trim() || null,
+        settings.emailNotifications ?? true,
       ]
     );
 
@@ -288,7 +320,17 @@ function mapContactSettingsFromDb(row: any): ContactSettings {
     email: row.email,
     phone: row.phone,
     address: row.address,
-    hours: row.hours,
+    workingHours: row.working_hours,
+    twitterUrl: row.twitter_url,
+    linkedinUrl: row.linkedin_url,
+    instagramUrl: row.instagram_url,
+    behanceUrl: row.behance_url,
+    enablePhoneField: row.enable_phone_field,
+    requirePhoneField: row.require_phone_field,
+    autoReplyEnabled: row.auto_reply_enabled,
+    autoReplyMessage: row.auto_reply_message,
+    notificationEmail: row.notification_email,
+    emailNotifications: row.email_notifications,
     updatedAt: row.updated_at,
   };
 }

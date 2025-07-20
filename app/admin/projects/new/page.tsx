@@ -22,6 +22,8 @@ import { toast } from '@/components/ui/use-toast'
 import { Badge } from '@/components/ui/badge'
 import { X, Plus } from 'lucide-react'
 import { PageTransition } from '@/components/page-transition'
+import { ImageUploader } from '@/components/admin/image-uploader'
+import { GalleryUploader } from '@/components/admin/gallery-uploader'
 
 const projectFormSchema = z.object({
   title: z.string().min(1, { message: 'Title is required' }).max(100, { message: 'Title must be less than 100 characters' }),
@@ -34,12 +36,9 @@ const projectFormSchema = z.object({
     .max(500, { message: 'Description must be less than 500 characters' }),
   content: z.string().optional(),
   category: z.string().min(1, { message: 'Category is required' }),
-  imageUrl: z.string().optional().refine((val) => !val || z.string().url().safeParse(val).success, {
-    message: 'Must be a valid URL'
-  }),
-  heroImageUrl: z.string().optional().refine((val) => !val || z.string().url().safeParse(val).success, {
-    message: 'Must be a valid URL'
-  }),
+  imageUrl: z.string().optional().nullable(),
+  heroImageUrl: z.string().optional().nullable(),
+  gallery: z.array(z.string()).default([]),
   year: z.string().optional(),
   client: z.string().optional(),
   duration: z.string().optional(),
@@ -79,8 +78,9 @@ export default function NewProjectPage() {
       description: '',
       content: '',
       category: '',
-      imageUrl: '',
-      heroImageUrl: '',
+      imageUrl: null,
+      heroImageUrl: null,
+      gallery: [],
       year: '',
       client: '',
       duration: '',
@@ -374,10 +374,16 @@ export default function NewProjectPage() {
                 name="imageUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Thumbnail Image URL</FormLabel>
+                    <FormLabel>Thumbnail Image</FormLabel>
                     <FormControl>
-                      <Input placeholder="https://example.com/thumbnail.jpg" {...field} />
-                    </FormControl>
+                       <ImageUploader
+                         label="Thumbnail Image"
+                         initialImageUrl={field.value || undefined}
+                         onImageChangeAction={field.onChange}
+                         folder="projects"
+                         helpText="Upload a thumbnail image for the project grid"
+                       />
+                     </FormControl>
                     <FormDescription>
                       Used in project listings
                     </FormDescription>
@@ -391,12 +397,42 @@ export default function NewProjectPage() {
                 name="heroImageUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Hero Image URL</FormLabel>
+                    <FormLabel>Hero Image</FormLabel>
                     <FormControl>
-                      <Input placeholder="https://example.com/hero.jpg" {...field} />
-                    </FormControl>
+                       <ImageUploader
+                         label="Hero Image"
+                         initialImageUrl={field.value || undefined}
+                         onImageChangeAction={field.onChange}
+                         folder="projects"
+                         helpText="Upload a hero image for the project detail page"
+                       />
+                     </FormControl>
                     <FormDescription>
                       Large image for project detail page
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <div className="col-span-full">
+              <FormField
+                control={form.control}
+                name="gallery"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Project Gallery</FormLabel>
+                    <FormControl>
+                      <GalleryUploader
+                        label="Project Gallery"
+                        initialImages={field.value.map(url => ({ url })) || []}
+                        onImagesChange={field.onChange}
+                        helpText="Upload multiple images to showcase the project"
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Additional images for the project gallery
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

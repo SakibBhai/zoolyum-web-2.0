@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { stackServerApp } from './stack'
+import { getStackServerApp } from './lib/stack-server'
 
 export async function middleware(request: NextRequest) {
+  // Skip middleware for Next.js internal requests
+  if (
+    request.nextUrl.pathname.startsWith('/_next') ||
+    request.nextUrl.pathname.includes('_rsc=') ||
+    request.nextUrl.search.includes('_rsc=') ||
+    request.nextUrl.pathname.includes('.hot-update.') ||
+    request.nextUrl.pathname.startsWith('/api')
+  ) {
+    return NextResponse.next()
+  }
+  
   // Development bypass for Stack Auth issues
   // Check if we're in development by looking for localhost or dev indicators
   const isDevelopment = request.nextUrl.hostname === 'localhost' || 
@@ -25,16 +36,16 @@ export async function middleware(request: NextRequest) {
     
     // Production: Get the user from Stack Auth
     try {
+      const stackServerApp = await getStackServerApp()
       const user = await stackServerApp.getUser()
       
       // Redirect to login if not authenticated
       if (!user) {
-        return NextResponse.redirect(new URL('/handler/sign-in', request.url))
+        return NextResponse.redirect(new URL('/admin/login', request.url))
       }
     } catch (error) {
-      console.error('Stack Auth error:', error)
-      // In case of Stack Auth errors, redirect to login
-      return NextResponse.redirect(new URL('/handler/sign-in', request.url))
+      console.error('Stack Auth error in middleware:', error)
+      return NextResponse.redirect(new URL('/admin/login', request.url))
     }
   }
   
@@ -55,6 +66,6 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/admin/:path*',
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!api|_next|favicon.ico|.*\\.).*)',
   ],
 }

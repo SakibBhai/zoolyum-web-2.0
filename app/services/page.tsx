@@ -50,46 +50,55 @@ export default function ServicesPage() {
                 title="Brand Strategy"
                 description="Developing comprehensive brand strategies that position your business for success in competitive markets."
                 icon="strategy"
+                slug="brand-strategy"
               />
               <ServiceCard
                 title="Digital Transformation"
                 description="Creating digital ecosystems that amplify your brand's presence and engage audiences across platforms."
                 icon="globe"
+                slug="digital-transformation"
               />
               <ServiceCard
                 title="Creative Direction"
                 description="Providing expert guidance to navigate complex brand challenges and identify growth opportunities."
                 icon="compass"
+                slug="creative-direction"
               />
               <ServiceCard
                 title="Visual Identity"
                 description="Crafting distinctive visual systems that express your brand's personality and values across all touchpoints."
                 icon="palette"
+                slug="visual-identity"
               />
               <ServiceCard
                 title="Content Strategy"
                 description="Developing strategic content frameworks that tell your brand story and engage your target audience."
                 icon="file-text"
+                slug="content-strategy"
               />
               <ServiceCard
                 title="Market Research"
                 description="Conducting in-depth research to uncover insights that inform strategic decision-making and positioning."
                 icon="search"
+                slug="market-research"
               />
               <ServiceCard
                 title="UX/UI Design"
                 description="Creating intuitive digital experiences that balance user needs with business objectives."
                 icon="layout"
+                slug="ux-ui-design"
               />
               <ServiceCard
                 title="Social Media Strategy"
                 description="Building strategic social media approaches that build community and drive engagement."
                 icon="share-2"
+                slug="social-media-strategy"
               />
               <ServiceCard
                 title="Brand Workshops"
                 description="Facilitating collaborative sessions to align stakeholders and define brand direction."
                 icon="users"
+                slug="brand-workshops"
               />
             </StaggerReveal>
           </section>
@@ -321,9 +330,10 @@ interface ServiceCardProps {
   title: string
   description: string
   icon?: string
+  slug?: string
 }
 
-function ServiceCard({ title, description, icon }: ServiceCardProps) {
+function ServiceCard({ title, description, icon, slug }: ServiceCardProps) {
   const getIcon = () => {
     switch (icon) {
       case "strategy":
@@ -349,8 +359,8 @@ function ServiceCard({ title, description, icon }: ServiceCardProps) {
     }
   }
 
-  return (
-    <Card className="h-full bg-[#1A1A1A] border-[#333333] hover:border-[#FF5001]/30 transition-all duration-300 group">
+  const cardContent = (
+    <Card className="h-full bg-[#1A1A1A] border-[#333333] hover:border-[#FF5001]/30 transition-all duration-300 group cursor-pointer">
       <CardHeader>
         <div className="flex items-center gap-3 mb-2">
           <div className="p-2 bg-[#FF5001]/10 rounded-lg group-hover:bg-[#FF5001]/20 transition-colors">
@@ -363,9 +373,23 @@ function ServiceCard({ title, description, icon }: ServiceCardProps) {
       </CardHeader>
       <CardContent>
         <p className="text-[#E9E7E2]/70 leading-relaxed">{description}</p>
+        <div className="mt-4 flex items-center text-[#FF5001] opacity-0 group-hover:opacity-100 transition-opacity">
+          <span className="text-sm font-medium">Learn More</span>
+          <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+        </div>
       </CardContent>
     </Card>
   )
+
+  if (slug) {
+    return (
+      <Link href={`/services/${slug}`} className="block h-full">
+        {cardContent}
+      </Link>
+    )
+  }
+
+  return cardContent
 }
 
 const processSteps = [

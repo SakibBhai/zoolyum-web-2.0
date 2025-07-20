@@ -1,5 +1,5 @@
-import { stackServerApp } from "../stack";
 import { NextRequest } from "next/server";
+import { getStackServerApp } from "./stack-server";
 
 /**
  * Verify if the user is authenticated using Stack Auth
@@ -23,6 +23,7 @@ export async function verifyStackAuth(request?: NextRequest) {
   }
   
   try {
+    const stackServerApp = await getStackServerApp();
     const user = await stackServerApp.getUser();
     
     return {
@@ -55,6 +56,7 @@ export async function getCurrentUser() {
   }
   
   try {
+    const stackServerApp = await getStackServerApp();
     const user = await stackServerApp.getUser();
     return user;
   } catch (error) {
@@ -78,6 +80,7 @@ export async function isAdmin() {
   }
   
   try {
+    const stackServerApp = await getStackServerApp();
     const user = await stackServerApp.getUser();
     return !!user; // For now, any authenticated user is admin
   } catch (error) {

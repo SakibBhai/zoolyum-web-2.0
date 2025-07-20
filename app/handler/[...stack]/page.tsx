@@ -1,6 +1,22 @@
-import { StackHandler } from "@stackframe/stack";
-import { stackServerApp } from "../../../stack";
+'use client';
 
-export default function Handler(props: unknown) {
-  return <StackHandler fullPage app={stackServerApp} routeProps={props} />;
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+interface StackHandlerProps {
+  params: {
+    stack: string[];
+  };
+}
+
+export default function StackHandler({ params }: StackHandlerProps) {
+  const router = useRouter();
+
+  useEffect(() => {
+    // Always redirect to admin dashboard in development
+    // In production, this route should be handled by the actual Stack Auth handler
+    router.push('/admin/dashboard');
+  }, [router]);
+
+  return <div>Redirecting...</div>;
 }

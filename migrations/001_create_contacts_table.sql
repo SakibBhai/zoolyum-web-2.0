@@ -41,13 +41,18 @@ CREATE TABLE IF NOT EXISTS contact_settings (
 
 -- Insert default contact settings
 INSERT INTO contact_settings (
-  email, phone, address, working_hours, enable_phone_field, 
-  require_phone_field, auto_reply_enabled, email_notifications
+  email, phone, address, working_hours, twitter_url, linkedin_url, 
+  instagram_url, behance_url, enable_phone_field, require_phone_field, 
+  auto_reply_enabled, email_notifications
 ) VALUES (
   'hello@zoolyum.com',
   '+1 (555) 123-4567',
   '123 Creative Street, Design District, San Francisco, CA 94103',
   'Monday - Friday: 9:00 AM - 6:00 PM',
+  'https://x.com/zoolyum',
+  'https://linkedin.com/company/zoolyum',
+  'https://instagram.com/zoolyum',
+  'https://behance.net/zoolyum',
   true,
   false,
   false,

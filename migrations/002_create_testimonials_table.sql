@@ -22,33 +22,42 @@ CREATE INDEX IF NOT EXISTS idx_testimonials_approved_featured ON testimonials(ap
 
 -- Insert some sample testimonials
 INSERT INTO testimonials (
-  name, position, company, content, rating, featured, approved
+  id, name, position, company, content, rating, featured, approved, created_at, updated_at
 ) VALUES 
 (
+  gen_random_uuid(),
   'Sarah Johnson',
   'Marketing Director',
   'TechCorp Inc.',
   'Working with Zoolyum has been an absolute game-changer for our business. Their innovative approach and attention to detail exceeded all our expectations.',
   5,
   true,
-  true
+  true,
+  NOW(),
+  NOW()
 ),
 (
+  gen_random_uuid(),
   'Michael Chen',
   'CEO',
   'StartupXYZ',
   'The team at Zoolyum delivered exceptional results on time and within budget. Their expertise in modern web technologies is truly impressive.',
   5,
   true,
-  true
+  true,
+  NOW(),
+  NOW()
 ),
 (
+  gen_random_uuid(),
   'Emily Rodriguez',
   'Product Manager',
   'InnovateLabs',
   'Zoolyum transformed our digital presence completely. The user experience they created has significantly improved our customer engagement.',
   5,
   true,
-  true
+  true,
+  NOW(),
+  NOW()
 )
-ON CONFLICT DO NOTHING;
+ON CONFLICT (id) DO NOTHING;
