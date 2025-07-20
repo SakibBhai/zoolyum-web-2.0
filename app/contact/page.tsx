@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { ConsultationBookingModal } from "@/components/consultation-booking-modal"
 
 // Form validation schema
 const contactFormSchema = z.object({
@@ -49,6 +50,8 @@ export default function ContactPage() {
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [submitMessage, setSubmitMessage] = useState('')
   const [contactSettings, setContactSettings] = useState<ContactSettings | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [consultationType, setConsultationType] = useState<'brand_strategy' | 'digital_strategy' | 'creative_direction'>('brand_strategy')
   
   const {
     register,
@@ -350,7 +353,13 @@ export default function ContactPage() {
                     <p className="text-[#E9E7E2]/80 mb-6 flex-grow">
                       Discuss your brand challenges and explore strategic solutions with our Brand Strategy Director.
                     </p>
-                    <button className="w-full px-4 py-3 bg-[#252525] hover:bg-[#333333] text-[#E9E7E2] font-medium rounded-lg transition-colors">
+                    <button 
+                      onClick={() => {
+                        setConsultationType('brand_strategy')
+                        setIsModalOpen(true)
+                      }}
+                      className="w-full px-4 py-3 bg-[#252525] hover:bg-[#333333] text-[#E9E7E2] font-medium rounded-lg transition-colors"
+                    >
                       Book Consultation
                     </button>
                 </Card>
@@ -364,7 +373,13 @@ export default function ContactPage() {
                       Explore digital transformation opportunities with our Digital Director to enhance your online
                       presence.
                     </p>
-                    <button className="w-full px-4 py-3 bg-[#252525] hover:bg-[#333333] text-[#E9E7E2] font-medium rounded-lg transition-colors">
+                    <button 
+                      onClick={() => {
+                        setConsultationType('digital_strategy')
+                        setIsModalOpen(true)
+                      }}
+                      className="w-full px-4 py-3 bg-[#252525] hover:bg-[#333333] text-[#E9E7E2] font-medium rounded-lg transition-colors"
+                    >
                       Book Consultation
                     </button>
                 </Card>
@@ -378,7 +393,13 @@ export default function ContactPage() {
                       Discuss your creative vision with our Creative Director and explore visual storytelling
                       opportunities.
                     </p>
-                    <button className="w-full px-4 py-3 bg-[#252525] hover:bg-[#333333] text-[#E9E7E2] font-medium rounded-lg transition-colors">
+                    <button 
+                      onClick={() => {
+                        setConsultationType('creative_direction')
+                        setIsModalOpen(true)
+                      }}
+                      className="w-full px-4 py-3 bg-[#252525] hover:bg-[#333333] text-[#E9E7E2] font-medium rounded-lg transition-colors"
+                    >
                       Book Consultation
                     </button>
                 </Card>
@@ -402,6 +423,12 @@ export default function ContactPage() {
         </main>
 
         <Footer />
+        
+        <ConsultationBookingModal 
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          consultationType={consultationType}
+        />
       </div>
     </PageTransition>
   )
