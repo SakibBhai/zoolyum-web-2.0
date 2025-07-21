@@ -25,19 +25,13 @@ import { Separator } from "@/components/ui/separator";
 import { Plus, Trash2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
+import { CampaignFormBuilder, FormField } from "@/components/admin/campaign-form-builder";
+import { CampaignMediaUploader } from "@/components/admin/campaign-media-uploader";
 import { createCampaign } from "@/lib/campaign-operations";
 
 interface CTA {
   label: string;
   url: string;
-}
-
-interface FormField {
-  name: string;
-  label: string;
-  type: "text" | "email" | "tel" | "textarea";
-  required: boolean;
-  placeholder?: string;
 }
 
 export default function NewCampaignPage() {
@@ -51,8 +45,8 @@ export default function NewCampaignPage() {
     startDate: "",
     endDate: "",
     status: "DRAFT",
-    imageUrls: [""],
-    videoUrls: [""],
+    imageUrls: [] as string[],
+    videoUrls: [] as string[],
     enableForm: false,
     successMessage: "Thank you for your submission!",
     redirectUrl: "",
@@ -60,8 +54,22 @@ export default function NewCampaignPage() {
 
   const [ctas, setCtas] = useState<CTA[]>([{ label: "", url: "" }]);
   const [formFields, setFormFields] = useState<FormField[]>([
-    { name: "name", label: "Full Name", type: "text", required: true },
-    { name: "email", label: "Email Address", type: "email", required: true },
+    {
+      id: "field_name",
+      name: "name",
+      label: "Full Name",
+      type: "text",
+      required: true,
+      placeholder: "Enter your full name"
+    },
+    {
+      id: "field_email",
+      name: "email",
+      label: "Email Address",
+      type: "email",
+      required: true,
+      placeholder: "Enter your email address"
+    },
   ]);
 
   const handleInputChange = (field: string, value: any) => {
@@ -76,32 +84,17 @@ export default function NewCampaignPage() {
     }
   };
 
-  const handleArrayChange = (
-    field: "imageUrls" | "videoUrls",
-    index: number,
-    value: string
-  ) => {
-    const newArray = [...formData[field]];
-    newArray[index] = value;
-    setFormData((prev) => ({ ...prev, [field]: newArray }));
+  const handleMediaChange = (imageUrls: string[], videoUrls: string[]) => {
+    setFormData({
+      ...formData,
+      imageUrls,
+      videoUrls,
+    });
   };
 
-  const addArrayItem = (field: "imageUrls" | "videoUrls") => {
-    setFormData((prev) => ({ ...prev, [field]: [...prev[field], ""] }));
-  };
-
-  const removeArrayItem = (field: "imageUrls" | "videoUrls", index: number) => {
-    const newArray = formData[field].filter((_, i) => i !== index);
-    setFormData((prev) => ({ ...prev, [field]: newArray }));
-  };
-
-  const handleCTAChange = (
-    index: number,
-    field: "label" | "url",
-    value: string
-  ) => {
+  const handleCTAChange = (index: number, field: keyof CTA, value: string) => {
     const newCTAs = [...ctas];
-    newCTAs[index][field] = value;
+    newCTAs[index] = { ...newCTAs[index], [field]: value };
     setCtas(newCTAs);
   };
 
@@ -110,51 +103,46 @@ export default function NewCampaignPage() {
   };
 
   const removeCTA = (index: number) => {
-    setCtas(ctas.filter((_, i) => i !== index));
-  };
-
-  const handleFormFieldChange = (
-    index: number,
-    field: keyof FormField,
-    value: any
-  ) => {
-    const newFields = [...formFields];
-    newFields[index] = { ...newFields[index], [field]: value };
-    setFormFields(newFields);
-  };
-
-  const addFormField = () => {
-    setFormFields([
-      ...formFields,
-      { name: "", label: "", type: "text", required: false },
-    ]);
-  };
-
-  const removeFormField = (index: number) => {
-    setFormFields(formFields.filter((_, i) => i !== index));
-  };
-
-  const handleSubmit = async (formData: FormData) => {
-    setLoading(true);
-
-    const result = await createCampaign(formData);
-
-    setLoading(false);
-
-    if (result?.errors) {
-      console.error("Validation errors:", result.errors);
-      alert(`Failed to create campaign: ${JSON.stringify(result.errors)}`);
-      return;
+    if (ctas.length > 1) {
+      setCtas(ctas.filter((_, i) => i !== index));
     }
+  };
 
-    if (result?.error) {
-      console.error("Error creating campaign:", result.error);
-      alert(`Failed to create campaign: ${result.error}`);
-      return;
-    }
 
-    if (result?.campaign) {
-      router.push(`/campaigns/${result.campaign.slug}`);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      const result = await createCampaign({
+        title: formData.title,
+        slug: formData.slug,
+        shortDescription: formData.shortDescription,
+        content: formData.content,
+        status: formData.status as "DRAFT" | "PUBLISHED" | "ARCHIVED",
+        startDate: formData.startDate ? new Date(formData.startDate) : null,
+        endDate: formData.endDate ? new Date(formData.endDate) : null,
+        imageUrls: formData.imageUrls.filter(url => url.trim() !== ""),
+        videoUrls: formData.videoUrls.filter(url => url.trim() !== ""),
+        enableForm: formData.enableForm,
+        formFields: formData.enableForm ? formFields.map(field => ({
+          ...field,
+          type: field.type === 'tel' ? 'phone' : field.type
+        })) : [],
+        ctas: ctas.filter(cta => cta.label.trim() !== "" && cta.url.trim() !== ""),
+        successMessage: formData.successMessage,
+        redirectUrl: formData.redirectUrl,
+      });
+
+      if (result.success) {
+        router.push("/admin/campaigns");
+      } else {
+        console.error("Failed to create campaign:", result.error);
+      }
+    } catch (error) {
+      console.error("Error creating campaign:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -176,48 +164,42 @@ export default function NewCampaignPage() {
         </div>
       </div>
 
-      <form action={handleSubmit} className="space-y-6">
-        <Card className="bg-[#1A1A1A] border-[#333333]">
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Basic Information */}
+        <Card>
           <CardHeader>
-            <CardTitle className="text-[#E9E7E2]">Basic Information</CardTitle>
-            <CardDescription className="text-[#E9E7E2]/60">
-              Essential details about your campaign
+            <CardTitle>Basic Information</CardTitle>
+            <CardDescription>
+              Set up the basic details for your campaign
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="title" className="text-[#E9E7E2]">
-                  Campaign Title *
-                </Label>
+              <div className="space-y-2">
+                <Label htmlFor="title">Campaign Title</Label>
                 <Input
                   id="title"
                   name="title"
                   value={formData.title}
                   onChange={(e) => handleInputChange("title", e.target.value)}
-                  className="bg-[#252525] border-[#333333] text-[#E9E7E2]"
+                  placeholder="Enter campaign title"
                   required
                 />
               </div>
-              <div>
-                <Label htmlFor="slug" className="text-[#E9E7E2]">
-                  URL Slug *
-                </Label>
+              <div className="space-y-2">
+                <Label htmlFor="slug">URL Slug</Label>
                 <Input
                   id="slug"
                   name="slug"
                   value={formData.slug}
                   onChange={(e) => handleInputChange("slug", e.target.value)}
-                  className="bg-[#252525] border-[#333333] text-[#E9E7E2]"
+                  placeholder="campaign-url-slug"
                   required
                 />
               </div>
             </div>
-
-            <div>
-              <Label htmlFor="shortDescription" className="text-[#E9E7E2]">
-                Short Description
-              </Label>
+            <div className="space-y-2">
+              <Label htmlFor="shortDescription">Short Description</Label>
               <Textarea
                 id="shortDescription"
                 name="shortDescription"
@@ -225,59 +207,184 @@ export default function NewCampaignPage() {
                 onChange={(e) =>
                   handleInputChange("shortDescription", e.target.value)
                 }
-                className="bg-[#252525] border-[#333333] text-[#E9E7E2]"
+                placeholder="Brief description of the campaign"
                 rows={3}
-                placeholder="Brief description for meta tags and summaries"
               />
             </div>
-
-            <div>
-              <Label className="text-[#E9E7E2]">Campaign Content</Label>
+            <div className="space-y-2">
+              <Label htmlFor="content">Campaign Content</Label>
               <RichTextEditor
                 value={formData.content}
-                onChangeAction={(value: string) =>
-                  handleInputChange("content", value)
+                onContentChange={(value: string) =>
+                  setFormData({ ...formData, content: value })
                 }
+                placeholder="Write your campaign content here..."
               />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-[#1A1A1A] border-[#333333]">
+        {/* Media Upload */}
+        <Card>
           <CardHeader>
-            <CardTitle className="text-[#E9E7E2]">
-              Scheduling & Status
-            </CardTitle>
-            <CardDescription className="text-[#E9E7E2]/60">
-              Set campaign timeline and publication status
+            <CardTitle>Campaign Media</CardTitle>
+            <CardDescription>
+              Upload images and add YouTube videos for your campaign
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CampaignMediaUploader
+              images={formData.imageUrls}
+              videoUrls={formData.videoUrls}
+              onChange={handleMediaChange}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Call-to-Action Buttons */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Call-to-Action Buttons</CardTitle>
+            <CardDescription>
+              Add buttons to drive user engagement
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="status" className="text-[#E9E7E2]">
-                  Status
-                </Label>
-                <Select
-                  name="status"
-                  value={formData.status}
-                  onValueChange={(value) => handleInputChange("status", value)}
+            {ctas.map((cta, index) => (
+              <div key={index} className="flex gap-4 items-end">
+                <div className="flex-1">
+                  <Label htmlFor={`cta-label-${index}`}>Button Label</Label>
+                  <Input
+                    id={`cta-label-${index}`}
+                    value={cta.label}
+                    onChange={(e) =>
+                      handleCTAChange(index, "label", e.target.value)
+                    }
+                    placeholder="e.g., Learn More"
+                  />
+                </div>
+                <div className="flex-1">
+                  <Label htmlFor={`cta-url-${index}`}>Button URL</Label>
+                  <Input
+                    id={`cta-url-${index}`}
+                    value={cta.url}
+                    onChange={(e) =>
+                      handleCTAChange(index, "url", e.target.value)
+                    }
+                    placeholder="https://example.com"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => removeCTA(index)}
+                  disabled={ctas.length === 1}
                 >
-                  <SelectTrigger className="bg-[#252525] border-[#333333] text-[#E9E7E2]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="DRAFT">Draft</SelectItem>
-                    <SelectItem value="SCHEDULED">Scheduled</SelectItem>
-                    <SelectItem value="PUBLISHED">Published</SelectItem>
-                    <SelectItem value="ARCHIVED">Archived</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={addCTA}
+              className="w-full"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add CTA Button
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Form Builder */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
               <div>
-                <Label htmlFor="startDate" className="text-[#E9E7E2]">
-                  Start Date
-                </Label>
+                <CardTitle>Lead Capture Form</CardTitle>
+                <CardDescription>
+                  Collect user information with a custom form
+                </CardDescription>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="enable-form">Enable Form</Label>
+                <Switch
+                  id="enable-form"
+                  checked={formData.enableForm}
+                  onCheckedChange={(checked) =>
+                    handleInputChange("enableForm", checked)
+                  }
+                />
+              </div>
+            </div>
+          </CardHeader>
+          {formData.enableForm && (
+            <CardContent className="space-y-4">
+              <CampaignFormBuilder
+                fields={formFields}
+                onChange={setFormFields}
+              />
+              <Separator />
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="successMessage">Success Message</Label>
+                  <Textarea
+                    id="successMessage"
+                    value={formData.successMessage}
+                    onChange={(e) =>
+                      handleInputChange("successMessage", e.target.value)
+                    }
+                    placeholder="Thank you for your submission!"
+                    rows={2}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="redirectUrl">Redirect URL (Optional)</Label>
+                  <Input
+                    id="redirectUrl"
+                    value={formData.redirectUrl}
+                    onChange={(e) =>
+                      handleInputChange("redirectUrl", e.target.value)
+                    }
+                    placeholder="https://example.com/thank-you"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          )}
+        </Card>
+
+        {/* Scheduling & Status */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Scheduling & Status</CardTitle>
+            <CardDescription>
+              Configure when your campaign should be active
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="status">Status</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, status: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="DRAFT">Draft</SelectItem>
+                  <SelectItem value="PUBLISHED">Published</SelectItem>
+                  <SelectItem value="ARCHIVED">Archived</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="startDate">Start Date</Label>
                 <Input
                   id="startDate"
                   name="startDate"
@@ -286,39 +393,37 @@ export default function NewCampaignPage() {
                   onChange={(e) =>
                     handleInputChange("startDate", e.target.value)
                   }
-                  className="bg-[#252525] border-[#333333] text-[#E9E7E2]"
                 />
               </div>
-              <div>
-                <Label htmlFor="endDate" className="text-[#E9E7E2]">
-                  End Date
-                </Label>
+              <div className="space-y-2">
+                <Label htmlFor="endDate">End Date</Label>
                 <Input
                   id="endDate"
                   name="endDate"
                   type="datetime-local"
                   value={formData.endDate}
                   onChange={(e) => handleInputChange("endDate", e.target.value)}
-                  className="bg-[#252525] border-[#333333] text-[#E9E7E2]"
                 />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <div className="flex gap-4">
+        <div className="flex justify-end space-x-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.push("/admin/campaigns")}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Cancel
+          </Button>
           <Button
             type="submit"
             disabled={loading}
-            className="bg-[#FF5001] hover:bg-[#FF5001]/90"
           >
             {loading ? "Creating..." : "Create Campaign"}
           </Button>
-          <Link href="/admin/campaigns">
-            <Button type="button" variant="outline">
-              Cancel
-            </Button>
-          </Link>
         </div>
       </form>
     </div>

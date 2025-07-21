@@ -14,10 +14,10 @@
     "@aws-sdk/client-s3": "^3.826.0",
     "@aws-sdk/s3-request-presigner": "^3.826.0",
     "@emotion/is-prop-valid": "latest",
+    "@hello-pangea/dnd": "^18.0.1",
     "@hookform/resolvers": "^3.9.1",
     "@modelcontextprotocol/sdk": "^1.12.1",
     "@paralleldrive/cuid2": "^2.2.2",
-    "@prisma/client": "^6.12.0",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
     "@radix-ui/react-aspect-ratio": "1.1.1",
@@ -67,7 +67,6 @@
     "next": "15.2.4",
     "next-themes": "^0.4.4",
     "pg": "^8.16.0",
-    "prisma": "^6.12.0",
     "react": "^19",
     "react-day-picker": "^9.0.0",
     "react-dom": "^19",
@@ -84,10 +83,12 @@
     "zod": "^3.25.73"
   },
   "devDependencies": {
+    "@prisma/client": "^6.12.0",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "postcss": "^8",
+    "prisma": "^6.12.0",
     "tailwindcss": "^3.4.17",
     "tsx": "^4.20.3",
     "typescript": "^5"

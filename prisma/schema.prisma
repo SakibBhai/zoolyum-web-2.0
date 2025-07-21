@@ -117,25 +117,42 @@ model TeamMember {
 }
 
 model Campaign {
-  id               String    @id @default(cuid())
+  id               String               @id @default(cuid())
   title            String
-  slug             String    @unique
+  slug             String               @unique
   shortDescription String?
   content          String?
-  startDate        DateTime? @map("start_date")
-  endDate          DateTime? @map("end_date")
-  status           String    @default("DRAFT")
-  imageUrls        String[]  @map("image_urls")
-  videoUrls        String[]  @map("video_urls")
-  enableForm       Boolean   @default(false) @map("enable_form")
-  successMessage   String?   @map("success_message")
-  redirectUrl      String?   @map("redirect_url")
-  ctas             Json?     @map("ctas")
-  formFields       Json?     @map("form_fields")
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
+  startDate        DateTime?            @map("start_date")
+  endDate          DateTime?            @map("end_date")
+  status           String               @default("DRAFT")
+  imageUrls        String[]             @map("image_urls")
+  videoUrls        String[]             @map("video_urls")
+  enableForm       Boolean              @default(false) @map("enable_form")
+  successMessage   String?              @map("success_message")
+  redirectUrl      String?              @map("redirect_url")
+  ctas             Json?                @map("ctas")
+  formFields       Json?                @map("form_fields")
+  createdAt        DateTime             @default(now()) @map("created_at")
+  updatedAt        DateTime             @updatedAt @map("updated_at")
+  
+  submissions      CampaignSubmission[]
 
   @@map("campaigns")
+}
+
+model CampaignSubmission {
+  id          String   @id @default(cuid())
+  campaignId  String   @map("campaign_id")
+  data        Json
+  submittedAt DateTime @default(now()) @map("submitted_at")
+  ipAddress   String?  @map("ip_address")
+  userAgent   String?  @map("user_agent")
+  
+  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  
+  @@index([campaignId])
+  @@index([submittedAt])
+  @@map("campaign_submissions")
 }
 
 model Project {
@@ -172,4 +189,112 @@ model Project {
   @@index([featured])
   @@index([category])
   @@map("projects")
+}
+
+model HomepageHero {
+  id          String   @id @default(cuid())
+  title       String
+  subtitle    String?
+  description String
+  primaryCta  Json?    @map("primary_cta") // {text: string, url: string}
+  secondaryCta Json?   @map("secondary_cta") // {text: string, url: string}
+  backgroundImage String? @map("background_image")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("homepage_hero")
+}
+
+model HomepageAbout {
+  id          String   @id @default(cuid())
+  title       String
+  subtitle    String?
+  description String
+  image       String?
+  ctaText     String?  @map("cta_text")
+  ctaUrl      String?  @map("cta_url")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("homepage_about")
+}
+
+model HomepageStatistic {
+  id        String   @id @default(cuid())
+  label     String
+  value     String
+  suffix    String?  // e.g., "+", "%", etc.
+  order     Int      @default(0)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("homepage_statistics")
+}
+
+model HomepageService {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  icon        String?  // Icon name or URL
+  order       Int      @default(0)
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("homepage_services")
+}
+
+model HomepageSection {
+  id          String   @id @default(cuid())
+  sectionType String   @map("section_type") // "expertise", "featured_work", "team", "testimonials", "cta"
+  title       String
+  subtitle    String?
+  description String?
+  ctaText     String?  @map("cta_text")
+  ctaUrl      String?  @map("cta_url")
+  isActive    Boolean  @default(true) @map("is_active")
+  order       Int      @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("homepage_sections")
+}
+
+model SiteSettings {
+  id              String   @id @default(cuid())
+  siteName        String   @map("site_name")
+  siteDescription String?  @map("site_description")
+  logoUrl         String?  @map("logo_url")
+  faviconUrl      String?  @map("favicon_url")
+  primaryColor    String?  @map("primary_color")
+  secondaryColor  String?  @map("secondary_color")
+  footerText      String?  @map("footer_text")
+  socialLinks     Json?    @map("social_links") // {facebook: string, twitter: string, etc.}
+  seoTitle        String?  @map("seo_title")
+  seoDescription  String?  @map("seo_description")
+  seoKeywords     String?  @map("seo_keywords")
+  googleAnalytics String?  @map("google_analytics")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("site_settings")
+}
+
+model NavigationMenu {
+  id        String   @id @default(cuid())
+  label     String
+  url       String
+  order     Int      @default(0)
+  isActive  Boolean  @default(true) @map("is_active")
+  parentId  String?  @map("parent_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  parent   NavigationMenu?  @relation("NavigationHierarchy", fields: [parentId], references: [id])
+  children NavigationMenu[] @relation("NavigationHierarchy")
+
+  @@map("navigation_menu")
 }
