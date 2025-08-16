@@ -61,22 +61,9 @@
     scroll-behavior: smooth;
   }
 
-  /* Hide default cursor when custom cursor is active */
-  @media (pointer: fine) {
-    * {
-      cursor: none !important;
-    }
-  }
-
-  /* But show default cursor on mobile/touch devices */
-  @media (pointer: coarse) {
-    * {
-      cursor: auto !important;
-    }
-
-    .custom-cursor {
-      display: none !important;
-    }
+  /* Standard cursor behavior for all devices */
+  * {
+    cursor: auto;
   }
 
   /* Animation for elements entering viewport */

@@ -427,7 +427,11 @@ export default function NewProjectPage() {
                       <GalleryUploader
                         label="Project Gallery"
                         initialImages={field.value.map(url => ({ url })) || []}
-                        onImagesChange={field.onChange}
+                        onImagesChange={(images) => {
+                          // Convert GalleryImage objects to URL strings
+                          const urls = images.map(img => img.url)
+                          field.onChange(urls)
+                        }}
                         helpText="Upload multiple images to showcase the project"
                       />
                     </FormControl>
