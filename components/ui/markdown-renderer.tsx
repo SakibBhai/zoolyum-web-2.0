@@ -25,17 +25,15 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
             const isExternal = src.startsWith('http');
             
             return (
-              <div className="my-6 flex justify-center">
-                <Image
-                  src={src}
-                  alt={alt || ''}
-                  width={800}
-                  height={400}
-                  className="rounded-lg shadow-md max-w-full h-auto"
-                  style={{ objectFit: 'contain' }}
-                  {...(isExternal && { unoptimized: true })}
-                />
-              </div>
+              <Image
+                src={src}
+                alt={alt || ''}
+                width={800}
+                height={400}
+                className="rounded-lg shadow-md max-w-full h-auto my-6 mx-auto block"
+                style={{ objectFit: 'contain' }}
+                {...(isExternal && { unoptimized: true })}
+              />
             );
           },
           

@@ -26,13 +26,18 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, email, phone, subject, message } = body
+    const { name, email, phone, countryCode, businessName, businessWebsite, services, subject, message } = body
     
     // Validate required fields
     const contactData = {
       name: name?.trim(),
       email: email?.trim(),
       phone: phone?.trim() || undefined,
+      countryCode: countryCode?.trim() || '+880',
+      company: undefined, // Legacy field, keeping for compatibility
+      businessName: businessName?.trim() || undefined,
+      businessWebsite: businessWebsite?.trim() || undefined,
+      services: Array.isArray(services) ? services : [],
       subject: subject?.trim() || undefined,
       message: message?.trim(),
       status: 'NEW' as const,

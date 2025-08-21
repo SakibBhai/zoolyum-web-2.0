@@ -23,86 +23,91 @@ export interface Testimonial {
 
 export interface Project {
   id: string;
-  name: string;
+  title: string;
+  slug: string;
   description: string | null;
-  client_id: string | null;
-  status: string | null;
-  type: string | null;
-  start_date: Date | null;
-  end_date: Date | null;
-  budget: number | null;
-  progress: number | null;
-  manager: string | null;
-  created_by: string | null;
-  tasks_total: number | null;
-  tasks_completed: number | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
+  content: string | null;
+  category: string;
+  image_url: string | null;
+  hero_image_url: string | null;
+  year: string;
+  client: string | null;
+  duration: string | null;
+  services: string[];
+  overview: string | null;
+  challenge: string | null;
+  solution: string | null;
+  process: ProcessStep[];
+  gallery: GalleryImage[];
+  results: Result[];
+  testimonial: Testimonial | null;
+  technologies: string[];
+  project_url: string | null;
+  github_url: string | null;
+  published: boolean;
+  featured: boolean;
+  order: number | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-// Extended project interface with backward compatibility fields
-export interface ProjectWithComputed extends Project {
-  title: string; // Maps to name
-  slug: string; // Generated from name
-  published: boolean; // Maps to status === 'active'
-  featured: boolean; // Always false for now
-  category: string; // Maps to type
-}
+// Project interface now matches database schema directly
+export interface ProjectWithComputed extends Project {}
 
-// Helper function to add computed fields to a project
+// Helper function to add computed fields to a project (no longer needed but kept for compatibility)
 export function addComputedFields(project: Project): ProjectWithComputed {
-  return {
-    ...project,
-    title: project.name,
-    slug: generateSlug(project.name),
-    published: project.status === 'active',
-    featured: false, // Default to false since this field doesn't exist in schema
-    category: project.type || 'General'
-  };
+  return project;
 }
 
-// Helper function to add computed fields to multiple projects
+// Helper function to add computed fields to multiple projects (no longer needed but kept for compatibility)
 export function addComputedFieldsToArray(projects: Project[]): ProjectWithComputed[] {
-  return projects.map(addComputedFields);
+  return projects;
 }
 
 export interface CreateProjectData {
-  name: string;
+  title: string;
+  slug?: string;
   description?: string;
-  client_id?: string;
-  status?: string;
-  type?: string;
-  start_date?: Date;
-  end_date?: Date;
-  budget?: number;
-  progress?: number;
-  manager?: string;
-  created_by?: string;
-  tasks_total?: number;
-  tasks_completed?: number;
+  content?: string;
+  category: string;
+  image_url?: string;
+  hero_image_url?: string;
+  year: string;
+  client?: string;
+  duration?: string;
+  services?: string[];
+  overview?: string;
+  challenge?: string;
+  solution?: string;
+  process?: ProcessStep[];
+  gallery?: GalleryImage[];
+  results?: Result[];
+  testimonial?: Testimonial;
+  technologies?: string[];
+  project_url?: string;
+  github_url?: string;
+  published?: boolean;
+  featured?: boolean;
+  order?: number;
 }
 
 export interface UpdateProjectData extends Partial<CreateProjectData> {}
 
 // Fetch all projects with optional filtering
 export async function fetchProjects(params?: {
-  status?: string;
-  type?: string;
-  published?: boolean; // For backward compatibility
+  published?: boolean;
+  category?: string;
   limit?: number;
 }): Promise<ProjectWithComputed[]> {
   try {
     const searchParams = new URLSearchParams();
     
-    // Handle backward compatibility for 'published' parameter
     if (params?.published !== undefined) {
-      searchParams.append('status', params.published ? 'active' : 'inactive');
-    } else if (params?.status) {
-      searchParams.append('status', params.status);
+      searchParams.append('published', params.published.toString());
     }
     
-    if (params?.type) {
-      searchParams.append('type', params.type);
+    if (params?.category) {
+      searchParams.append('category', params.category);
     }
     
     if (params?.limit) {
@@ -145,16 +150,16 @@ export async function fetchProject(id: string): Promise<ProjectWithComputed | nu
   }
 }
 
-// Helper function to generate URL-friendly slug from project name
-export function generateSlug(name: string): string {
-  return name
+// Helper function to generate URL-friendly slug from project title
+export function generateSlug(title: string): string {
+  return title
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
 }
 
-// Helper function to get project name from slug
-export function getNameFromSlug(slug: string): string {
+// Helper function to get project title from slug
+export function getTitleFromSlug(slug: string): string {
   return slug.replace(/-/g, ' ');
 }
 
@@ -180,26 +185,35 @@ export async function fetchProjectBySlug(slug: string, isAdmin: boolean = false)
   }
 }
 
-// Fetch a single project by name
-export async function fetchProjectByName(name: string, isAdmin: boolean = false): Promise<ProjectWithComputed | null> {
-  try {
-    const slug = generateSlug(name);
-    return await fetchProjectBySlug(slug, isAdmin);
-  } catch (error) {
-    console.error('Error fetching project by name:', error);
-    throw error;
-  }
+// Fetch a single project by title
+export async function fetchProjectByTitle(title: string, isAdmin: boolean = false): Promise<ProjectWithComputed | null> {
+  const projects = await fetchProjects({ published: isAdmin ? undefined : true });
+  const project = projects.find(p => p.title.toLowerCase() === title.toLowerCase());
+  return project || null;
 }
 
 // Create a new project
 export async function createProject(data: CreateProjectData): Promise<ProjectWithComputed> {
   try {
+    // Generate slug if not provided
+    const projectData = {
+      ...data,
+      slug: data.slug || generateSlug(data.title),
+      services: data.services || [],
+      process: data.process || [],
+      gallery: data.gallery || [],
+      results: data.results || [],
+      technologies: data.technologies || [],
+      published: data.published ?? false,
+      featured: data.featured ?? false,
+    };
+
     const response = await fetch('/api/projects', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(projectData),
     });
     
     if (!response.ok) {

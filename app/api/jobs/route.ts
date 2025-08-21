@@ -35,11 +35,21 @@ export async function GET(request: NextRequest) {
     const featured = searchParams.get('featured');
     const limit = searchParams.get('limit');
     const page = searchParams.get('page');
+    const includeUnpublished = searchParams.get('includeUnpublished');
+    const published = searchParams.get('published');
 
     // Build where clause for filtering
-    const where: any = {
-      published: true,
-    };
+    const where: any = {};
+
+    // Handle published filter - admin can see all jobs
+    if (includeUnpublished !== 'true') {
+      where.published = true;
+    } else if (published === 'true') {
+      where.published = true;
+    } else if (published === 'false') {
+      where.published = false;
+    }
+    // If includeUnpublished is true and no published filter, show all
 
     if (department) {
       where.department = department;

@@ -8,10 +8,9 @@ export async function GET(
   try {
     const { slug } = await params;
     
-    // Since 'slug' field doesn't exist in the schema, we'll search by name or id
-    // For now, we'll treat the slug as the project name
+    // Search by slug field
     const project = await prisma.project.findFirst({
-      where: { name: slug },
+      where: { slug: slug },
     });
 
     if (!project) {

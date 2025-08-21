@@ -118,17 +118,6 @@ export default function ContactsAdminPage() {
     {}
   );
 
-  // Redirect if not authenticated
-  if (!user) {
-    redirect("/handler/sign-in");
-  }
-
-  useEffect(() => {
-    fetchContacts();
-    fetchSettings();
-    fetchStats();
-  }, []);
-
   const fetchContacts = async () => {
     try {
       const response = await fetch("/api/contacts");
@@ -143,18 +132,7 @@ export default function ContactsAdminPage() {
     }
   };
 
-  const fetchSettings = async () => {
-    try {
-      const response = await fetch("/api/contacts/settings");
-      if (response.ok) {
-        const data = await response.json();
-        setSettings(data);
-        setSettingsForm(data);
-      }
-    } catch (error) {
-      console.error("Error fetching settings:", error);
-    }
-  };
+  // Settings functionality removed - endpoint deleted
 
   const fetchStats = async () => {
     try {
@@ -167,6 +145,25 @@ export default function ContactsAdminPage() {
       console.error("Error fetching stats:", error);
     }
   };
+
+  useEffect(() => {
+    fetchContacts();
+    fetchStats();
+  }, []);
+
+  // Redirect if not authenticated (but wait for user to load)
+  if (user === null) {
+    redirect("/handler/sign-in");
+  }
+
+  // Show loading state while user is being determined
+  if (user === undefined) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
+  }
 
   const updateContactStatus = async (contactId: string, newStatus: string) => {
     try {
@@ -213,25 +210,7 @@ export default function ContactsAdminPage() {
     }
   };
 
-  const updateSettings = async () => {
-    try {
-      const response = await fetch("/api/contacts/settings", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(settingsForm),
-      });
-
-      if (response.ok) {
-        const updatedSettings = await response.json();
-        setSettings(updatedSettings);
-        setIsSettingsOpen(false);
-      }
-    } catch (error) {
-      console.error("Error updating settings:", error);
-    }
-  };
+  // Settings update functionality removed - endpoint deleted
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {

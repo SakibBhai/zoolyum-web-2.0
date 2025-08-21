@@ -301,7 +301,7 @@ export function CampaignFormBuilder({
         )}
 
         {/* Form Fields */}
-        <Card className={cn("bg-[#1A1A1A] border-[#333333]", previewMode ? "lg:col-span-3" : "lg:col-span-1")}>>
+        <Card className={cn("bg-[#1A1A1A] border-[#333333]", previewMode ? "lg:col-span-3" : "lg:col-span-1")}>
           <CardHeader>
             <CardTitle className="text-[#E9E7E2] text-sm">
               {previewMode ? "Form Preview" : "Form Fields"}

@@ -48,20 +48,35 @@ function ProjectsTable() {
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this project?')) return;
+    console.log('Delete button clicked for project ID:', id);
+    
+    if (!confirm('Are you sure you want to delete this project?')) {
+      console.log('Delete cancelled by user');
+      return;
+    }
+    
+    console.log('Proceeding with delete for project ID:', id);
     
     try {
       const response = await fetch(`/api/projects/${id}`, {
         method: 'DELETE',
       });
       
+      console.log('Delete response status:', response.status);
+      
       if (response.ok) {
+        const result = await response.json();
+        console.log('Delete successful:', result);
         setProjects(projects.filter(project => project.id !== id));
+        alert('Project deleted successfully!');
       } else {
-        console.error('Failed to delete project');
+        const error = await response.json();
+        console.error('Failed to delete project:', error);
+        alert(`Failed to delete project: ${error.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error deleting project:', error);
+      alert(`Error deleting project: ${error}`);
     }
   };
 

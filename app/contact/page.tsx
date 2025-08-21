@@ -21,11 +21,28 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ConsultationBookingModal } from "@/components/consultation-booking-modal"
 
-// Form validation schema
+// Form validation schema with enhanced phone validation
 const contactFormSchema = z.object({
   name: z.string().min(1, "Name is required").min(2, "Name must be at least 2 characters"),
   email: z.string().min(1, "Email is required").email("Invalid email address"),
-  phone: z.string().optional(),
+  countryCode: z.string().default("+880"),
+  phone: z.string().optional().refine((phone) => {
+    if (!phone) return true;
+    // Bangladesh phone number validation (11 digits starting with 1)
+    const bdPhoneRegex = /^1[3-9]\d{8}$/;
+    return bdPhoneRegex.test(phone.replace(/\s+/g, ''));
+  }, "Please enter a valid Bangladesh phone number (11 digits starting with 1)"),
+  businessName: z.string().optional(),
+  businessWebsite: z.string().optional().refine((url) => {
+    if (!url) return true;
+    try {
+      new URL(url.startsWith('http') ? url : `https://${url}`);
+      return true;
+    } catch {
+      return false;
+    }
+  }, "Please enter a valid website URL"),
+  services: z.array(z.string()).optional(),
   subject: z.string().optional(),
   message: z.string().min(1, "Message is required").min(10, "Message must be at least 10 characters")
 })
@@ -45,6 +62,24 @@ interface ContactSettings {
   requirePhoneField: boolean
 }
 
+// Country codes for phone numbers
+const countryCodes = [
+  { code: "+880", country: "BD", flag: "🇧🇩", name: "Bangladesh" },
+  { code: "+1", country: "US", flag: "🇺🇸", name: "United States" },
+  { code: "+44", country: "GB", flag: "🇬🇧", name: "United Kingdom" },
+  { code: "+91", country: "IN", flag: "🇮🇳", name: "India" },
+  { code: "+86", country: "CN", flag: "🇨🇳", name: "China" },
+]
+
+// Service options
+const serviceOptions = [
+  "SEO",
+  "Google Ads Management & Scaling",
+  "Facebook Ads Management & Scaling",
+  "Performance Marketing - Lead Generation",
+  "Performance Marketing - D2C Brands"
+]
+
 export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
@@ -62,22 +97,7 @@ export default function ContactPage() {
     resolver: zodResolver(contactFormSchema)
   })
 
-  // Fetch contact settings on component mount
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const response = await fetch('/api/contacts/settings')
-        if (response.ok) {
-          const settings = await response.json()
-          setContactSettings(settings)
-        }
-      } catch (error) {
-        console.error('Error fetching contact settings:', error)
-      }
-    }
-    
-    fetchSettings()
-  }, [])
+  // Contact settings functionality removed - endpoint deleted
 
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true)
@@ -144,91 +164,184 @@ export default function ContactPage() {
                     )}
                     
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                      <div className="grid md:grid-cols-2 gap-6">
-                        <div>
-                          <Label htmlFor="name" className="block text-sm font-medium mb-2">
-                            Name *
-                          </Label>
-                          <Input
-                            {...register('name')}
-                            type="text"
-                            id="name"
-                            className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2]"
-                            placeholder="Your name"
-                          />
-                          {errors.name && (
-                            <p className="text-red-400 text-sm mt-1">{errors.name.message}</p>
-                          )}
-                        </div>
-                        <div>
-                          <Label htmlFor="email" className="block text-sm font-medium mb-2">
-                            Email *
-                          </Label>
-                          <Input
-                            {...register('email')}
-                            type="email"
-                            id="email"
-                            className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2]"
-                            placeholder="Your email"
-                          />
-                          {errors.email && (
-                            <p className="text-red-400 text-sm mt-1">{errors.email.message}</p>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <div className="grid md:grid-cols-2 gap-6">
-                        {/* Phone Field - conditionally rendered based on settings */}
-                        {(!contactSettings || contactSettings.enablePhoneField) && (
+                      {/* Contact Information Table */}
+                      <div className="bg-[#1F1F1F] rounded-lg p-6 border border-[#333333]">
+                        <h3 className="text-lg font-semibold mb-4 text-[#FF5001]">Contact Information</h3>
+                        <div className="grid md:grid-cols-2 gap-6">
                           <div>
-                            <Label htmlFor="phone" className="block text-sm font-medium mb-2">
-                              Phone {contactSettings?.requirePhoneField ? '*' : ''}
+                            <Label htmlFor="name" className="block text-sm font-medium mb-2">
+                              Name *
                             </Label>
                             <Input
-                              {...register('phone')}
-                              type="tel"
-                              id="phone"
+                              {...register('name', { required: "Name is required" })}
+                              type="text"
+                              id="name"
+                              name="name"
+                              required
                               className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2]"
-                              placeholder="Your phone number"
+                              placeholder="Your full name"
                             />
+                            {errors.name && (
+                              <p className="text-red-400 text-sm mt-1">{errors.name.message}</p>
+                            )}
+                          </div>
+                          <div>
+                            <Label htmlFor="email" className="block text-sm font-medium mb-2">
+                              Email *
+                            </Label>
+                            <Input
+                              {...register('email', { required: "Email is required" })}
+                              type="email"
+                              id="email"
+                              name="email"
+                              required
+                              className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2]"
+                              placeholder="your.email@example.com"
+                            />
+                            {errors.email && (
+                              <p className="text-red-400 text-sm mt-1">{errors.email.message}</p>
+                            )}
+                          </div>
+                        </div>
+                      
+                        
+                        
+                        {/* Phone Field with Country Code - Bangladesh Focus */}
+                        {(!contactSettings || contactSettings.enablePhoneField) && (
+                          <div className="md:col-span-2">
+                            <Label htmlFor="phone" className="block text-sm font-medium mb-2">
+                              Phone Number {contactSettings?.requirePhoneField ? '*' : ''}
+                            </Label>
+                            <div className="flex gap-2">
+                              <select
+                                {...register('countryCode')}
+                                name="countryCode"
+                                className="px-3 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2] min-w-[120px]"
+                              >
+                                {countryCodes.map((country) => (
+                                  <option key={country.code} value={country.code} className="bg-[#252525]">
+                                    {country.flag} {country.code}
+                                  </option>
+                                ))}
+                              </select>
+                              <Input
+                                {...register('phone')}
+                                type="tel"
+                                id="phone"
+                                name="phone"
+                                className="flex-1 px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2]"
+                                placeholder="1812345678 (BD format)"
+                              />
+                            </div>
                             {errors.phone && (
                               <p className="text-red-400 text-sm mt-1">{errors.phone.message}</p>
                             )}
+                            {errors.countryCode && (
+                              <p className="text-red-400 text-sm mt-1">{errors.countryCode.message}</p>
+                            )}
                           </div>
                         )}
-                        
-                        <div>
-                          <Label htmlFor="subject" className="block text-sm font-medium mb-2">
-                            Subject
-                          </Label>
-                          <Input
-                            {...register('subject')}
-                            type="text"
-                            id="subject"
-                            className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2]"
-                            placeholder="Subject of your message"
-                          />
-                          {errors.subject && (
-                            <p className="text-red-400 text-sm mt-1">{errors.subject.message}</p>
-                          )}
+                      </div>
+                      
+                      {/* Business Information Table */}
+                      <div className="bg-[#1F1F1F] rounded-lg p-6 border border-[#333333]">
+                        <h3 className="text-lg font-semibold mb-4 text-[#FF5001]">Business Information</h3>
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div>
+                            <Label htmlFor="businessName" className="block text-sm font-medium mb-2">
+                              Business Name
+                            </Label>
+                            <Input
+                              {...register('businessName')}
+                              type="text"
+                              id="businessName"
+                              name="businessName"
+                              className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2]"
+                              placeholder="Your business name"
+                            />
+                            {errors.businessName && (
+                              <p className="text-red-400 text-sm mt-1">{errors.businessName.message}</p>
+                            )}
+                          </div>
+                          <div>
+                            <Label htmlFor="businessWebsite" className="block text-sm font-medium mb-2">
+                              Business Website
+                            </Label>
+                            <Input
+                              {...register('businessWebsite')}
+                              type="url"
+                              id="businessWebsite"
+                              name="businessWebsite"
+                              className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2]"
+                              placeholder="https://yourwebsite.com"
+                            />
+                            {errors.businessWebsite && (
+                              <p className="text-red-400 text-sm mt-1">{errors.businessWebsite.message}</p>
+                            )}
+                          </div>
                         </div>
                       </div>
                       
-                      <div>
-                        <Label htmlFor="message" className="block text-sm font-medium mb-2">
-                          Message *
-                        </Label>
-                        <Textarea
-                          {...register('message')}
-                          id="message"
-                          rows={5}
-                          className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2] resize-none"
-                          placeholder="Tell us about your project"
-                        />
-                        {errors.message && (
-                          <p className="text-red-400 text-sm mt-1">{errors.message.message}</p>
-                        )}
+                      {/* Services Selection Table */}
+                      <div className="bg-[#1F1F1F] rounded-lg p-6 border border-[#333333]">
+                        <h3 className="text-lg font-semibold mb-4 text-[#FF5001]">How Can We Help?</h3>
+                        <div className="grid md:grid-cols-2 gap-3">
+                          {serviceOptions.map((service) => (
+                            <label key={service} className="flex items-center space-x-3 cursor-pointer group">
+                              <input
+                                type="checkbox"
+                                value={service}
+                                {...register('services')}
+                                className="w-4 h-4 text-[#FF5001] bg-[#252525] border-[#333333] rounded focus:ring-[#FF5001] focus:ring-2"
+                              />
+                              <span className="text-sm text-[#E9E7E2] group-hover:text-[#FF5001] transition-colors">
+                                {service}
+                              </span>
+                            </label>
+                          ))}
+                        </div>
                       </div>
+                      
+                      {/* Message Section */}
+                       <div className="bg-[#1F1F1F] rounded-lg p-6 border border-[#333333]">
+                         <h3 className="text-lg font-semibold mb-4 text-[#FF5001]">Project Details</h3>
+                         <div className="space-y-4">
+                           <div>
+                             <Label htmlFor="subject" className="block text-sm font-medium mb-2">
+                               Subject
+                             </Label>
+                             <Input
+                              {...register('subject')}
+                              type="text"
+                              id="subject"
+                              name="subject"
+                              className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2]"
+                              placeholder="Brief description of your project"
+                            />
+                             {errors.subject && (
+                               <p className="text-red-400 text-sm mt-1">{errors.subject.message}</p>
+                             )}
+                           </div>
+                           
+                           <div>
+                             <Label htmlFor="message" className="block text-sm font-medium mb-2">
+                               Message *
+                             </Label>
+                             <Textarea
+                               {...register('message', { required: "Message is required" })}
+                               id="message"
+                               name="message"
+                               required
+                               rows={5}
+                               className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2] resize-none"
+                               placeholder="Tell us about your project, goals, timeline, and any specific requirements"
+                             />
+                             {errors.message && (
+                               <p className="text-red-400 text-sm mt-1">{errors.message.message}</p>
+                             )}
+                           </div>
+                         </div>
+                       </div>
                       
                       <Button
                         type="submit"

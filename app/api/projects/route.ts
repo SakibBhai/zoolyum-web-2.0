@@ -1,22 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { createId } from '@paralleldrive/cuid2';
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status');
-    const type = searchParams.get('type');
+    const published = searchParams.get('published');
+    const category = searchParams.get('category');
     const limitParam = searchParams.get('limit');
     const limit = limitParam ? parseInt(limitParam, 10) : undefined;
 
     const whereClause: any = {};
     
-    if (status) {
-      whereClause.status = status;
+    if (published !== null) {
+      whereClause.published = published === 'true';
     }
     
-    if (type) {
-      whereClause.type = type;
+    if (category) {
+      whereClause.category = category;
     }
 
     const queryOptions: any = {
@@ -46,44 +47,68 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const {
-      name,
+      id,
+      title,
+      slug,
       description,
-      client_id,
-      status,
-      type,
-      start_date,
-      end_date,
-      budget,
-      progress,
-      manager,
-      created_by,
-      tasks_total,
-      tasks_completed
+      content,
+      category,
+      image_url,
+      hero_image_url,
+      year,
+      client,
+      duration,
+      services,
+      overview,
+      challenge,
+      solution,
+      process,
+      gallery,
+      results,
+      testimonial,
+      technologies,
+      project_url,
+      github_url,
+      published,
+      featured,
+      order
     } = body;
 
     // Validate required fields
-    if (!name) {
+    if (!title || !slug || !description || !category) {
       return NextResponse.json(
-        { error: 'Missing required field: name' },
+        { error: 'Missing required fields: title, slug, description, category' },
         { status: 400 }
       );
     }
 
     const project = await prisma.project.create({
       data: {
-        name,
+        id: id || createId(),
+        title,
+        slug,
         description,
-        client_id,
-        status,
-        type,
-        start_date: start_date ? new Date(start_date) : null,
-        end_date: end_date ? new Date(end_date) : null,
-        budget,
-        progress: progress || 0,
-        manager,
-        created_by,
-        tasks_total: tasks_total || 0,
-        tasks_completed: tasks_completed || 0,
+        content,
+        category,
+        imageUrl: image_url,
+        hero_image_url,
+        year,
+        client,
+        duration,
+        services: services || [],
+        overview,
+        challenge,
+        solution,
+        process,
+        gallery,
+        results,
+        testimonial,
+        technologies: technologies || [],
+        project_url,
+        github_url,
+        published: published || false,
+        featured: featured || false,
+        order: order || 0,
       },
     });
 

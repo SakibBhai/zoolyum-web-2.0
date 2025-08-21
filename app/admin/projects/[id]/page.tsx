@@ -15,7 +15,7 @@ interface Project {
   id: string
   title: string
   slug: string
-  description: string
+  overview: string
   content?: string
   category: string
   imageUrl?: string
@@ -24,7 +24,6 @@ interface Project {
   client?: string
   duration?: string
   services: string[]
-  overview?: string
   challenge?: string
   solution?: string
   technologies: string[]
@@ -183,17 +182,17 @@ export default function ViewProjectPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Project Details */}
           <div className="md:col-span-2 space-y-6">
-            {/* Description */}
+            {/* Overview */}
             <div className="bg-[#1A1A1A] rounded-lg p-6">
-              <h2 className="text-lg font-semibold text-[#E9E7E2] mb-3">Description</h2>
-              <p className="text-[#E9E7E2]/80 leading-relaxed">{project.description}</p>
+              <h2 className="text-lg font-semibold text-[#E9E7E2] mb-3">Overview</h2>
+              <p className="text-[#E9E7E2]/80 leading-relaxed">{project.overview}</p>
             </div>
 
-            {/* Overview */}
-            {project.overview && (
+            {/* Challenge */}
+            {project.challenge && (
               <div className="bg-[#1A1A1A] rounded-lg p-6">
-                <h2 className="text-lg font-semibold text-[#E9E7E2] mb-3">Overview</h2>
-                <p className="text-[#E9E7E2]/80 leading-relaxed whitespace-pre-wrap">{project.overview}</p>
+                <h2 className="text-lg font-semibold text-[#E9E7E2] mb-3">Challenge</h2>
+                <p className="text-[#E9E7E2]/80 leading-relaxed whitespace-pre-wrap">{project.challenge}</p>
               </div>
             )}
 

@@ -37,24 +37,17 @@ export async function GET() {
           isVisible: true
         },
         {
-          label: "Work",
-          url: "/work",
-          type: "internal",
-          order: 4,
-          isVisible: true
-        },
-        {
           label: "Blog",
           url: "/blog",
           type: "internal",
-          order: 5,
+          order: 4,
           isVisible: true
         },
         {
           label: "Contact",
           url: "/contact",
           type: "internal",
-          order: 6,
+          order: 5,
           isVisible: true
         }
       ]);

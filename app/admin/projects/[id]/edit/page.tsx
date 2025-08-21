@@ -113,7 +113,7 @@ export default function EditProjectPage() {
         form.reset({
           title: project.title || '',
           slug: project.slug || '',
-          description: project.description || '',
+          description: project.overview || '',
           content: project.content || '',
           category: project.category || '',
           imageUrl: project.imageUrl || '',

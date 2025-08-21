@@ -7,6 +7,11 @@ export interface Contact {
   name: string;
   email: string;
   phone?: string;
+  countryCode?: string;
+  company?: string;
+  businessName?: string;
+  businessWebsite?: string;
+  services?: string[];
   subject?: string;
   message: string;
   status: "NEW" | "READ" | "REPLIED" | "ARCHIVED";
@@ -62,8 +67,40 @@ export function validateContactData(data: any) {
     errors.push("Message must be at least 10 characters long");
   }
 
-  if (data.phone && !/^[\+]?[1-9][\d\s\-\(\)]{7,}$/.test(data.phone)) {
-    errors.push("Invalid phone number format");
+  // Enhanced phone validation for Bangladesh numbers
+  if (data.phone) {
+    const countryCode = data.countryCode || "+880";
+    if (countryCode === "+880") {
+      // Bangladesh phone number validation (11 digits)
+      const phoneDigits = data.phone.replace(/\D/g, '');
+      if (!/^01[3-9]\d{8}$/.test(phoneDigits)) {
+        errors.push("Bangladesh phone number must be 11 digits starting with 013-019");
+      }
+    } else {
+      // General international phone validation
+      if (!/^[\+]?[1-9][\d\s\-\(\)]{7,}$/.test(data.phone)) {
+        errors.push("Invalid phone number format");
+      }
+    }
+  }
+
+  // Business website validation
+  if (data.businessWebsite) {
+    try {
+      new URL(data.businessWebsite);
+    } catch {
+      errors.push("Business website must be a valid URL");
+    }
+  }
+
+  // Business name validation
+  if (data.businessName && data.businessName.trim().length < 2) {
+    errors.push("Business name must be at least 2 characters long");
+  }
+
+  // Services validation
+  if (data.services && !Array.isArray(data.services)) {
+    errors.push("Services must be an array");
   }
 
   return {
@@ -81,14 +118,19 @@ export async function createContact(
   const id = createId();
   
   const result = await query(
-    `INSERT INTO contacts (id, name, email, phone, subject, message, status, ip_address, user_agent, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())
+    `INSERT INTO contacts (id, name, email, phone, country_code, company, business_name, business_website, services, subject, message, status, ip_address, user_agent, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
      RETURNING *`,
     [
       id,
       data.name,
       data.email,
       data.phone,
+      data.countryCode || "+880",
+      data.company,
+      data.businessName,
+      data.businessWebsite,
+      data.services || [],
       data.subject,
       data.message,
       data.status || "NEW",
@@ -135,6 +177,12 @@ export async function updateContact(
           ? "user_agent"
           : key === "updatedAt"
           ? "updated_at"
+          : key === "countryCode"
+          ? "country_code"
+          : key === "businessName"
+          ? "business_name"
+          : key === "businessWebsite"
+          ? "business_website"
           : key;
       fields.push(`${dbKey} = $${paramCount}`);
       values.push(value);
@@ -304,6 +352,11 @@ function mapContactFromDb(row: any): Contact {
     name: row.name,
     email: row.email,
     phone: row.phone,
+    countryCode: row.country_code,
+    company: row.company,
+    businessName: row.business_name,
+    businessWebsite: row.business_website,
+    services: row.services || [],
     subject: row.subject,
     message: row.message,
     status: row.status,

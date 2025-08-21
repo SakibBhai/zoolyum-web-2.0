@@ -71,8 +71,8 @@ export default function AdminJobsPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [departmentFilter, setDepartmentFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [departmentFilter, setDepartmentFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [departments, setDepartments] = useState<string[]>([]);
   const [deleting, setDeleting] = useState<string | null>(null);
 
@@ -83,7 +83,7 @@ export default function AdminJobsPage() {
       const params = new URLSearchParams();
       params.append('includeUnpublished', 'true'); // Admin can see all jobs
       if (searchTerm) params.append('search', searchTerm);
-      if (departmentFilter) params.append('department', departmentFilter);
+      if (departmentFilter && departmentFilter !== 'all') params.append('department', departmentFilter);
       if (statusFilter === 'published') params.append('published', 'true');
       if (statusFilter === 'draft') params.append('published', 'false');
 
@@ -278,7 +278,7 @@ export default function AdminJobsPage() {
                 <SelectValue placeholder="All Departments" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Departments</SelectItem>
+                <SelectItem value="all">All Departments</SelectItem>
                 {departments.map((dept) => (
                   <SelectItem key={dept} value={dept}>{dept}</SelectItem>
                 ))}
@@ -289,7 +289,7 @@ export default function AdminJobsPage() {
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Status</SelectItem>
+                <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="published">Published</SelectItem>
                 <SelectItem value="draft">Draft</SelectItem>
               </SelectContent>
@@ -298,8 +298,8 @@ export default function AdminJobsPage() {
               variant="outline"
               onClick={() => {
                 setSearchTerm('');
-                setDepartmentFilter('');
-                setStatusFilter('');
+                setDepartmentFilter('all');
+                setStatusFilter('all');
               }}
             >
               <Filter className="h-4 w-4 mr-2" />

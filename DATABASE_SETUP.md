@@ -136,8 +136,7 @@ testimonials (
 - `GET /api/contacts/[id]` - Get specific contact (Admin only)
 - `PUT /api/contacts/[id]` - Update contact (Admin only)
 - `DELETE /api/contacts/[id]` - Delete contact (Admin only)
-- `GET /api/contacts/settings` - Get contact settings
-- `PUT /api/contacts/settings` - Update contact settings (Admin only)
+
 - `GET /api/contacts/stats` - Get contact statistics (Admin only)
 
 ### Testimonials

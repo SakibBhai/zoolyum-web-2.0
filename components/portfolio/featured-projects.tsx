@@ -145,7 +145,7 @@ function PortfolioItem({
         <span className="text-[#FF5001] text-xs md:text-sm">{category}</span>
         <h3 className="text-lg md:text-xl font-bold mt-1 md:mt-2">{title}</h3>
         <Link
-          href={`/work/${slug}`}
+          href={`/portfolio/${slug}`}
           className="mt-3 md:mt-4 inline-flex items-center text-[#E9E7E2] hover:text-[#FF5001] transition-colors text-sm md:text-base"
         >
           View Project

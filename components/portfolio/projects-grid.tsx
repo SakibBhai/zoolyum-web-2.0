@@ -6,9 +6,10 @@ import { prisma } from '@/lib/prisma'
 
 interface Project {
   id: string
-  name: string
-  description: string | null
-  type: string | null
+  title: string
+  overview: string | null
+  category: string | null
+  slug: string
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -22,7 +23,7 @@ async function getProjects({ category, limit }: ProjectsGridProps = {}): Promise
   const whereClause: any = {}
   
   if (category && category !== 'all') {
-    whereClause.type = category
+    whereClause.category = category
   }
 
   const projects = await prisma.project.findMany({
@@ -60,13 +61,13 @@ export async function ProjectsGrid({ category, limit }: ProjectsGridProps) {
           key={project.id}
           className="group"
         >
-          <Link href={`/work/${project.id}`} className="block">
+          <Link href={`/portfolio/${project.slug}`} className="block">
             <Card className="h-full bg-[#1A1A1A] border-[#333333] overflow-hidden transform-gpu transition-all duration-300 hover:scale-105">
               <div className="overflow-hidden">
                 <div className="transform-gpu transition-transform duration-700 group-hover:scale-110">
                   <Image
                     src="/placeholder.svg"
-                    alt={project.name}
+                    alt={project.title}
                     width={600}
                     height={400}
                     className="w-full aspect-[3/2] object-cover"
@@ -75,12 +76,12 @@ export async function ProjectsGrid({ category, limit }: ProjectsGridProps) {
                 </div>
               </div>
               <CardContent className="p-6">
-                <span className="text-[#FF5001] text-sm">{project.type || 'General'}</span>
+                <span className="text-[#FF5001] text-sm">{project.category || 'General'}</span>
                 <h3 className="text-xl font-bold mt-1 group-hover:text-[#FF5001] transition-colors">
-                  {project.name}
+                  {project.title}
                 </h3>
                 <p className="text-[#E9E7E2]/70 mt-2 line-clamp-3">
-                  {project.description || 'No description available.'}
+                  {project.overview || 'No description available.'}
                 </p>
                 <div className="mt-4 pt-4 border-t border-[#333333]">
                   <span className="text-[#FF5001] font-medium inline-flex items-center group/link">

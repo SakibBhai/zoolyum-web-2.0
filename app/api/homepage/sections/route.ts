@@ -16,20 +16,12 @@ export async function GET() {
       // Return default sections if none exist
       return NextResponse.json([
         {
-          sectionType: "featured_work",
-          title: "Featured Work",
-          subtitle: "Our Latest Projects",
-          content: "Explore our portfolio of successful brand transformations and digital innovations.",
-          isVisible: true,
-          order: 1
-        },
-        {
           sectionType: "our_team",
           title: "Our Team",
           subtitle: "Meet the Experts",
           content: "Our diverse team of strategists, designers, and marketers brings years of experience to every project.",
           isVisible: true,
-          order: 2
+          order: 1
         },
         {
           sectionType: "client_success",
@@ -37,7 +29,7 @@ export async function GET() {
           subtitle: "What Our Clients Say",
           content: "Hear from the businesses we've helped transform and grow.",
           isVisible: true,
-          order: 3
+          order: 2
         },
         {
           sectionType: "get_started",
@@ -45,7 +37,7 @@ export async function GET() {
           subtitle: "Ready to Transform Your Brand?",
           content: "Let's discuss how we can help your business achieve its full potential.",
           isVisible: true,
-          order: 4
+          order: 3
         }
       ]);
     }
