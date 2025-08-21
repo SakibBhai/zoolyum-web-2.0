@@ -3,7 +3,7 @@
 import { type ReactNode, useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { LayoutDashboard, FileText, Briefcase, MessageSquare, Settings, LogOut, Menu, X, User, Mail, Megaphone } from "lucide-react"
+import { LayoutDashboard, FileText, Briefcase, MessageSquare, Settings, LogOut, Menu, X, User, Mail, Megaphone, UserCheck } from "lucide-react"
 import { useConditionalUser } from "@/hooks/use-conditional-user"
 import { AdminLoading } from "@/components/admin/admin-loading"
 
@@ -84,6 +84,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       name: "Testimonials",
       href: "/admin/testimonials",
       icon: MessageSquare
+    },
+    {
+      name: "Jobs",
+      href: "/admin/jobs",
+      icon: UserCheck
     },
     {
       name: "Contacts",

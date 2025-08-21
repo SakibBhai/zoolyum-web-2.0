@@ -4,32 +4,33 @@ import { prisma } from '@/lib/prisma';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const published = searchParams.get('published');
-    const featured = searchParams.get('featured');
-    const category = searchParams.get('category');
+    const status = searchParams.get('status');
+    const type = searchParams.get('type');
+    const limitParam = searchParams.get('limit');
+    const limit = limitParam ? parseInt(limitParam, 10) : undefined;
 
     const whereClause: any = {};
     
-    if (published !== null) {
-      whereClause.published = published === 'true';
+    if (status) {
+      whereClause.status = status;
     }
     
-    if (featured !== null) {
-      whereClause.featured = featured === 'true';
-    }
-    
-    if (category) {
-      whereClause.category = category;
+    if (type) {
+      whereClause.type = type;
     }
 
-    const projects = await prisma.project.findMany({
+    const queryOptions: any = {
       where: whereClause,
       orderBy: [
-        { featured: 'desc' },
-        { order: 'asc' },
         { createdAt: 'desc' }
       ],
-    });
+    };
+    
+    if (limit && limit > 0) {
+      queryOptions.take = limit;
+    }
+
+    const projects = await prisma.project.findMany(queryOptions);
 
     return NextResponse.json(projects);
   } catch (error) {
@@ -45,78 +46,44 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const {
-      title,
-      slug,
+      name,
       description,
-      content,
-      category,
-      imageUrl,
-      heroImageUrl,
-      year,
-      client,
-      duration,
-      services,
-      overview,
-      challenge,
-      solution,
-      process,
-      gallery,
-      results,
-      testimonial,
-      technologies,
-      projectUrl,
-      githubUrl,
-      published,
-      featured,
-      order
+      client_id,
+      status,
+      type,
+      start_date,
+      end_date,
+      budget,
+      progress,
+      manager,
+      created_by,
+      tasks_total,
+      tasks_completed
     } = body;
 
     // Validate required fields
-    if (!title || !slug || !description || !category) {
+    if (!name) {
       return NextResponse.json(
-        { error: 'Missing required fields: title, slug, description, category' },
+        { error: 'Missing required field: name' },
         { status: 400 }
-      );
-    }
-
-    // Check if slug already exists
-    const existingProject = await prisma.project.findUnique({
-      where: { slug }
-    });
-
-    if (existingProject) {
-      return NextResponse.json(
-        { error: 'A project with this slug already exists' },
-        { status: 409 }
       );
     }
 
     const project = await prisma.project.create({
       data: {
-        title,
-        slug,
+        name,
         description,
-        content,
-        category,
-        imageUrl,
-        heroImageUrl,
-        year,
-        client,
-        duration,
-        services: services || [],
-        overview,
-        challenge,
-        solution,
-        process,
-        gallery,
-        results,
-        testimonial,
-        technologies: technologies || [],
-        projectUrl,
-        githubUrl,
-        published: published || false,
-        featured: featured || false,
-        order: order || 0,
+        client_id,
+        status,
+        type,
+        start_date: start_date ? new Date(start_date) : null,
+        end_date: end_date ? new Date(end_date) : null,
+        budget,
+        progress: progress || 0,
+        manager,
+        created_by,
+        tasks_total: tasks_total || 0,
+        tasks_completed: tasks_completed || 0,
       },
     });
 

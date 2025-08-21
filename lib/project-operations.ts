@@ -23,82 +23,92 @@ export interface Testimonial {
 
 export interface Project {
   id: string;
-  title: string;
-  slug: string;
-  description: string;
-  content?: string;
-  category: string;
-  imageUrl?: string;
-  heroImageUrl?: string;
-  year?: string;
-  client?: string;
-  duration?: string;
-  services?: string[];
-  overview?: string;
-  challenge?: string;
-  solution?: string;
-  process?: ProcessStep[];
-  gallery?: GalleryImage[];
-  results?: Result[];
-  testimonial?: Testimonial;
-  technologies?: string[];
-  projectUrl?: string;
-  githubUrl?: string;
-  published: boolean;
-  featured: boolean;
-  order: number;
-  createdAt: Date;
-  updatedAt: Date;
+  name: string;
+  description: string | null;
+  client_id: string | null;
+  status: string | null;
+  type: string | null;
+  start_date: Date | null;
+  end_date: Date | null;
+  budget: number | null;
+  progress: number | null;
+  manager: string | null;
+  created_by: string | null;
+  tasks_total: number | null;
+  tasks_completed: number | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+}
+
+// Extended project interface with backward compatibility fields
+export interface ProjectWithComputed extends Project {
+  title: string; // Maps to name
+  slug: string; // Generated from name
+  published: boolean; // Maps to status === 'active'
+  featured: boolean; // Always false for now
+  category: string; // Maps to type
+}
+
+// Helper function to add computed fields to a project
+export function addComputedFields(project: Project): ProjectWithComputed {
+  return {
+    ...project,
+    title: project.name,
+    slug: generateSlug(project.name),
+    published: project.status === 'active',
+    featured: false, // Default to false since this field doesn't exist in schema
+    category: project.type || 'General'
+  };
+}
+
+// Helper function to add computed fields to multiple projects
+export function addComputedFieldsToArray(projects: Project[]): ProjectWithComputed[] {
+  return projects.map(addComputedFields);
 }
 
 export interface CreateProjectData {
-  title: string;
-  slug: string;
-  description: string;
-  content?: string;
-  category: string;
-  imageUrl?: string;
-  heroImageUrl?: string;
-  year?: string;
-  client?: string;
-  duration?: string;
-  services?: string[];
-  overview?: string;
-  challenge?: string;
-  solution?: string;
-  process?: ProcessStep[];
-  gallery?: GalleryImage[];
-  results?: Result[];
-  testimonial?: Testimonial;
-  technologies?: string[];
-  projectUrl?: string;
-  githubUrl?: string;
-  published?: boolean;
-  featured?: boolean;
-  order?: number;
+  name: string;
+  description?: string;
+  client_id?: string;
+  status?: string;
+  type?: string;
+  start_date?: Date;
+  end_date?: Date;
+  budget?: number;
+  progress?: number;
+  manager?: string;
+  created_by?: string;
+  tasks_total?: number;
+  tasks_completed?: number;
 }
 
 export interface UpdateProjectData extends Partial<CreateProjectData> {}
 
-// Fetch all projects
+// Fetch all projects with optional filtering
 export async function fetchProjects(params?: {
-  published?: boolean;
-  featured?: boolean;
-  category?: string;
-}): Promise<Project[]> {
+  status?: string;
+  type?: string;
+  published?: boolean; // For backward compatibility
+  limit?: number;
+}): Promise<ProjectWithComputed[]> {
   try {
     const searchParams = new URLSearchParams();
     
+    // Handle backward compatibility for 'published' parameter
     if (params?.published !== undefined) {
-      searchParams.append('published', params.published.toString());
+      searchParams.append('status', params.published ? 'active' : 'inactive');
+    } else if (params?.status) {
+      searchParams.append('status', params.status);
     }
-    if (params?.featured !== undefined) {
-      searchParams.append('featured', params.featured.toString());
+    
+    if (params?.type) {
+      searchParams.append('type', params.type);
     }
-    if (params?.category) {
-      searchParams.append('category', params.category);
+    
+    if (params?.limit) {
+      searchParams.append('limit', params.limit.toString());
     }
-
+    
     const url = `/api/projects${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
     const response = await fetch(url);
     
@@ -106,7 +116,8 @@ export async function fetchProjects(params?: {
       throw new Error('Failed to fetch projects');
     }
     
-    return await response.json();
+    const projects: Project[] = await response.json();
+    return addComputedFieldsToArray(projects);
   } catch (error) {
     console.error('Error fetching projects:', error);
     throw error;
@@ -114,7 +125,7 @@ export async function fetchProjects(params?: {
 }
 
 // Fetch a single project by ID
-export async function fetchProject(id: string): Promise<Project | null> {
+export async function fetchProject(id: string): Promise<ProjectWithComputed | null> {
   try {
     const response = await fetch(`/api/projects/${id}`);
     
@@ -126,15 +137,29 @@ export async function fetchProject(id: string): Promise<Project | null> {
       throw new Error('Failed to fetch project');
     }
     
-    return await response.json();
+    const project: Project = await response.json();
+    return addComputedFields(project);
   } catch (error) {
     console.error('Error fetching project:', error);
     throw error;
   }
 }
 
-// Fetch a single project by slug
-export async function fetchProjectBySlug(slug: string, isAdmin: boolean = false): Promise<Project | null> {
+// Helper function to generate URL-friendly slug from project name
+export function generateSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+}
+
+// Helper function to get project name from slug
+export function getNameFromSlug(slug: string): string {
+  return slug.replace(/-/g, ' ');
+}
+
+// Fetch a single project by slug (using name)
+export async function fetchProjectBySlug(slug: string, isAdmin: boolean = false): Promise<ProjectWithComputed | null> {
   try {
     const url = `/api/projects/slug/${slug}${isAdmin ? '?admin=true' : ''}`;
     const response = await fetch(url);
@@ -147,15 +172,27 @@ export async function fetchProjectBySlug(slug: string, isAdmin: boolean = false)
       throw new Error('Failed to fetch project');
     }
     
-    return await response.json();
+    const project: Project = await response.json();
+    return addComputedFields(project);
   } catch (error) {
     console.error('Error fetching project by slug:', error);
     throw error;
   }
 }
 
+// Fetch a single project by name
+export async function fetchProjectByName(name: string, isAdmin: boolean = false): Promise<ProjectWithComputed | null> {
+  try {
+    const slug = generateSlug(name);
+    return await fetchProjectBySlug(slug, isAdmin);
+  } catch (error) {
+    console.error('Error fetching project by name:', error);
+    throw error;
+  }
+}
+
 // Create a new project
-export async function createProject(data: CreateProjectData): Promise<Project> {
+export async function createProject(data: CreateProjectData): Promise<ProjectWithComputed> {
   try {
     const response = await fetch('/api/projects', {
       method: 'POST',
@@ -170,7 +207,8 @@ export async function createProject(data: CreateProjectData): Promise<Project> {
       throw new Error(error.error || 'Failed to create project');
     }
     
-    return await response.json();
+    const project: Project = await response.json();
+    return addComputedFields(project);
   } catch (error) {
     console.error('Error creating project:', error);
     throw error;
@@ -178,7 +216,7 @@ export async function createProject(data: CreateProjectData): Promise<Project> {
 }
 
 // Update an existing project
-export async function updateProject(id: string, data: UpdateProjectData): Promise<Project> {
+export async function updateProject(id: string, data: UpdateProjectData): Promise<ProjectWithComputed> {
   try {
     const response = await fetch(`/api/projects/${id}`, {
       method: 'PUT',
@@ -193,7 +231,8 @@ export async function updateProject(id: string, data: UpdateProjectData): Promis
       throw new Error(error.error || 'Failed to update project');
     }
     
-    return await response.json();
+    const project: Project = await response.json();
+    return addComputedFields(project);
   } catch (error) {
     console.error('Error updating project:', error);
     throw error;

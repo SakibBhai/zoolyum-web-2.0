@@ -11,7 +11,8 @@ import {
   Settings,
   LogOut,
   Megaphone,
-  Mail
+  Mail,
+  UserCheck
 } from "lucide-react"
 import { useConditionalUser } from "@/hooks/use-conditional-user"
 
@@ -48,6 +49,11 @@ export function AdminSidebar() {
       name: "Testimonials",
       href: "/admin/testimonials",
       icon: <MessageSquare className="h-5 w-5" />
+    },
+    {
+      name: "Jobs",
+      href: "/admin/jobs",
+      icon: <UserCheck className="h-5 w-5" />
     },
     {
       name: "Contacts",

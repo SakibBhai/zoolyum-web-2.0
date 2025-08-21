@@ -8,8 +8,10 @@ export async function GET(
   try {
     const { slug } = await params;
     
-    const project = await prisma.project.findUnique({
-      where: { slug },
+    // Since 'slug' field doesn't exist in the schema, we'll search by name or id
+    // For now, we'll treat the slug as the project name
+    const project = await prisma.project.findFirst({
+      where: { name: slug },
     });
 
     if (!project) {
@@ -19,11 +21,11 @@ export async function GET(
       );
     }
 
-    // Allow admin access to unpublished projects via query parameter
+    // Allow admin access to all projects via query parameter
     const isAdmin = request.nextUrl.searchParams.get('admin') === 'true';
     
-    // Only return published projects for public access
-    if (!project.published && !isAdmin) {
+    // Only return active projects for public access
+    if (project.status !== 'active' && !isAdmin) {
       return NextResponse.json(
         { error: 'Project not found' },
         { status: 404 }

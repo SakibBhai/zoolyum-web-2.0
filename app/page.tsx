@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { useState } from "react";
 import { PageTransition } from "@/components/page-transition";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -16,9 +17,20 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { PageHeadline } from "@/components/page-headline";
 import { TeamMemberCard } from "@/components/team-member-card";
 import { CounterAnimation } from "@/components/scroll-animations/counter-animation";
+import { FeaturedProjects } from "@/components/portfolio/featured-projects";
+import { MobileCTAMenu, MobileCTATrigger } from "@/components/mobile-cta-menu";
 
 export default function Home() {
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const [isMobileCTAMenuOpen, setIsMobileCTAMenuOpen] = useState(false);
+
+  const handleOpenMobileCTAMenu = () => {
+    setIsMobileCTAMenuOpen(true);
+  };
+
+  const handleCloseMobileCTAMenu = () => {
+    setIsMobileCTAMenuOpen(false);
+  };
 
   return (
     <PageTransition>
@@ -263,45 +275,7 @@ export default function Home() {
                 description="Explore a selection of our most impactful projects that have helped businesses achieve remarkable growth and market presence."
               />
 
-              <StaggerReveal
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
-                staggerDelay={0.1}
-                mobileStaggerDelay={0.05}
-                mobileAnimation="fade"
-              >
-                <PortfolioItem
-                  title="Nexus Rebrand"
-                  category="Brand Strategy"
-                  image="/placeholder.svg?height=400&width=600"
-                />
-                <PortfolioItem
-                  title="Elevate Digital Transformation"
-                  category="Digital Strategy"
-                  image="/placeholder.svg?height=400&width=600"
-                />
-                <PortfolioItem
-                  title="Horizon Market Entry"
-                  category="Consultancy"
-                  image="/placeholder.svg?height=400&width=600"
-                />
-              </StaggerReveal>
-
-              <ScrollReveal
-                className="mt-10 md:mt-12 text-center"
-                delay={0.3}
-                mobileDelay={0.2}
-                mobileAnimation="fade"
-              >
-                <Link
-                  href="/portfolio"
-                  className="px-6 py-3 md:px-8 md:py-4 bg-[#FF5001] text-[#161616] font-bold rounded-full hover:bg-[#FF5001]/90 transition-all duration-300 inline-flex items-center group"
-                  data-cursor="button"
-                  data-cursor-text="View Portfolio"
-                >
-                  View Full Portfolio
-                  <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </ScrollReveal>
+              <FeaturedProjects limit={3} />
             </div>
           </section>
 
@@ -448,26 +422,34 @@ export default function Home() {
                     that resonates with your audience and drives meaningful
                     results for your business.
                   </p>
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <Link
-                      href="/contact"
-                      className="px-6 py-3 md:px-8 md:py-4 bg-[#FF5001] text-[#161616] font-bold rounded-full hover:bg-[#FF5001]/90 transition-all duration-300 inline-flex items-center justify-center group"
-                      data-cursor="button"
-                      data-cursor-text="Contact"
-                    >
-                      Start Your Project
-                      <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                    <Link
-                      href="/contact#schedule"
-                      className="px-6 py-3 md:px-8 md:py-4 border border-[#FF5001] text-[#FF5001] font-bold rounded-full hover:bg-[#FF5001]/10 transition-all duration-300 inline-flex items-center justify-center group"
-                      data-cursor="button"
-                      data-cursor-text="Schedule"
-                    >
-                      Schedule a Consultation
-                      <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                  </div>
+                  {/* Mobile CTA Trigger */}
+                  {isMobile ? (
+                    <div className="flex justify-center">
+                      <MobileCTATrigger onOpen={handleOpenMobileCTAMenu} />
+                    </div>
+                  ) : (
+                    /* Desktop CTA Buttons */
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                      <Link
+                        href="/contact"
+                        className="px-6 py-3 md:px-8 md:py-4 bg-[#FF5001] text-[#161616] font-bold rounded-full hover:bg-[#FF5001]/90 transition-all duration-300 inline-flex items-center justify-center group"
+                        data-cursor="button"
+                        data-cursor-text="Contact"
+                      >
+                        Start Your Project
+                        <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
+                      </Link>
+                      <Link
+                        href="/contact#schedule"
+                        className="px-6 py-3 md:px-8 md:py-4 border border-[#FF5001] text-[#FF5001] font-bold rounded-full hover:bg-[#FF5001]/10 transition-all duration-300 inline-flex items-center justify-center group"
+                        data-cursor="button"
+                        data-cursor-text="Schedule"
+                      >
+                        Schedule a Consultation
+                        <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
+                      </Link>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -476,6 +458,12 @@ export default function Home() {
 
         <Footer />
       </div>
+      
+      {/* Mobile CTA Menu */}
+      <MobileCTAMenu 
+        isOpen={isMobileCTAMenuOpen} 
+        onClose={handleCloseMobileCTAMenu} 
+      />
     </PageTransition>
   );
 }
@@ -578,43 +566,6 @@ function AgencyNameAnimation() {
         transition={{ delay: sparkleDelay, duration: 0.3 }}
         className="absolute bottom-0 right-0 w-1 h-12 md:h-16 bg-[#FF5001] translate-x-2"
       ></motion.div>
-    </div>
-  );
-}
-
-// Portfolio Item Component
-function PortfolioItem({
-  title,
-  category,
-  image,
-}: {
-  title: string;
-  category: string;
-  image: string;
-}) {
-  return (
-    <div className="group relative overflow-hidden rounded-xl">
-      <div className="aspect-[4/3] bg-[#212121] overflow-hidden">
-        <Image
-          src={image || "/placeholder.svg"}
-          alt={title}
-          width={400}
-          height={300}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          sizes="(max-width: 768px) 100vw, 400px"
-        />
-      </div>
-      <div className="absolute inset-0 bg-gradient-to-t from-[#161616] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 md:p-6">
-        <span className="text-[#FF5001] text-xs md:text-sm">{category}</span>
-        <h3 className="text-lg md:text-xl font-bold mt-1 md:mt-2">{title}</h3>
-        <Link
-          href="/portfolio"
-          className="mt-3 md:mt-4 inline-flex items-center text-[#E9E7E2] hover:text-[#FF5001] transition-colors text-sm md:text-base"
-        >
-          View Project
-          <ArrowRight className="ml-2 w-3 h-3 md:w-4 md:h-4" />
-        </Link>
-      </div>
     </div>
   );
 }

@@ -4,20 +4,18 @@ import { prisma } from '@/lib/prisma'
 
 export async function getProjectCategories(): Promise<string[]> {
   try {
-    const categories = await prisma.project.findMany({
-      where: {
-        published: true,
-      },
+    const projects = await prisma.project.findMany({
       select: {
-        category: true,
+        type: true,
       },
-      distinct: ['category'],
       orderBy: {
-        category: 'asc',
+        type: 'asc',
       },
     })
 
-    return categories.map(item => item.category).filter(Boolean)
+    // Get unique types and filter out null/undefined values
+    const uniqueTypes = [...new Set(projects.map(item => item.type).filter(Boolean))]
+    return uniqueTypes
   } catch (error) {
     console.error('Error fetching project categories:', error)
     return []
@@ -27,12 +25,8 @@ export async function getProjectCategories(): Promise<string[]> {
 export async function getFeaturedProject() {
   try {
     const featuredProject = await prisma.project.findFirst({
-      where: {
-        published: true,
-        featured: true,
-      },
       orderBy: {
-        order: 'asc',
+        createdAt: 'desc',
       },
     })
 

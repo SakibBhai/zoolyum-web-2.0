@@ -38,30 +38,19 @@ export async function PUT(
     const body = await request.json();
     
     const {
-      title,
-      slug,
+      name,
       description,
-      content,
-      category,
-      imageUrl,
-      heroImageUrl,
-      year,
-      client,
-      duration,
-      services,
-      overview,
-      challenge,
-      solution,
-      process,
-      gallery,
-      results,
-      testimonial,
-      technologies,
-      projectUrl,
-      githubUrl,
-      published,
-      featured,
-      order
+      client_id,
+      status,
+      type,
+      start_date,
+      end_date,
+      budget,
+      progress,
+      manager,
+      created_by,
+      tasks_total,
+      tasks_completed
     } = body;
 
     // Check if project exists
@@ -76,74 +65,24 @@ export async function PUT(
       );
     }
 
-    // If slug is being updated, check if it's already taken by another project
-    if (slug && slug !== existingProject.slug) {
-      const slugExists = await prisma.project.findUnique({
-        where: { slug },
-      });
 
-      if (slugExists) {
-        return NextResponse.json(
-          { error: 'A project with this slug already exists' },
-          { status: 409 }
-        );
-      }
-    }
-
-    // Process services field to ensure it's an array
-    let processedServices = services;
-    if (services !== undefined) {
-      if (typeof services === 'string') {
-        // Convert string to array, handling empty strings
-        processedServices = services.trim() === '' ? [] : services.split(',').map(s => s.trim()).filter(s => s.length > 0);
-      } else if (Array.isArray(services)) {
-        // If it's already an array, filter out empty strings
-        processedServices = services.filter(s => s && s.trim().length > 0);
-      } else {
-        // If it's neither string nor array, default to empty array
-        processedServices = [];
-      }
-    }
-
-    // Process technologies field similarly
-    let processedTechnologies = technologies;
-    if (technologies !== undefined) {
-      if (typeof technologies === 'string') {
-        processedTechnologies = technologies.trim() === '' ? [] : technologies.split(',').map(s => s.trim()).filter(s => s.length > 0);
-      } else if (Array.isArray(technologies)) {
-        processedTechnologies = technologies.filter(s => s && s.trim().length > 0);
-      } else {
-        processedTechnologies = [];
-      }
-    }
 
     const updatedProject = await prisma.project.update({
       where: { id },
       data: {
-        ...(title && { title }),
-        ...(slug && { slug }),
-        ...(description && { description }),
-        ...(content !== undefined && { content }),
-        ...(category && { category }),
-        ...(imageUrl !== undefined && { imageUrl }),
-        ...(heroImageUrl !== undefined && { heroImageUrl }),
-        ...(year !== undefined && { year }),
-        ...(client !== undefined && { client }),
-        ...(duration !== undefined && { duration }),
-        ...(processedServices !== undefined && { services: processedServices }),
-        ...(overview !== undefined && { overview }),
-        ...(challenge !== undefined && { challenge }),
-        ...(solution !== undefined && { solution }),
-        ...(process !== undefined && { process }),
-        ...(gallery !== undefined && { gallery }),
-        ...(results !== undefined && { results }),
-        ...(testimonial !== undefined && { testimonial }),
-        ...(processedTechnologies !== undefined && { technologies: processedTechnologies }),
-        ...(projectUrl !== undefined && { projectUrl }),
-        ...(githubUrl !== undefined && { githubUrl }),
-        ...(published !== undefined && { published }),
-        ...(featured !== undefined && { featured }),
-        ...(order !== undefined && { order }),
+        ...(name && { name }),
+        ...(description !== undefined && { description }),
+        ...(client_id !== undefined && { client_id }),
+        ...(status && { status }),
+        ...(type && { type }),
+        ...(start_date && { start_date: new Date(start_date) }),
+        ...(end_date && { end_date: new Date(end_date) }),
+        ...(budget !== undefined && { budget }),
+        ...(progress !== undefined && { progress }),
+        ...(manager && { manager }),
+        ...(created_by && { created_by }),
+        ...(tasks_total !== undefined && { tasks_total }),
+        ...(tasks_completed !== undefined && { tasks_completed }),
       },
     });
 
