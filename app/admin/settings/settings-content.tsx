@@ -262,35 +262,39 @@ export function SettingsContent({ initialSettings }: SettingsContentProps) {
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-4">
-        <TabsTrigger value="general">General</TabsTrigger>
-        <TabsTrigger value="social">Social Links</TabsTrigger>
-        <TabsTrigger value="appearance">Appearance</TabsTrigger>
-        <TabsTrigger value="seo">SEO</TabsTrigger>
+      <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 sm:gap-0 h-auto p-1">
+        <TabsTrigger value="general" className="text-xs sm:text-sm px-2 py-3 sm:px-3 sm:py-2 touch-manipulation min-h-[44px]">General</TabsTrigger>
+        <TabsTrigger value="social" className="text-xs sm:text-sm px-2 py-3 sm:px-3 sm:py-2 touch-manipulation min-h-[44px]">Social</TabsTrigger>
+        <TabsTrigger value="appearance" className="text-xs sm:text-sm px-2 py-3 sm:px-3 sm:py-2 touch-manipulation min-h-[44px]">Appearance</TabsTrigger>
+        <TabsTrigger value="seo" className="text-xs sm:text-sm px-2 py-3 sm:px-3 sm:py-2 touch-manipulation min-h-[44px]">SEO</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="general" className="space-y-6">
+      <TabsContent value="general" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
         <Card>
-          <CardHeader>
-            <CardTitle>General Settings</CardTitle>
-            <CardDescription>Basic information about your site</CardDescription>
+          <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
+            <CardTitle className="text-lg sm:text-xl">General Settings</CardTitle>
+            <CardDescription className="text-sm sm:text-base">Basic information about your site</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
             <Form {...generalForm}>
               <form
                 onSubmit={generalForm.handleSubmit(onSubmitGeneral)}
-                className="space-y-6"
+                className="space-y-4 sm:space-y-6"
               >
                 <FormField
                   control={generalForm.control}
                   name="siteName"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Site Name</FormLabel>
+                    <FormItem className="space-y-2 sm:space-y-3">
+                      <FormLabel className="text-sm sm:text-base font-medium">Site Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter your site name" {...field} />
+                        <Input 
+                          placeholder="Enter your site name" 
+                          className="h-12 sm:h-10 text-base sm:text-sm px-4 sm:px-3 touch-manipulation" 
+                          {...field} 
+                        />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-sm" />
                     </FormItem>
                   )}
                 />
@@ -299,15 +303,16 @@ export function SettingsContent({ initialSettings }: SettingsContentProps) {
                   control={generalForm.control}
                   name="siteDescription"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Site Description</FormLabel>
+                    <FormItem className="space-y-2 sm:space-y-3">
+                      <FormLabel className="text-sm sm:text-base font-medium">Site Description</FormLabel>
                       <FormControl>
                         <Textarea
                           placeholder="Enter a brief description of your site"
+                          className="min-h-[100px] sm:min-h-[80px] text-base sm:text-sm px-4 py-3 sm:px-3 sm:py-2 touch-manipulation resize-y"
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-sm" />
                     </FormItem>
                   )}
                 />
@@ -316,16 +321,17 @@ export function SettingsContent({ initialSettings }: SettingsContentProps) {
                   control={generalForm.control}
                   name="contactEmail"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Contact Email</FormLabel>
+                    <FormItem className="space-y-2 sm:space-y-3">
+                      <FormLabel className="text-sm sm:text-base font-medium">Contact Email</FormLabel>
                       <FormControl>
                         <Input
                           type="email"
                           placeholder="contact@example.com"
+                          className="h-12 sm:h-10 text-base sm:text-sm px-4 sm:px-3 touch-manipulation"
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-sm" />
                     </FormItem>
                   )}
                 />
@@ -334,12 +340,16 @@ export function SettingsContent({ initialSettings }: SettingsContentProps) {
                   control={generalForm.control}
                   name="contactPhone"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Contact Phone</FormLabel>
+                    <FormItem className="space-y-2 sm:space-y-3">
+                      <FormLabel className="text-sm sm:text-base font-medium">Contact Phone</FormLabel>
                       <FormControl>
-                        <Input placeholder="+1 (555) 123-4567" {...field} />
+                        <Input 
+                          placeholder="+1 (555) 123-4567" 
+                          className="h-12 sm:h-10 text-base sm:text-sm px-4 sm:px-3 touch-manipulation" 
+                          {...field} 
+                        />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-sm" />
                     </FormItem>
                   )}
                 />
@@ -348,21 +358,22 @@ export function SettingsContent({ initialSettings }: SettingsContentProps) {
                   control={generalForm.control}
                   name="address"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Address</FormLabel>
+                    <FormItem className="space-y-2 sm:space-y-3">
+                      <FormLabel className="text-sm sm:text-base font-medium">Address</FormLabel>
                       <FormControl>
                         <Textarea
                           placeholder="Enter your business address"
+                          className="min-h-[100px] sm:min-h-[80px] text-base sm:text-sm px-4 py-3 sm:px-3 sm:py-2 touch-manipulation resize-y"
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-sm" />
                     </FormItem>
                   )}
                 />
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
+                <div className="space-y-2 sm:space-y-3">
+                  <label className="block text-sm sm:text-base font-medium mb-2 sm:mb-3">
                     Site Logo
                   </label>
                   <ImageUploader
@@ -375,7 +386,11 @@ export function SettingsContent({ initialSettings }: SettingsContentProps) {
                   />
                 </div>
 
-                <Button type="submit" disabled={isPending}>
+                <Button 
+                  type="submit" 
+                  disabled={isPending}
+                  className="w-full sm:w-auto h-12 sm:h-10 text-base sm:text-sm px-6 sm:px-4 py-3 sm:py-2 touch-manipulation mt-6 sm:mt-4"
+                >
                   {isPending && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
@@ -388,31 +403,32 @@ export function SettingsContent({ initialSettings }: SettingsContentProps) {
         </Card>
       </TabsContent>
 
-      <TabsContent value="social" className="space-y-6">
+      <TabsContent value="social" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
         <Card>
-          <CardHeader>
-            <CardTitle>Social Links</CardTitle>
-            <CardDescription>Manage your social media presence</CardDescription>
+          <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
+            <CardTitle className="text-lg sm:text-xl">Social Links</CardTitle>
+            <CardDescription className="text-sm sm:text-base">Manage your social media presence</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
             <Form {...socialForm}>
               <form
                 onSubmit={socialForm.handleSubmit(onSubmitSocial)}
-                className="space-y-6"
+                className="space-y-4 sm:space-y-6"
               >
                 <FormField
                   control={socialForm.control}
                   name="twitter"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Twitter URL</FormLabel>
+                    <FormItem className="space-y-2 sm:space-y-3">
+                      <FormLabel className="text-sm sm:text-base font-medium">Twitter URL</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="https://twitter.com/yourhandle"
+                          className="h-12 sm:h-10 text-base sm:text-sm px-4 sm:px-3 touch-manipulation"
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-sm" />
                     </FormItem>
                   )}
                 />
@@ -421,15 +437,16 @@ export function SettingsContent({ initialSettings }: SettingsContentProps) {
                   control={socialForm.control}
                   name="facebook"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Facebook URL</FormLabel>
+                    <FormItem className="space-y-2 sm:space-y-3">
+                      <FormLabel className="text-sm sm:text-base font-medium">Facebook URL</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="https://facebook.com/yourpage"
+                          className="h-12 sm:h-10 text-base sm:text-sm px-4 sm:px-3 touch-manipulation"
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-sm" />
                     </FormItem>
                   )}
                 />
@@ -438,15 +455,16 @@ export function SettingsContent({ initialSettings }: SettingsContentProps) {
                   control={socialForm.control}
                   name="instagram"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Instagram URL</FormLabel>
+                    <FormItem className="space-y-2 sm:space-y-3">
+                      <FormLabel className="text-sm sm:text-base font-medium">Instagram URL</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="https://instagram.com/yourhandle"
+                          className="h-12 sm:h-10 text-base sm:text-sm px-4 sm:px-3 touch-manipulation"
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-sm" />
                     </FormItem>
                   )}
                 />
@@ -455,20 +473,25 @@ export function SettingsContent({ initialSettings }: SettingsContentProps) {
                   control={socialForm.control}
                   name="linkedin"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>LinkedIn URL</FormLabel>
+                    <FormItem className="space-y-2 sm:space-y-3">
+                      <FormLabel className="text-sm sm:text-base font-medium">LinkedIn URL</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="https://linkedin.com/company/yourcompany"
+                          className="h-12 sm:h-10 text-base sm:text-sm px-4 sm:px-3 touch-manipulation"
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-sm" />
                     </FormItem>
                   )}
                 />
 
-                <Button type="submit" disabled={isPending}>
+                <Button 
+                  type="submit" 
+                  disabled={isPending}
+                  className="w-full sm:w-auto h-12 sm:h-10 text-base sm:text-sm px-6 sm:px-4 py-3 sm:py-2 touch-manipulation mt-6 sm:mt-4"
+                >
                   {isPending && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
@@ -481,40 +504,44 @@ export function SettingsContent({ initialSettings }: SettingsContentProps) {
         </Card>
       </TabsContent>
 
-      <TabsContent value="appearance" className="space-y-6">
+      <TabsContent value="appearance" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
         <Card>
-          <CardHeader>
-            <CardTitle>Appearance</CardTitle>
-            <CardDescription>
+          <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
+            <CardTitle className="text-lg sm:text-xl">Appearance</CardTitle>
+            <CardDescription className="text-sm sm:text-base">
               Customize the look and feel of your site
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
             <Form {...appearanceForm}>
               <form
                 onSubmit={appearanceForm.handleSubmit(onSubmitAppearance)}
-                className="space-y-6"
+                className="space-y-4 sm:space-y-6"
               >
                 <FormField
                   control={appearanceForm.control}
                   name="primaryColor"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Primary Color</FormLabel>
+                    <FormItem className="space-y-2 sm:space-y-3">
+                      <FormLabel className="text-sm sm:text-base font-medium">Primary Color</FormLabel>
                       <FormControl>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
                           <Input
                             type="color"
-                            className="w-16 h-10"
+                            className="w-20 h-12 sm:w-16 sm:h-10 touch-manipulation"
                             {...field}
                           />
-                          <Input placeholder="#FF5001" {...field} />
+                          <Input 
+                            placeholder="#FF5001" 
+                            className="h-12 sm:h-10 text-base sm:text-sm px-4 sm:px-3 touch-manipulation flex-1" 
+                            {...field} 
+                          />
                         </div>
                       </FormControl>
-                      <FormDescription>
+                      <FormDescription className="text-sm">
                         Choose the primary color for your brand
                       </FormDescription>
-                      <FormMessage />
+                      <FormMessage className="text-sm" />
                     </FormItem>
                   )}
                 />
@@ -523,10 +550,10 @@ export function SettingsContent({ initialSettings }: SettingsContentProps) {
                   control={appearanceForm.control}
                   name="darkMode"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                      <div className="space-y-0.5">
-                        <FormLabel className="text-base">Dark Mode</FormLabel>
-                        <FormDescription>
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 sm:p-4 min-h-[60px] sm:min-h-[auto] touch-manipulation">
+                      <div className="space-y-0.5 flex-1">
+                        <FormLabel className="text-sm sm:text-base font-medium">Dark Mode</FormLabel>
+                        <FormDescription className="text-sm">
                           Enable dark mode by default
                         </FormDescription>
                       </div>
@@ -534,13 +561,18 @@ export function SettingsContent({ initialSettings }: SettingsContentProps) {
                         <Switch
                           checked={field.value}
                           onCheckedChange={field.onChange}
+                          className="touch-manipulation"
                         />
                       </FormControl>
                     </FormItem>
                   )}
                 />
 
-                <Button type="submit" disabled={isPending}>
+                <Button 
+                  type="submit" 
+                  disabled={isPending}
+                  className="w-full sm:w-auto h-12 sm:h-10 text-base sm:text-sm px-6 sm:px-4 py-3 sm:py-2 touch-manipulation mt-6 sm:mt-4"
+                >
                   {isPending && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
@@ -553,37 +585,38 @@ export function SettingsContent({ initialSettings }: SettingsContentProps) {
         </Card>
       </TabsContent>
 
-      <TabsContent value="seo" className="space-y-6">
+      <TabsContent value="seo" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
         <Card>
-          <CardHeader>
-            <CardTitle>SEO Settings</CardTitle>
-            <CardDescription>
+          <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
+            <CardTitle className="text-lg sm:text-xl">SEO Settings</CardTitle>
+            <CardDescription className="text-sm sm:text-base">
               Optimize your site for search engines
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
             <Form {...seoForm}>
               <form
                 onSubmit={seoForm.handleSubmit(onSubmitSEO)}
-                className="space-y-6"
+                className="space-y-4 sm:space-y-6"
               >
                 <FormField
                   control={seoForm.control}
                   name="metaTitle"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Meta Title</FormLabel>
+                    <FormItem className="space-y-2 sm:space-y-3">
+                      <FormLabel className="text-sm sm:text-base font-medium">Meta Title</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Your Site Name - Tagline"
+                          className="h-12 sm:h-10 text-base sm:text-sm px-4 sm:px-3 touch-manipulation"
                           {...field}
                         />
                       </FormControl>
-                      <FormDescription>
+                      <FormDescription className="text-sm">
                         The title that appears in search results and browser
                         tabs
                       </FormDescription>
-                      <FormMessage />
+                      <FormMessage className="text-sm" />
                     </FormItem>
                   )}
                 />
@@ -592,23 +625,28 @@ export function SettingsContent({ initialSettings }: SettingsContentProps) {
                   control={seoForm.control}
                   name="metaDescription"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Meta Description</FormLabel>
+                    <FormItem className="space-y-2 sm:space-y-3">
+                      <FormLabel className="text-sm sm:text-base font-medium">Meta Description</FormLabel>
                       <FormControl>
                         <Textarea
                           placeholder="A brief description of your site for search engines"
+                          className="min-h-[100px] sm:min-h-[80px] text-base sm:text-sm px-4 py-3 sm:px-3 sm:py-2 touch-manipulation resize-y"
                           {...field}
                         />
                       </FormControl>
-                      <FormDescription>
+                      <FormDescription className="text-sm">
                         Keep it under 160 characters for best results
                       </FormDescription>
-                      <FormMessage />
+                      <FormMessage className="text-sm" />
                     </FormItem>
                   )}
                 />
 
-                <Button type="submit" disabled={isPending}>
+                <Button 
+                  type="submit" 
+                  disabled={isPending}
+                  className="w-full sm:w-auto h-12 sm:h-10 text-base sm:text-sm px-6 sm:px-4 py-3 sm:py-2 touch-manipulation mt-6 sm:mt-4"
+                >
                   {isPending && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}

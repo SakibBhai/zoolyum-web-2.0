@@ -215,7 +215,7 @@ export default function NewCampaignPage() {
               <Label htmlFor="content">Campaign Content</Label>
               <RichTextEditor
                 value={formData.content}
-                onContentChange={(value: string) =>
+                onChangeAction={(value: string) =>
                   setFormData({ ...formData, content: value })
                 }
                 placeholder="Write your campaign content here..."

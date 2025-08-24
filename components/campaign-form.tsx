@@ -125,8 +125,8 @@ export function CampaignForm({ campaignId, fields, successMessage, redirectUrl }
       case 'date':
       case 'number':
         return (
-          <div key={field.id} className="space-y-2">
-            <Label htmlFor={field.id}>
+          <div key={field.id} className="space-y-3">
+            <Label htmlFor={field.id} className="text-base">
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
@@ -139,14 +139,15 @@ export function CampaignForm({ campaignId, fields, successMessage, redirectUrl }
               placeholder={field.placeholder}
               value={formData[field.name] || ''}
               onChange={(e) => handleInputChange(field.name, e.target.value)}
+              className="h-12 text-base"
             />
           </div>
         );
 
       case 'textarea':
         return (
-          <div key={field.id} className="space-y-2">
-            <Label htmlFor={field.id}>
+          <div key={field.id} className="space-y-3">
+            <Label htmlFor={field.id} className="text-base">
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
@@ -159,14 +160,15 @@ export function CampaignForm({ campaignId, fields, successMessage, redirectUrl }
               value={formData[field.name] || ''}
               onChange={(e) => handleInputChange(field.name, e.target.value)}
               rows={4}
+              className="min-h-[120px] text-base"
             />
           </div>
         );
 
       case 'select':
         return (
-          <div key={field.id} className="space-y-2">
-            <Label htmlFor={field.id}>
+          <div key={field.id} className="space-y-3">
+            <Label htmlFor={field.id} className="text-base">
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
@@ -177,12 +179,12 @@ export function CampaignForm({ campaignId, fields, successMessage, redirectUrl }
               value={formData[field.name] || ''}
               onValueChange={(value) => handleInputChange(field.name, value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-12 text-base">
                 <SelectValue placeholder={field.placeholder || 'Select an option'} />
               </SelectTrigger>
               <SelectContent>
                 {field.options?.map((option, index) => (
-                  <SelectItem key={index} value={option}>
+                  <SelectItem key={index} value={option} className="text-base py-3">
                     {option}
                   </SelectItem>
                 ))}
@@ -193,28 +195,29 @@ export function CampaignForm({ campaignId, fields, successMessage, redirectUrl }
 
       case 'checkbox':
         return (
-          <div key={field.id} className="space-y-2">
-            <div className="flex items-center space-x-2">
+          <div key={field.id} className="space-y-3">
+            <div className="flex items-start space-x-3">
               <Checkbox
                 {...commonProps}
                 checked={formData[field.name] || false}
                 onCheckedChange={(checked) => handleInputChange(field.name, checked)}
+                className="mt-1 h-5 w-5"
               />
-              <Label htmlFor={field.id} className="text-sm font-normal">
+              <Label htmlFor={field.id} className="text-base font-normal leading-relaxed">
                 {field.label}
                 {field.required && <span className="text-red-500 ml-1">*</span>}
               </Label>
             </div>
             {field.description && (
-              <p className="text-sm text-gray-600 ml-6">{field.description}</p>
+              <p className="text-sm text-gray-600 ml-8">{field.description}</p>
             )}
           </div>
         );
 
       case 'radio':
         return (
-          <div key={field.id} className="space-y-2">
-            <Label>
+          <div key={field.id} className="space-y-3">
+            <Label className="text-base">
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
@@ -224,11 +227,12 @@ export function CampaignForm({ campaignId, fields, successMessage, redirectUrl }
             <RadioGroup
               value={formData[field.name] || ''}
               onValueChange={(value) => handleInputChange(field.name, value)}
+              className="space-y-3"
             >
               {field.options?.map((option, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <RadioGroupItem value={option} id={`${field.id}_${index}`} />
-                  <Label htmlFor={`${field.id}_${index}`} className="text-sm font-normal">
+                <div key={index} className="flex items-center space-x-3">
+                  <RadioGroupItem value={option} id={`${field.id}_${index}`} className="h-5 w-5" />
+                  <Label htmlFor={`${field.id}_${index}`} className="text-base font-normal">
                     {option}
                   </Label>
                 </div>
@@ -244,17 +248,17 @@ export function CampaignForm({ campaignId, fields, successMessage, redirectUrl }
 
   return (
     <Card className="max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle>Get In Touch</CardTitle>
+      <CardHeader className="p-4 sm:p-6">
+        <CardTitle className="text-xl sm:text-2xl">Get In Touch</CardTitle>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+      <CardContent className="p-4 sm:p-6">
+        <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
           {fields.map(renderField)}
           
           <Button 
             type="submit" 
             disabled={isSubmitting}
-            className="w-full"
+            className="w-full h-12 text-base"
           >
             {isSubmitting ? 'Submitting...' : 'Submit'}
           </Button>

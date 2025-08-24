@@ -69,6 +69,11 @@ interface Contact {
   name: string;
   email: string;
   phone?: string | null;
+  countryCode?: string | null;
+  company?: string | null;
+  businessName?: string | null;
+  businessWebsite?: string | null;
+  services?: string[] | null;
   subject?: string | null;
   message: string;
   status: string;
@@ -132,7 +137,18 @@ export default function ContactsAdminPage() {
     }
   };
 
-  // Settings functionality removed - endpoint deleted
+  const fetchSettings = async () => {
+    try {
+      const response = await fetch('/api/contacts/settings');
+      if (response.ok) {
+        const data = await response.json();
+        setSettings(data);
+        setSettingsForm(data);
+      }
+    } catch (error) {
+      console.error('Error fetching settings:', error);
+    }
+  };
 
   const fetchStats = async () => {
     try {
@@ -148,6 +164,7 @@ export default function ContactsAdminPage() {
 
   useEffect(() => {
     fetchContacts();
+    fetchSettings();
     fetchStats();
   }, []);
 
@@ -210,7 +227,31 @@ export default function ContactsAdminPage() {
     }
   };
 
-  // Settings update functionality removed - endpoint deleted
+  const updateSettings = async () => {
+    try {
+      const response = await fetch('/api/contacts/settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(settingsForm),
+      });
+
+      if (response.ok) {
+        const updatedSettings = await response.json();
+        setSettings(updatedSettings);
+        setIsSettingsOpen(false);
+        // You could add a toast notification here for success
+        console.log('Settings updated successfully');
+      } else {
+        console.error('Failed to update settings');
+        // You could add a toast notification here for error
+      }
+    } catch (error) {
+      console.error('Error updating settings:', error);
+      // You could add a toast notification here for error
+    }
+  };
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
@@ -435,96 +476,248 @@ export default function ContactsAdminPage() {
                             </DialogDescription>
                           </DialogHeader>
                           {selectedContact && (
-                            <div className="space-y-6">
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <Label className="text-sm font-medium">
-                                    Name
-                                  </Label>
-                                  <p className="text-[#E9E7E2] mt-1">
-                                    {selectedContact.name}
-                                  </p>
-                                </div>
-                                <div>
-                                  <Label className="text-sm font-medium">
-                                    Email
-                                  </Label>
-                                  <p className="text-[#E9E7E2] mt-1">
-                                    {selectedContact.email}
-                                  </p>
-                                </div>
-                                {selectedContact.phone && (
+                            <div className="space-y-6 max-h-[60vh] overflow-y-auto">
+                              {/* Personal Information */}
+                              <div>
+                                <h3 className="text-lg font-semibold mb-4 text-[#FF5001] border-b border-[#333333] pb-2">
+                                  Personal Information
+                                </h3>
+                                <div className="grid grid-cols-2 gap-4">
                                   <div>
                                     <Label className="text-sm font-medium">
-                                      Phone
+                                      Name
                                     </Label>
                                     <p className="text-[#E9E7E2] mt-1">
-                                      {selectedContact.phone}
+                                      {selectedContact.name}
                                     </p>
                                   </div>
-                                )}
-                                {selectedContact.subject && (
                                   <div>
+                                    <Label className="text-sm font-medium">
+                                      Email
+                                    </Label>
+                                    <p className="text-[#E9E7E2] mt-1 break-all">
+                                      <a href={`mailto:${selectedContact.email}`} className="hover:text-[#FF5001] transition-colors">
+                                        {selectedContact.email}
+                                      </a>
+                                    </p>
+                                  </div>
+                                  {selectedContact.phone && (
+                                    <div>
+                                      <Label className="text-sm font-medium">
+                                        Phone
+                                      </Label>
+                                      <p className="text-[#E9E7E2] mt-1">
+                                        {selectedContact.countryCode && selectedContact.countryCode !== '+880' 
+                                          ? `${selectedContact.countryCode} ${selectedContact.phone}`
+                                          : selectedContact.phone
+                                        }
+                                      </p>
+                                    </div>
+                                  )}
+                                  {selectedContact.countryCode && (
+                                    <div>
+                                      <Label className="text-sm font-medium">
+                                        Country Code
+                                      </Label>
+                                      <p className="text-[#E9E7E2] mt-1">
+                                        {selectedContact.countryCode}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Business Information */}
+                              {(selectedContact.company || selectedContact.businessName || selectedContact.businessWebsite) && (
+                                <div>
+                                  <h3 className="text-lg font-semibold mb-4 text-[#FF5001] border-b border-[#333333] pb-2">
+                                    Business Information
+                                  </h3>
+                                  <div className="grid grid-cols-2 gap-4">
+                                    {selectedContact.company && (
+                                      <div>
+                                        <Label className="text-sm font-medium">
+                                          Company
+                                        </Label>
+                                        <p className="text-[#E9E7E2] mt-1">
+                                          {selectedContact.company}
+                                        </p>
+                                      </div>
+                                    )}
+                                    {selectedContact.businessName && (
+                                      <div>
+                                        <Label className="text-sm font-medium">
+                                          Business Name
+                                        </Label>
+                                        <p className="text-[#E9E7E2] mt-1">
+                                          {selectedContact.businessName}
+                                        </p>
+                                      </div>
+                                    )}
+                                    {selectedContact.businessWebsite && (
+                                      <div className="col-span-2">
+                                        <Label className="text-sm font-medium">
+                                          Business Website
+                                        </Label>
+                                        <p className="text-[#E9E7E2] mt-1 break-all">
+                                          <a 
+                                            href={selectedContact.businessWebsite.startsWith('http') 
+                                              ? selectedContact.businessWebsite 
+                                              : `https://${selectedContact.businessWebsite}`
+                                            } 
+                                            target="_blank" 
+                                            rel="noopener noreferrer" 
+                                            className="hover:text-[#FF5001] transition-colors"
+                                          >
+                                            {selectedContact.businessWebsite}
+                                          </a>
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Services */}
+                              {selectedContact.services && selectedContact.services.length > 0 && (
+                                <div>
+                                  <h3 className="text-lg font-semibold mb-4 text-[#FF5001] border-b border-[#333333] pb-2">
+                                    Services of Interest
+                                  </h3>
+                                  <div className="flex flex-wrap gap-2">
+                                    {selectedContact.services.map((service, index) => (
+                                      <Badge key={index} variant="secondary" className="bg-[#252525] text-[#E9E7E2] border-[#333333]">
+                                        {service}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Message Content */}
+                              <div>
+                                <h3 className="text-lg font-semibold mb-4 text-[#FF5001] border-b border-[#333333] pb-2">
+                                  Message Details
+                                </h3>
+                                {selectedContact.subject && (
+                                  <div className="mb-4">
                                     <Label className="text-sm font-medium">
                                       Subject
                                     </Label>
-                                    <p className="text-[#E9E7E2] mt-1">
+                                    <p className="text-[#E9E7E2] mt-1 font-medium">
                                       {selectedContact.subject}
                                     </p>
                                   </div>
                                 )}
-                              </div>
-                              <div>
-                                <Label className="text-sm font-medium">
-                                  Message
-                                </Label>
-                                <p className="text-[#E9E7E2] mt-1 whitespace-pre-wrap">
-                                  {selectedContact.message}
-                                </p>
-                              </div>
-                              <div className="flex gap-4">
                                 <div>
                                   <Label className="text-sm font-medium">
-                                    Status
+                                    Message
                                   </Label>
-                                  <Select
-                                    value={selectedContact.status}
-                                    onValueChange={(value) => {
-                                      updateContactStatus(
-                                        selectedContact.id,
-                                        value
-                                      );
-                                      setSelectedContact({
-                                        ...selectedContact,
-                                        status: value,
-                                      });
-                                    }}
-                                  >
-                                    <SelectTrigger className="w-[180px] bg-[#252525] border-[#333333] text-[#E9E7E2] mt-1">
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent className="bg-[#252525] border-[#333333]">
-                                      <SelectItem value="new">New</SelectItem>
-                                      <SelectItem value="read">Read</SelectItem>
-                                      <SelectItem value="replied">
-                                        Replied
-                                      </SelectItem>
-                                      <SelectItem value="archived">
-                                        Archived
-                                      </SelectItem>
-                                    </SelectContent>
-                                  </Select>
+                                  <div className="text-[#E9E7E2] mt-1 whitespace-pre-wrap bg-[#252525] p-4 rounded-lg border border-[#333333] max-h-40 overflow-y-auto">
+                                    {selectedContact.message}
+                                  </div>
                                 </div>
+                              </div>
+
+                              {/* Technical Information */}
+                              {(selectedContact.ipAddress || selectedContact.userAgent) && (
                                 <div>
-                                  <Label className="text-sm font-medium">
-                                    Submitted
-                                  </Label>
-                                  <p className="text-[#E9E7E2] mt-1">
-                                    {formatDate(
-                                      new Date(selectedContact.createdAt),
-                                      "full"
+                                  <h3 className="text-lg font-semibold mb-4 text-[#FF5001] border-b border-[#333333] pb-2">
+                                    Technical Information
+                                  </h3>
+                                  <div className="space-y-3">
+                                    {selectedContact.ipAddress && (
+                                      <div>
+                                        <Label className="text-sm font-medium">
+                                          IP Address
+                                        </Label>
+                                        <p className="text-[#E9E7E2] mt-1 font-mono text-sm">
+                                          {selectedContact.ipAddress}
+                                        </p>
+                                      </div>
                                     )}
-                                  </p>
+                                    {selectedContact.userAgent && (
+                                      <div>
+                                        <Label className="text-sm font-medium">
+                                          User Agent
+                                        </Label>
+                                        <p className="text-[#E9E7E2] mt-1 text-sm bg-[#252525] p-2 rounded border border-[#333333] break-all">
+                                          {selectedContact.userAgent}
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Status and Timestamps */}
+                              <div>
+                                <h3 className="text-lg font-semibold mb-4 text-[#FF5001] border-b border-[#333333] pb-2">
+                                  Status & Timeline
+                                </h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <Label className="text-sm font-medium">
+                                      Status
+                                    </Label>
+                                    <Select
+                                      value={selectedContact.status}
+                                      onValueChange={(value) => {
+                                        updateContactStatus(
+                                          selectedContact.id,
+                                          value
+                                        );
+                                        setSelectedContact({
+                                          ...selectedContact,
+                                          status: value,
+                                        });
+                                      }}
+                                    >
+                                      <SelectTrigger className="w-full bg-[#252525] border-[#333333] text-[#E9E7E2] mt-1">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent className="bg-[#252525] border-[#333333]">
+                                        <SelectItem value="new">New</SelectItem>
+                                        <SelectItem value="read">Read</SelectItem>
+                                        <SelectItem value="replied">
+                                          Replied
+                                        </SelectItem>
+                                        <SelectItem value="archived">
+                                          Archived
+                                        </SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                  <div>
+                                    <Label className="text-sm font-medium">
+                                      Submitted
+                                    </Label>
+                                    <p className="text-[#E9E7E2] mt-1">
+                                      {formatDate(
+                                        new Date(selectedContact.createdAt),
+                                        "full"
+                                      )}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-sm font-medium">
+                                      Last Updated
+                                    </Label>
+                                    <p className="text-[#E9E7E2] mt-1">
+                                      {formatDate(
+                                        new Date(selectedContact.updatedAt),
+                                        "full"
+                                      )}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-sm font-medium">
+                                      Contact ID
+                                    </Label>
+                                    <p className="text-[#E9E7E2] mt-1 font-mono text-sm">
+                                      {selectedContact.id}
+                                    </p>
+                                  </div>
                                 </div>
                               </div>
                             </div>

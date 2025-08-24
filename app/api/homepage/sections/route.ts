@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 // GET /api/homepage/sections - Get all homepage sections
 export async function GET() {
   try {
-    const sections = await prisma.homepageSection.findMany({
+    const sections = await prisma.homepage_sections.findMany({
       where: { isActive: true },
       orderBy: { order: 'asc' }
     });
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { sectionType, title, subtitle, content, isVisible, order, metadata } = body;
 
-    const section = await prisma.homepageSection.create({
+    const section = await prisma.homepage_sections.create({
       data: {
         sectionType,
         title,
@@ -111,12 +111,12 @@ export async function PUT(request: NextRequest) {
     }
 
     // Delete existing sections
-    await prisma.homepageSection.deleteMany({
+    await prisma.homepage_sections.deleteMany({
       where: { isActive: true }
     });
 
     // Create new sections
-    const newSections = await prisma.homepageSection.createMany({
+    const newSections = await prisma.homepage_sections.createMany({
       data: sections.map((section: any, index: number) => ({
         sectionType: section.sectionType,
         title: section.title,
@@ -130,7 +130,7 @@ export async function PUT(request: NextRequest) {
     });
 
     // Fetch and return the created sections
-    const createdSections = await prisma.homepageSection.findMany({
+    const createdSections = await prisma.homepage_sections.findMany({
       where: { isActive: true },
       orderBy: { order: 'asc' }
     });

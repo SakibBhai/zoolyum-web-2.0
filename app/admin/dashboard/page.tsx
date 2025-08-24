@@ -30,6 +30,7 @@ export default function AdminDashboard() {
     recentActivity: []
   });
   const [loading, setLoading] = useState(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -46,8 +47,9 @@ export default function AdminDashboard() {
         const blogPostsRes = await fetch('/api/blog-posts');
         const blogPosts = blogPostsRes.ok ? await blogPostsRes.json() : [];
 
-        // Mock data for projects (you can implement these APIs later)
-        const projects = [];
+        // Fetch projects
+        const projectsRes = await fetch('/api/projects');
+        const projects = projectsRes.ok ? await projectsRes.json() : [];
         
         // Create recent activity from available data
         const recentActivity = [
@@ -155,20 +157,20 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="p-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+      <div className="p-4 sm:p-6">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-gray-600 mt-2">Welcome to your admin dashboard</p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
           {[1, 2, 3, 4].map((i) => (
             <Card key={i} className="animate-pulse">
               <CardHeader className="pb-2">
                 <div className="h-4 bg-gray-200 rounded w-3/4"></div>
               </CardHeader>
               <CardContent>
-                <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-6 sm:h-8 bg-gray-200 rounded w-1/2"></div>
               </CardContent>
             </Card>
           ))}
@@ -178,15 +180,15 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
         <p className="text-gray-600 mt-2">Welcome to your admin dashboard</p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
         {statCards.map((stat, index) => {
           const Icon = stat.icon;
           return (
@@ -197,7 +199,7 @@ export default function AdminDashboard() {
               transition={{ delay: index * 0.1 }}
             >
               <Link href={stat.href}>
-                <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer touch-manipulation">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium text-gray-600">
                       {stat.title}
@@ -207,7 +209,7 @@ export default function AdminDashboard() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
+                    <div className="text-xl sm:text-2xl font-bold text-gray-900">{stat.value}</div>
                   </CardContent>
                 </Card>
               </Link>
@@ -217,20 +219,20 @@ export default function AdminDashboard() {
       </div>
 
       {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-[#FF5001]" />
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-[#FF5001]" />
               Recent Activity
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-sm sm:text-base">
               Latest updates across your platform
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             {stats.recentActivity.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {stats.recentActivity.map((activity, index) => {
                   const Icon = getActivityIcon(activity.type);
                   return (
@@ -239,16 +241,16 @@ export default function AdminDashboard() {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                      className="flex items-center gap-3 p-3 sm:p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors touch-manipulation"
                     >
-                      <Icon className={`h-4 w-4 ${getActivityColor(activity.type)}`} />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">
+                      <Icon className={`h-3 w-3 sm:h-4 sm:w-4 ${getActivityColor(activity.type)} flex-shrink-0`} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">
                           {activity.title}
                         </p>
-                        <p className="text-xs text-gray-500">{activity.date}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">{activity.date}</p>
                       </div>
-                      <Badge variant="outline" className="text-xs">
+                      <Badge variant="outline" className="text-xs flex-shrink-0">
                         {activity.type}
                       </Badge>
                     </motion.div>
@@ -256,9 +258,9 @@ export default function AdminDashboard() {
                 })}
               </div>
             ) : (
-              <div className="text-center py-8">
-                <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500">No recent activity</p>
+              <div className="text-center py-6 sm:py-8">
+                <Calendar className="h-10 w-10 sm:h-12 sm:w-12 text-gray-300 mx-auto mb-3 sm:mb-4" />
+                <p className="text-gray-500 text-sm sm:text-base">No recent activity</p>
               </div>
             )}
           </CardContent>
@@ -266,36 +268,36 @@ export default function AdminDashboard() {
 
         {/* Quick Actions */}
         <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="text-base sm:text-lg">Quick Actions</CardTitle>
+            <CardDescription className="text-sm sm:text-base">
               Common tasks and shortcuts
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 gap-3">
+          <CardContent className="pt-0">
+            <div className="grid grid-cols-1 gap-2 sm:gap-3">
               <Link href="/admin/dashboard/blog/new">
-                <Button variant="outline" className="w-full justify-start">
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  Create New Blog Post
+                <Button variant="outline" className="w-full justify-start h-10 sm:h-12 text-sm sm:text-base touch-manipulation hover:bg-gray-50">
+                  <MessageSquare className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span className="truncate">Create New Blog Post</span>
                 </Button>
               </Link>
               <Link href="/admin/dashboard/projects/new">
-                <Button variant="outline" className="w-full justify-start">
-                  <Briefcase className="h-4 w-4 mr-2" />
-                  Add New Project
+                <Button variant="outline" className="w-full justify-start h-10 sm:h-12 text-sm sm:text-base touch-manipulation hover:bg-gray-50">
+                  <Briefcase className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span className="truncate">Add New Project</span>
                 </Button>
               </Link>
               <Link href="/admin/contacts">
-                <Button variant="outline" className="w-full justify-start">
-                  <Users className="h-4 w-4 mr-2" />
-                  View All Contacts
+                <Button variant="outline" className="w-full justify-start h-10 sm:h-12 text-sm sm:text-base touch-manipulation hover:bg-gray-50">
+                  <Users className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span className="truncate">View All Contacts</span>
                 </Button>
               </Link>
               <Link href="/admin/testimonials">
-                <Button variant="outline" className="w-full justify-start">
-                  <Star className="h-4 w-4 mr-2" />
-                  Manage Testimonials
+                <Button variant="outline" className="w-full justify-start h-10 sm:h-12 text-sm sm:text-base touch-manipulation hover:bg-gray-50">
+                  <Star className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span className="truncate">Manage Testimonials</span>
                 </Button>
               </Link>
             </div>

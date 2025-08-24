@@ -260,39 +260,82 @@ export async function updateContactSettings(
   settings: Partial<ContactSettings>
 ): Promise<ContactSettings> {
   try {
-    // Validate required fields
-    if (!settings.email || !settings.email.trim()) {
-      throw new ContactOperationError("Email is required");
+    // Check if settings already exist
+    const existingSettings = await fetchContactSettings();
+    
+    let result;
+    if (existingSettings) {
+      // Update existing settings
+      result = await query(
+        `
+        UPDATE contact_settings SET
+          email = COALESCE($1, email),
+          phone = COALESCE($2, phone),
+          address = COALESCE($3, address),
+          working_hours = COALESCE($4, working_hours),
+          twitter_url = $5,
+          linkedin_url = $6,
+          instagram_url = $7,
+          behance_url = $8,
+          enable_phone_field = COALESCE($9, enable_phone_field),
+          require_phone_field = COALESCE($10, require_phone_field),
+          auto_reply_enabled = COALESCE($11, auto_reply_enabled),
+          auto_reply_message = $12,
+          notification_email = $13,
+          email_notifications = COALESCE($14, email_notifications),
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = $15
+        RETURNING *
+        `,
+        [
+          settings.email?.trim() || null,
+          settings.phone?.trim() || null,
+          settings.address?.trim() || null,
+          settings.workingHours?.trim() || null,
+          settings.twitterUrl?.trim() || null,
+          settings.linkedinUrl?.trim() || null,
+          settings.instagramUrl?.trim() || null,
+          settings.behanceUrl?.trim() || null,
+          settings.enablePhoneField,
+          settings.requirePhoneField,
+          settings.autoReplyEnabled,
+          settings.autoReplyMessage?.trim() || null,
+          settings.notificationEmail?.trim() || null,
+          settings.emailNotifications,
+          existingSettings.id
+        ]
+      );
+    } else {
+      // Create new settings
+      result = await query(
+        `
+        INSERT INTO contact_settings (
+          email, phone, address, working_hours, 
+          twitter_url, linkedin_url, instagram_url, behance_url,
+          enable_phone_field, require_phone_field, auto_reply_enabled,
+          auto_reply_message, notification_email, email_notifications
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+        RETURNING *
+        `,
+        [
+          settings.email?.trim() || null,
+          settings.phone?.trim() || null,
+          settings.address?.trim() || null,
+          settings.workingHours?.trim() || null,
+          settings.twitterUrl?.trim() || null,
+          settings.linkedinUrl?.trim() || null,
+          settings.instagramUrl?.trim() || null,
+          settings.behanceUrl?.trim() || null,
+          settings.enablePhoneField ?? true,
+          settings.requirePhoneField ?? false,
+          settings.autoReplyEnabled ?? false,
+          settings.autoReplyMessage?.trim() || null,
+          settings.notificationEmail?.trim() || null,
+          settings.emailNotifications ?? true,
+        ]
+      );
     }
-
-    const result = await query(
-      `
-      INSERT INTO contact_settings (
-        email, phone, address, working_hours, 
-        twitter_url, linkedin_url, instagram_url, behance_url,
-        enable_phone_field, require_phone_field, auto_reply_enabled,
-        auto_reply_message, notification_email, email_notifications
-      )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
-      RETURNING *
-      `,
-      [
-        settings.email.trim(),
-        settings.phone?.trim() || "",
-        settings.address?.trim() || "",
-        settings.workingHours?.trim() || "",
-        settings.twitterUrl?.trim() || null,
-        settings.linkedinUrl?.trim() || null,
-        settings.instagramUrl?.trim() || null,
-        settings.behanceUrl?.trim() || null,
-        settings.enablePhoneField ?? true,
-        settings.requirePhoneField ?? false,
-        settings.autoReplyEnabled ?? false,
-        settings.autoReplyMessage?.trim() || null,
-        settings.notificationEmail?.trim() || null,
-        settings.emailNotifications ?? true,
-      ]
-    );
 
     if (!result.rows[0]) {
       throw new ContactOperationError("Failed to update contact settings");

@@ -66,6 +66,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 });
     }
 
+    const { id } = await params;
     const formData = await request.formData();
     const data: any = {};
 
@@ -76,7 +77,7 @@ export async function PUT(
     const validated = z.object({}).passthrough().parse(data);
 
     const job = await prisma.job.update({
-      where: { id: params.id },
+      where: { id },
       data: validated,
     });
 
@@ -104,7 +105,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 });
     }
 
-    await prisma.job.delete({ where: { id: params.id } });
+    const { id } = await params;
+    await prisma.job.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting job:', error);

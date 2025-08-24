@@ -25,15 +25,20 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
             const isExternal = src.startsWith('http');
             
             return (
-              <Image
-                src={src}
-                alt={alt || ''}
-                width={800}
-                height={400}
-                className="rounded-lg shadow-md max-w-full h-auto my-6 mx-auto block"
-                style={{ objectFit: 'contain' }}
-                {...(isExternal && { unoptimized: true })}
-              />
+              <div className="relative w-full max-w-4xl mx-auto my-6 overflow-hidden rounded-lg shadow-md">
+                <Image
+                  src={src}
+                  alt={alt || ''}
+                  width={800}
+                  height={400}
+                  className="w-full h-auto object-contain"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 800px"
+                  loading="lazy"
+                  placeholder="blur"
+                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+                  {...(isExternal && { unoptimized: true })}
+                />
+              </div>
             );
           },
           

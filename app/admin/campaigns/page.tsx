@@ -2,6 +2,7 @@ import { revalidatePath } from 'next/cache'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
+import { prisma } from '@/lib/prisma'
 
 // Force dynamic rendering for admin pages
 export const dynamic = 'force-dynamic';
@@ -16,33 +17,43 @@ interface Campaign {
 
 async function deleteCampaign(id: string) {
   'use server'
+  
   try {
-    const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/campaigns/${id}`, {
-      method: 'DELETE',
+    await prisma.campaign.delete({
+      where: {
+        id: id
+      }
     });
-    if (!response.ok) {
-      throw new Error('Failed to delete campaign');
-    }
+    
+    // Revalidate the campaigns page to reflect the deletion
     revalidatePath('/admin/campaigns');
   } catch (error) {
     console.error('Error deleting campaign:', error);
+    throw new Error('Failed to delete campaign');
   }
 }
 
 async function getCampaigns(): Promise<Campaign[]> {
   try {
-    const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/campaigns`, {
-      cache: 'no-store'
+    const campaigns = await prisma.campaign.findMany({
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        status: true,
+        createdAt: true,
+      },
     });
     
-    if (!response.ok) {
-      throw new Error('Failed to fetch campaigns');
-    }
-    
-    return await response.json();
+    // Convert Date objects to strings for serialization
+    return campaigns.map(campaign => ({
+      ...campaign,
+      createdAt: campaign.createdAt.toISOString(),
+    }));
   } catch (error) {
     console.error('Error fetching campaigns:', error);
-    return [];
+    throw new Error('Failed to fetch campaigns');
   }
 }
 
@@ -85,7 +96,7 @@ export default async function CampaignsPage() {
                   <Link href={`/admin/campaigns/${campaign.id}/edit`}>
                     <Button variant="outline" size="sm">Edit</Button>
                   </Link>
-                  <form action={async () => { await deleteCampaign(campaign.id) }}>
+                  <form action={deleteCampaign.bind(null, campaign.id)}>
                     <Button variant="destructive" size="sm">Delete</Button>
                   </form>
                 </td>

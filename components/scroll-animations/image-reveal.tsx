@@ -7,8 +7,9 @@ import Image from "next/image";
 interface ImageRevealProps {
   src: string;
   alt: string;
-  width: number;
-  height: number;
+  width?: number;
+  height?: number;
+  aspectRatio?: "square" | "video" | "portrait" | "landscape" | "auto";
   className?: string;
   imageClassName?: string;
   delay?: number;
@@ -17,13 +18,17 @@ interface ImageRevealProps {
   direction?: "left" | "right" | "top" | "bottom";
   mobileDirection?: "left" | "right" | "top" | "bottom";
   mobileDuration?: number;
+  priority?: boolean;
+  sizes?: string;
+  fill?: boolean;
 }
 
 export function ImageReveal({
   src,
   alt,
-  width,
-  height,
+  width = 800,
+  height = 600,
+  aspectRatio = "auto",
   className = "",
   imageClassName = "",
   delay = 0,
@@ -32,6 +37,9 @@ export function ImageReveal({
   direction = "left",
   mobileDirection,
   mobileDuration,
+  priority = false,
+  sizes,
+  fill = false,
 }: ImageRevealProps) {
   const { ref, controls, isMobile } = useScrollAnimation({
     threshold,
@@ -86,24 +94,54 @@ export function ImageReveal({
 
   const variants = getDirectionVariants();
 
+  // Get aspect ratio classes
+  const getAspectRatioClass = () => {
+    switch (aspectRatio) {
+      case "square":
+        return "aspect-square";
+      case "video":
+        return "aspect-video";
+      case "portrait":
+        return "aspect-[3/4]";
+      case "landscape":
+        return "aspect-[4/3]";
+      default:
+        return "";
+    }
+  };
+
+  // Generate responsive sizes if not provided
+  const responsiveSizes = sizes || (
+    fill 
+      ? "100vw"
+      : isMobile 
+        ? "100vw" 
+        : `(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, ${width}px`
+  );
+
+  const aspectClass = getAspectRatioClass();
+  const containerClass = fill ? "relative" : aspectClass;
+
   return (
-    <div ref={ref} className={`overflow-hidden ${className}`}>
+    <div ref={ref} className={`overflow-hidden ${containerClass} ${className}`}>
       <motion.div
         initial="hidden"
         animate={controls}
         variants={variants}
-        className="h-full w-full"
+        className={fill ? "absolute inset-0" : "h-full w-full"}
         // Improve touch response
         whileTap={isMobile ? { scale: 1 } : undefined}
       >
         <Image
           src={src || "/placeholder.svg"}
           alt={alt}
-          width={width}
-          height={height}
-          className={`w-full h-full object-cover ${imageClassName}`}
-          sizes={isMobile ? "100vw" : `(max-width: 768px) 100vw, ${width}px`}
-          priority={isMobile}
+          {...(fill ? { fill: true } : { width, height })}
+          className={`object-cover transition-transform duration-300 hover:scale-105 ${fill ? "" : "w-full h-full"} ${imageClassName}`}
+          sizes={responsiveSizes}
+          priority={priority}
+          loading={priority ? "eager" : "lazy"}
+          placeholder="blur"
+          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
         />
       </motion.div>
     </div>

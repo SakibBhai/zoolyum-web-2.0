@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { PageTransition } from "@/components/page-transition"
@@ -28,10 +28,11 @@ const contactFormSchema = z.object({
   countryCode: z.string().default("+880"),
   phone: z.string().optional().refine((phone) => {
     if (!phone) return true;
-    // Bangladesh phone number validation (11 digits starting with 1)
-    const bdPhoneRegex = /^1[3-9]\d{8}$/;
-    return bdPhoneRegex.test(phone.replace(/\s+/g, ''));
-  }, "Please enter a valid Bangladesh phone number (11 digits starting with 1)"),
+    // Bangladesh phone number validation (11 digits starting with 01)
+    const phoneDigits = phone.replace(/\D/g, '');
+    const bdPhoneRegex = /^01[3-9]\d{8}$/;
+    return bdPhoneRegex.test(phoneDigits);
+  }, "Please enter a valid Bangladesh phone number (11 digits starting with 013-019)"),
   businessName: z.string().optional(),
   businessWebsite: z.string().optional().refine((url) => {
     if (!url) return true;
@@ -92,9 +93,13 @@ export default function ContactPage() {
     register,
     handleSubmit,
     formState: { errors },
-    reset
+    reset,
+    control
   } = useForm<ContactFormData>({
-    resolver: zodResolver(contactFormSchema)
+    resolver: zodResolver(contactFormSchema),
+    defaultValues: {
+      services: []
+    }
   })
 
   // Contact settings functionality removed - endpoint deleted
@@ -163,13 +168,13 @@ export default function ContactPage() {
                       </Alert>
                     )}
                     
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8">
                       {/* Contact Information Table */}
-                      <div className="bg-[#1F1F1F] rounded-lg p-6 border border-[#333333]">
-                        <h3 className="text-lg font-semibold mb-4 text-[#FF5001]">Contact Information</h3>
-                        <div className="grid md:grid-cols-2 gap-6">
+                      <div className="bg-[#1F1F1F] rounded-lg p-4 sm:p-6 border border-[#333333]">
+                        <h3 className="text-lg font-semibold mb-4 sm:mb-6 text-[#FF5001]">Contact Information</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                           <div>
-                            <Label htmlFor="name" className="block text-sm font-medium mb-2">
+                            <Label htmlFor="name" className="block text-sm font-medium mb-3 text-[#E9E7E2]">
                               Name *
                             </Label>
                             <Input
@@ -178,15 +183,15 @@ export default function ContactPage() {
                               id="name"
                               name="name"
                               required
-                              className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2]"
+                              className="w-full px-4 py-4 sm:py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2] text-base min-h-[48px] touch-manipulation"
                               placeholder="Your full name"
                             />
                             {errors.name && (
-                              <p className="text-red-400 text-sm mt-1">{errors.name.message}</p>
+                              <p className="text-red-400 text-sm mt-2">{errors.name.message}</p>
                             )}
                           </div>
                           <div>
-                            <Label htmlFor="email" className="block text-sm font-medium mb-2">
+                            <Label htmlFor="email" className="block text-sm font-medium mb-3 text-[#E9E7E2]">
                               Email *
                             </Label>
                             <Input
@@ -195,11 +200,11 @@ export default function ContactPage() {
                               id="email"
                               name="email"
                               required
-                              className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2]"
+                              className="w-full px-4 py-4 sm:py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2] text-base min-h-[48px] touch-manipulation"
                               placeholder="your.email@example.com"
                             />
                             {errors.email && (
-                              <p className="text-red-400 text-sm mt-1">{errors.email.message}</p>
+                              <p className="text-red-400 text-sm mt-2">{errors.email.message}</p>
                             )}
                           </div>
                         </div>
@@ -209,14 +214,14 @@ export default function ContactPage() {
                         {/* Phone Field with Country Code - Bangladesh Focus */}
                         {(!contactSettings || contactSettings.enablePhoneField) && (
                           <div className="md:col-span-2">
-                            <Label htmlFor="phone" className="block text-sm font-medium mb-2">
+                            <Label htmlFor="phone" className="block text-sm font-medium mb-3 text-[#E9E7E2]">
                               Phone Number {contactSettings?.requirePhoneField ? '*' : ''}
                             </Label>
-                            <div className="flex gap-2">
+                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-2">
                               <select
                                 {...register('countryCode')}
                                 name="countryCode"
-                                className="px-3 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2] min-w-[120px]"
+                                className="px-4 py-4 sm:py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2] min-w-[120px] min-h-[48px] text-base touch-manipulation"
                               >
                                 {countryCodes.map((country) => (
                                   <option key={country.code} value={country.code} className="bg-[#252525]">
@@ -229,26 +234,26 @@ export default function ContactPage() {
                                 type="tel"
                                 id="phone"
                                 name="phone"
-                                className="flex-1 px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2]"
-                                placeholder="1812345678 (BD format)"
-                              />
-                            </div>
-                            {errors.phone && (
-                              <p className="text-red-400 text-sm mt-1">{errors.phone.message}</p>
-                            )}
-                            {errors.countryCode && (
-                              <p className="text-red-400 text-sm mt-1">{errors.countryCode.message}</p>
-                            )}
+                                className="flex-1 px-4 py-4 sm:py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2] text-base min-h-[48px] touch-manipulation"
+                                placeholder="01812345678 (BD format)"
+                               />
+                             </div>
+                             {errors.phone && (
+                               <p className="text-red-400 text-sm mt-1">{errors.phone.message}</p>
+                             )}
+                             {errors.countryCode && (
+                               <p className="text-red-400 text-sm mt-1">{errors.countryCode.message}</p>
+                             )}
                           </div>
                         )}
                       </div>
                       
                       {/* Business Information Table */}
-                      <div className="bg-[#1F1F1F] rounded-lg p-6 border border-[#333333]">
-                        <h3 className="text-lg font-semibold mb-4 text-[#FF5001]">Business Information</h3>
-                        <div className="grid md:grid-cols-2 gap-6">
+                      <div className="bg-[#1F1F1F] rounded-lg p-4 sm:p-6 border border-[#333333]">
+                        <h3 className="text-lg font-semibold mb-4 sm:mb-6 text-[#FF5001]">Business Information</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                           <div>
-                            <Label htmlFor="businessName" className="block text-sm font-medium mb-2">
+                            <Label htmlFor="businessName" className="block text-sm font-medium mb-3 text-[#E9E7E2]">
                               Business Name
                             </Label>
                             <Input
@@ -256,7 +261,7 @@ export default function ContactPage() {
                               type="text"
                               id="businessName"
                               name="businessName"
-                              className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2]"
+                              className="w-full px-4 py-4 sm:py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2] text-base min-h-[48px] touch-manipulation"
                               placeholder="Your business name"
                             />
                             {errors.businessName && (
@@ -264,7 +269,7 @@ export default function ContactPage() {
                             )}
                           </div>
                           <div>
-                            <Label htmlFor="businessWebsite" className="block text-sm font-medium mb-2">
+                            <Label htmlFor="businessWebsite" className="block text-sm font-medium mb-3 text-[#E9E7E2]">
                               Business Website
                             </Label>
                             <Input
@@ -272,7 +277,7 @@ export default function ContactPage() {
                               type="url"
                               id="businessWebsite"
                               name="businessWebsite"
-                              className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2]"
+                              className="w-full px-4 py-4 sm:py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2] text-base min-h-[48px] touch-manipulation"
                               placeholder="https://yourwebsite.com"
                             />
                             {errors.businessWebsite && (
@@ -283,31 +288,48 @@ export default function ContactPage() {
                       </div>
                       
                       {/* Services Selection Table */}
-                      <div className="bg-[#1F1F1F] rounded-lg p-6 border border-[#333333]">
-                        <h3 className="text-lg font-semibold mb-4 text-[#FF5001]">How Can We Help?</h3>
-                        <div className="grid md:grid-cols-2 gap-3">
-                          {serviceOptions.map((service) => (
-                            <label key={service} className="flex items-center space-x-3 cursor-pointer group">
-                              <input
-                                type="checkbox"
-                                value={service}
-                                {...register('services')}
-                                className="w-4 h-4 text-[#FF5001] bg-[#252525] border-[#333333] rounded focus:ring-[#FF5001] focus:ring-2"
-                              />
-                              <span className="text-sm text-[#E9E7E2] group-hover:text-[#FF5001] transition-colors">
-                                {service}
-                              </span>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
+                      <div className="bg-[#1F1F1F] rounded-lg p-4 sm:p-6 border border-[#333333]">
+                        <h3 className="text-lg font-semibold mb-4 sm:mb-6 text-[#FF5001]">How Can We Help?</h3>
+                        <Controller
+                          name="services"
+                          control={control}
+                          render={({ field }) => (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-3">
+                              {serviceOptions.map((service) => (
+                                <label key={service} className="flex items-center space-x-3 cursor-pointer group py-2 px-1 rounded-lg hover:bg-[#252525] transition-colors min-h-[48px] touch-manipulation">
+                                  <input
+                                    type="checkbox"
+                                    value={service}
+                                    checked={field.value?.includes(service) || false}
+                                    onChange={(e) => {
+                                      const currentServices = field.value || [];
+                                      if (e.target.checked) {
+                                        field.onChange([...currentServices, service]);
+                                      } else {
+                                        field.onChange(currentServices.filter((s) => s !== service));
+                                      }
+                                    }}
+                                    className="w-5 h-5 sm:w-4 sm:h-4 text-[#FF5001] bg-[#252525] border-[#333333] rounded focus:ring-[#FF5001] focus:ring-2 flex-shrink-0"
+                                  />
+                                  <span className="text-sm sm:text-sm text-[#E9E7E2] group-hover:text-[#FF5001] transition-colors leading-relaxed">
+                                    {service}
+                                  </span>
+                                </label>
+                              ))}
+                            </div>
+                          )}
+                         />
+                         {errors.services && (
+                           <p className="text-red-400 text-sm mt-2">{errors.services.message}</p>
+                         )}
+                       </div>
                       
                       {/* Message Section */}
-                       <div className="bg-[#1F1F1F] rounded-lg p-6 border border-[#333333]">
-                         <h3 className="text-lg font-semibold mb-4 text-[#FF5001]">Project Details</h3>
-                         <div className="space-y-4">
+                       <div className="bg-[#1F1F1F] rounded-lg p-4 sm:p-6 border border-[#333333]">
+                         <h3 className="text-lg font-semibold mb-4 sm:mb-6 text-[#FF5001]">Project Details</h3>
+                         <div className="space-y-4 sm:space-y-6">
                            <div>
-                             <Label htmlFor="subject" className="block text-sm font-medium mb-2">
+                             <Label htmlFor="subject" className="block text-sm font-medium mb-3 text-[#E9E7E2]">
                                Subject
                              </Label>
                              <Input
@@ -315,7 +337,7 @@ export default function ContactPage() {
                               type="text"
                               id="subject"
                               name="subject"
-                              className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2]"
+                              className="w-full px-4 py-4 sm:py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2] text-base min-h-[48px] touch-manipulation"
                               placeholder="Brief description of your project"
                             />
                              {errors.subject && (
@@ -324,7 +346,7 @@ export default function ContactPage() {
                            </div>
                            
                            <div>
-                             <Label htmlFor="message" className="block text-sm font-medium mb-2">
+                             <Label htmlFor="message" className="block text-sm font-medium mb-3 text-[#E9E7E2]">
                                Message *
                              </Label>
                              <Textarea
@@ -333,11 +355,11 @@ export default function ContactPage() {
                                name="message"
                                required
                                rows={5}
-                               className="w-full px-4 py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2] resize-none"
+                               className="w-full px-4 py-4 sm:py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2] resize-none text-base min-h-[120px] touch-manipulation"
                                placeholder="Tell us about your project, goals, timeline, and any specific requirements"
                              />
                              {errors.message && (
-                               <p className="text-red-400 text-sm mt-1">{errors.message.message}</p>
+                               <p className="text-red-400 text-sm mt-2">{errors.message.message}</p>
                              )}
                            </div>
                          </div>
@@ -346,7 +368,7 @@ export default function ContactPage() {
                       <Button
                         type="submit"
                         disabled={isSubmitting}
-                        className="w-full px-6 py-4 bg-[#FF5001] text-[#161616] font-bold rounded-lg hover:bg-[#FF5001]/90 transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full px-6 py-4 sm:py-3 bg-[#FF5001] text-[#161616] font-bold rounded-lg hover:bg-[#FF5001]/90 transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed min-h-[52px] text-base touch-manipulation"
                       >
                         {isSubmitting ? (
                           <>

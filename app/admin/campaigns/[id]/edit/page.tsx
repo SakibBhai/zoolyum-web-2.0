@@ -144,9 +144,11 @@ export default function EditCampaignPage({
     setFormFields(formFields.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = async (formData: FormData) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
 
+    const formData = new FormData(e.target as HTMLFormElement);
     const result = await updateCampaign(params.id, formData);
 
     setLoading(false);
@@ -186,7 +188,7 @@ export default function EditCampaignPage({
         </div>
       </div>
 
-      <form action={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <Card className="bg-[#1A1A1A] border-[#333333]">
           <CardHeader>
             <CardTitle className="text-[#E9E7E2]">Basic Information</CardTitle>

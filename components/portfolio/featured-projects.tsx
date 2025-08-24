@@ -86,13 +86,14 @@ export function FeaturedProjects({ limit = 3 }: FeaturedProjectsProps) {
         mobileStaggerDelay={0.05}
         mobileAnimation="fade"
       >
-        {projects.map((project) => (
+        {projects.map((project, index) => (
           <PortfolioItem
             key={project.id}
             title={project.title}
             category={project.category}
             image={project.image || "/placeholder.svg?height=400&width=600"}
             slug={project.slug}
+            priority={index < 2}
           />
         ))}
       </StaggerReveal>
@@ -123,33 +124,38 @@ function PortfolioItem({
   category,
   image,
   slug,
+  priority = false,
 }: {
   title: string;
   category: string;
   image: string;
   slug: string;
+  priority?: boolean;
 }) {
   return (
-    <div className="group relative overflow-hidden rounded-xl">
-      <div className="aspect-[4/3] bg-[#212121] overflow-hidden">
+    <div className="group relative overflow-hidden rounded-xl touch-manipulation">
+      <div className="aspect-[4/3] bg-[#212121] overflow-hidden relative">
         <Image
           src={image || "/placeholder.svg"}
           alt={title}
-          width={400}
-          height={300}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          sizes="(max-width: 768px) 100vw, 400px"
+          fill
+          className="object-cover transition-transform duration-500 group-hover:scale-110"
+          sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 400px"
+          priority={priority}
+          loading={priority ? "eager" : "lazy"}
+          placeholder="blur"
+          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
         />
       </div>
       <div className="absolute inset-0 bg-gradient-to-t from-[#161616] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 md:p-6">
-        <span className="text-[#FF5001] text-xs md:text-sm">{category}</span>
-        <h3 className="text-lg md:text-xl font-bold mt-1 md:mt-2">{title}</h3>
+        <span className="text-[#FF5001] text-xs md:text-sm font-medium">{category}</span>
+        <h3 className="text-lg md:text-xl font-bold mt-1 md:mt-2 text-white">{title}</h3>
         <Link
           href={`/portfolio/${slug}`}
-          className="mt-3 md:mt-4 inline-flex items-center text-[#E9E7E2] hover:text-[#FF5001] transition-colors text-sm md:text-base"
+          className="mt-3 md:mt-4 inline-flex items-center text-[#E9E7E2] hover:text-[#FF5001] transition-colors text-sm md:text-base group/link"
         >
           View Project
-          <ArrowRight className="ml-2 w-3 h-3 md:w-4 md:h-4" />
+          <ArrowRight className="ml-2 w-3 h-3 md:w-4 md:h-4 transition-transform group-hover/link:translate-x-1" />
         </Link>
       </div>
     </div>

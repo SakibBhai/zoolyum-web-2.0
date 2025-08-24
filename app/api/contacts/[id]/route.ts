@@ -20,7 +20,8 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
-    const contact = await fetchContact(params.id)
+    const { id } = await params
+    const contact = await fetchContact(id)
     
     if (!contact) {
       return NextResponse.json(
@@ -51,6 +52,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
+    const { id } = await params
     const body = await request.json()
     const { name, email, phone, subject, message, status } = body
     
@@ -71,7 +73,7 @@ export async function PUT(
       updateData.status = status
     }
     
-    const contact = await updateContact(params.id, updateData)
+    const contact = await updateContact(id, updateData)
     
     if (!contact) {
       return NextResponse.json(
@@ -102,7 +104,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
-    const deleted = await deleteContact(params.id)
+    const { id } = await params
+    const deleted = await deleteContact(id)
     
     if (!deleted) {
       return NextResponse.json(

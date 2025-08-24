@@ -25,7 +25,8 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const consultation = await fetchConsultationById(params.id)
+    const { id } = await params
+    const consultation = await fetchConsultationById(id)
     
     if (!consultation) {
       return NextResponse.json(
@@ -69,7 +70,8 @@ export async function PUT(
       }
     }
     
-    const updatedConsultation = await updateConsultation(params.id, body)
+    const { id } = await params
+    const updatedConsultation = await updateConsultation(id, body)
     
     if (!updatedConsultation) {
       return NextResponse.json(
@@ -100,7 +102,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const deleted = await deleteConsultation(params.id)
+    const { id } = await params
+    const deleted = await deleteConsultation(id)
     
     if (!deleted) {
       return NextResponse.json(

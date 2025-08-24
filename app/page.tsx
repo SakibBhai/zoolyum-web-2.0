@@ -19,9 +19,11 @@ import { TeamMemberCard } from "@/components/team-member-card";
 import { CounterAnimation } from "@/components/scroll-animations/counter-animation";
 import { FeaturedProjects } from "@/components/portfolio/featured-projects";
 import { MobileCTAMenu, MobileCTATrigger } from "@/components/mobile-cta-menu";
+import { TestimonialsSection } from "@/components/testimonials-section";
 
 export default function Home() {
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const isTablet = useMediaQuery("(max-width: 1024px)");
   const [isMobileCTAMenuOpen, setIsMobileCTAMenuOpen] = useState(false);
 
   const handleOpenMobileCTAMenu = () => {
@@ -38,8 +40,8 @@ export default function Home() {
         <Header />
 
         <main>
-          {/* Hero Section */}
-          <section className="min-h-[90vh] md:min-h-screen flex items-center justify-center relative overflow-hidden pt-16">
+          {/* Hero Section - Optimized for all screen sizes */}
+          <section className="min-h-screen flex items-center justify-center relative overflow-hidden pt-16 sm:pt-20 md:pt-24">
             <div className="container mx-auto px-4 py-12 md:py-20 flex flex-col items-center text-center z-10">
               <motion.div
                 initial={{ opacity: 0 }}
@@ -99,9 +101,9 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Services Preview Section */}
+          {/* Services Preview Section - Responsive spacing */}
           <section id="services-preview" className="bg-[#1A1A1A]">
-            <div className="container mx-auto px-4 py-16 md:py-20 lg:py-32">
+            <div className="container mx-auto px-4 py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32">
               <PageHeadline
                 eyebrow="Our Expertise"
                 title="Strategic Services for Modern Brands"
@@ -109,30 +111,30 @@ export default function Home() {
               />
 
               <StaggerReveal
-                className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8"
-                staggerDelay={0.1}
-                mobileStaggerDelay={0.05}
-                mobileAnimation="fade"
-              >
-                <div className="p-6 bg-[#1A1A1A] rounded-xl border border-[#333333]">
-                  <h3 className="text-xl font-bold mb-2">Brand Strategy</h3>
-                  <p className="text-[#E9E7E2]/70">
-                    Strategic brand positioning and identity development
-                  </p>
-                </div>
-                <div className="p-6 bg-[#1A1A1A] rounded-xl border border-[#333333]">
-                  <h3 className="text-xl font-bold mb-2">Digital Design</h3>
-                  <p className="text-[#E9E7E2]/70">
-                    Modern digital experiences and user interfaces
-                  </p>
-                </div>
-                <div className="p-6 bg-[#1A1A1A] rounded-xl border border-[#333333]">
-                  <h3 className="text-xl font-bold mb-2">Growth Marketing</h3>
-                  <p className="text-[#E9E7E2]/70">
-                    Data-driven marketing strategies for scalable growth
-                  </p>
-                </div>
-              </StaggerReveal>
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8"
+                  staggerDelay={0.1}
+                  mobileStaggerDelay={0.05}
+                  mobileAnimation="fade"
+                >
+                  <div className="p-4 sm:p-6 bg-[#1A1A1A] rounded-xl border border-[#333333] hover:border-[#FF5001]/30 transition-all duration-300 touch-manipulation">
+                    <h3 className="text-lg sm:text-xl font-bold mb-2">Brand Strategy</h3>
+                    <p className="text-sm sm:text-base text-[#E9E7E2]/70">
+                      Strategic brand positioning and identity development
+                    </p>
+                  </div>
+                  <div className="p-4 sm:p-6 bg-[#1A1A1A] rounded-xl border border-[#333333] hover:border-[#FF5001]/30 transition-all duration-300 touch-manipulation">
+                    <h3 className="text-lg sm:text-xl font-bold mb-2">Digital Design</h3>
+                    <p className="text-sm sm:text-base text-[#E9E7E2]/70">
+                      Modern digital experiences and user interfaces
+                    </p>
+                  </div>
+                  <div className="p-4 sm:p-6 bg-[#1A1A1A] rounded-xl border border-[#333333] hover:border-[#FF5001]/30 transition-all duration-300 touch-manipulation sm:col-span-2 lg:col-span-1">
+                    <h3 className="text-lg sm:text-xl font-bold mb-2">Growth Marketing</h3>
+                    <p className="text-sm sm:text-base text-[#E9E7E2]/70">
+                      Data-driven marketing strategies for scalable growth
+                    </p>
+                  </div>
+                </StaggerReveal>
 
               <ScrollReveal
                 className="mt-10 md:mt-12 text-center"
@@ -153,10 +155,10 @@ export default function Home() {
             </div>
           </section>
 
-          {/* About Preview Section */}
+          {/* About Preview Section - Responsive spacing */}
           <section id="about-preview">
-            <div className="container mx-auto px-4 py-16 md:py-20 lg:py-32">
-              <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+            <div className="container mx-auto px-4 py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32">
+              <div className="grid lg:grid-cols-2 gap-8 md:gap-10 lg:gap-12 items-center">
                 <ScrollReveal
                   animation="fade-slide"
                   direction="right"
@@ -212,41 +214,41 @@ export default function Home() {
                     market presence and drive meaningful growth.
                   </p>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mt-8">
-                    <div className="text-center p-4 bg-[#1A1A1A] rounded-lg">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mt-8">
+                    <div className="text-center p-3 sm:p-4 bg-[#1A1A1A] rounded-lg hover:bg-[#1A1A1A]/80 transition-colors duration-300 touch-manipulation">
                       <CounterAnimation
                         end={10}
                         suffix="+"
-                        className="text-2xl md:text-3xl font-bold text-[#FF5001]"
+                        className="text-xl sm:text-2xl md:text-3xl font-bold text-[#FF5001]"
                         duration={2}
                       />
-                      <p className="text-sm mt-2">Years Experience</p>
+                      <p className="text-xs sm:text-sm mt-1 sm:mt-2">Years Experience</p>
                     </div>
-                    <div className="text-center p-4 bg-[#1A1A1A] rounded-lg">
+                    <div className="text-center p-3 sm:p-4 bg-[#1A1A1A] rounded-lg hover:bg-[#1A1A1A]/80 transition-colors duration-300 touch-manipulation">
                       <CounterAnimation
                         end={50}
                         suffix="+"
-                        className="text-2xl md:text-3xl font-bold text-[#FF5001]"
+                        className="text-xl sm:text-2xl md:text-3xl font-bold text-[#FF5001]"
                         duration={2}
                       />
-                      <p className="text-sm mt-2">Projects Completed</p>
+                      <p className="text-xs sm:text-sm mt-1 sm:mt-2">Projects Completed</p>
                     </div>
-                    <div className="text-center p-4 bg-[#1A1A1A] rounded-lg">
+                    <div className="text-center p-3 sm:p-4 bg-[#1A1A1A] rounded-lg hover:bg-[#1A1A1A]/80 transition-colors duration-300 touch-manipulation">
                       <CounterAnimation
                         end={30}
                         suffix="+"
-                        className="text-2xl md:text-3xl font-bold text-[#FF5001]"
+                        className="text-xl sm:text-2xl md:text-3xl font-bold text-[#FF5001]"
                         duration={2}
                       />
-                      <p className="text-sm mt-2">Happy Clients</p>
+                      <p className="text-xs sm:text-sm mt-1 sm:mt-2">Happy Clients</p>
                     </div>
-                    <div className="text-center p-4 bg-[#1A1A1A] rounded-lg">
+                    <div className="text-center p-3 sm:p-4 bg-[#1A1A1A] rounded-lg hover:bg-[#1A1A1A]/80 transition-colors duration-300 touch-manipulation">
                       <CounterAnimation
                         end={5}
-                        className="text-2xl md:text-3xl font-bold text-[#FF5001]"
+                        className="text-xl sm:text-2xl md:text-3xl font-bold text-[#FF5001]"
                         duration={2}
                       />
-                      <p className="text-sm mt-2">Industry Awards</p>
+                      <p className="text-xs sm:text-sm mt-1 sm:mt-2">Industry Awards</p>
                     </div>
                   </div>
 
@@ -266,9 +268,9 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Portfolio Preview Section */}
+          {/* Portfolio Preview Section - Responsive spacing */}
           <section id="portfolio-preview" className="bg-[#1A1A1A]">
-            <div className="container mx-auto px-4 py-16 md:py-20 lg:py-32">
+            <div className="container mx-auto px-4 py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32">
               <PageHeadline
                 eyebrow="Featured Work"
                 title="Strategic Brand Transformations"
@@ -279,9 +281,9 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Team Preview Section */}
+          {/* Team Preview Section - Responsive spacing */}
           <section id="team-preview">
-            <div className="container mx-auto px-4 py-16 md:py-20 lg:py-32">
+            <div className="container mx-auto px-4 py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32">
               <PageHeadline
                 eyebrow="Our Team"
                 title="Meet the Strategists & Creatives"
@@ -289,7 +291,7 @@ export default function Home() {
               />
 
               <StaggerReveal
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8"
                 staggerDelay={0.1}
                 mobileStaggerDelay={0.05}
                 mobileAnimation="fade"
@@ -335,78 +337,13 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Testimonials Section */}
-          <section id="testimonials" className="bg-[#1A1A1A]">
-            <div className="container mx-auto px-4 py-16 md:py-20 lg:py-32">
-              <PageHeadline
-                eyebrow="Client Success"
-                title="What Our Clients Say"
-                description="Hear from the brands and businesses that have experienced the transformative power of our strategic approach."
-              />
+          {/* Dynamic Testimonials Section */}
+          <TestimonialsSection />
 
-              <StaggerReveal
-                className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8"
-                staggerDelay={0.1}
-                mobileStaggerDelay={0.05}
-                mobileAnimation="fade"
-              >
-                <Card className="h-full bg-[#1A1A1A] border-[#333333] hover:border-[#FF5001]/30 transition-all duration-300">
-                  <CardContent className="p-6">
-                    <blockquote className="text-lg text-[#E9E7E2]/90 mb-6 leading-relaxed">
-                      "Zoolyum's strategic approach completely transformed our brand positioning. Their insights helped us connect with our audience in ways we never thought possible."
-                    </blockquote>
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-[#FF5001]/20 rounded-full flex items-center justify-center">
-                        <span className="text-[#FF5001] font-bold text-lg">SJ</span>
-                      </div>
-                      <div>
-                        <p className="font-semibold text-[#E9E7E2]">Sarah Johnson</p>
-                        <p className="text-sm text-[#E9E7E2]/70">CEO, Nexus Technologies</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="h-full bg-[#1A1A1A] border-[#333333] hover:border-[#FF5001]/30 transition-all duration-300">
-                  <CardContent className="p-6">
-                    <blockquote className="text-lg text-[#E9E7E2]/90 mb-6 leading-relaxed">
-                      "Working with Zoolyum was a game-changer for our digital presence. The strategic vision and creative execution exceeded our expectations at every turn."
-                    </blockquote>
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-[#FF5001]/20 rounded-full flex items-center justify-center">
-                        <span className="text-[#FF5001] font-bold text-lg">MC</span>
-                      </div>
-                      <div>
-                        <p className="font-semibold text-[#E9E7E2]">Michael Chen</p>
-                        <p className="text-sm text-[#E9E7E2]/70">Marketing Director, Elevate</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </StaggerReveal>
-
-              <ScrollReveal
-                className="mt-10 md:mt-12 text-center"
-                delay={0.3}
-                mobileDelay={0.2}
-                mobileAnimation="fade"
-              >
-                <Link
-                  href="/testimonials"
-                  className="px-6 py-3 md:px-8 md:py-4 bg-[#FF5001] text-[#161616] font-bold rounded-full hover:bg-[#FF5001]/90 transition-all duration-300 inline-flex items-center group"
-                  data-cursor="button"
-                  data-cursor-text="View Testimonials"
-                >
-                  Read More Testimonials
-                  <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </ScrollReveal>
-            </div>
-          </section>
-
-          {/* Contact CTA Section */}
+          {/* Contact CTA Section - Responsive spacing */}
           <section id="contact-cta">
-            <div className="container mx-auto px-4 py-16 md:py-20 lg:py-32">
-              <div className="bg-[#1A1A1A] rounded-3xl p-8 md:p-12 lg:p-16 relative overflow-hidden">
+            <div className="container mx-auto px-4 py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32">
+              <div className="bg-[#1A1A1A] rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 lg:p-16 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-[#FF5001]/10 rounded-full filter blur-3xl"></div>
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#FF5001]/5 rounded-full filter blur-3xl"></div>
 
@@ -414,10 +351,10 @@ export default function Home() {
                   <span className="text-[#FF5001] text-sm uppercase tracking-widest font-medium">
                     Get Started
                   </span>
-                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mt-4 mb-6">
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mt-4 mb-4 sm:mb-6">
                     Ready to Transform Your Brand?
                   </h2>
-                  <p className="text-lg md:text-xl text-[#E9E7E2]/80 mb-8 md:mb-10">
+                  <p className="text-base sm:text-lg md:text-xl text-[#E9E7E2]/80 mb-6 sm:mb-8 md:mb-10">
                     Let's collaborate to create a strategic brand experience
                     that resonates with your audience and drives meaningful
                     results for your business.

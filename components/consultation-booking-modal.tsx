@@ -194,17 +194,17 @@ export function ConsultationBookingModal({ isOpen, onClose, consultationType }: 
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-[#E9E7E2]">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+        <DialogHeader className="space-y-3">
+          <DialogTitle className="text-xl sm:text-2xl font-bold text-[#E9E7E2]">
             {consultationTitles[consultationType]}
           </DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8 mt-6">
           {/* Full Name */}
-          <div className="space-y-2">
-            <Label htmlFor="fullName" className="text-[#E9E7E2]">
+          <div className="space-y-3">
+            <Label htmlFor="fullName" className="text-[#E9E7E2] text-sm font-medium">
               Full Name *
             </Label>
             <Input
@@ -213,18 +213,18 @@ export function ConsultationBookingModal({ isOpen, onClose, consultationType }: 
               onChange={(e) => handleInputChange('fullName', e.target.value)}
               placeholder="Who should we address?"
               className={cn(
-                "bg-[#1A1A1A] border-[#333333] text-[#E9E7E2]",
+                "bg-[#1A1A1A] border-[#333333] text-[#E9E7E2] h-12 text-base touch-manipulation",
                 errors.fullName && "border-red-500"
               )}
             />
             {errors.fullName && (
-              <p className="text-red-500 text-sm">{errors.fullName}</p>
+              <p className="text-red-500 text-sm mt-2">{errors.fullName}</p>
             )}
           </div>
 
           {/* Email */}
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-[#E9E7E2]">
+          <div className="space-y-3">
+            <Label htmlFor="email" className="text-[#E9E7E2] text-sm font-medium">
               Email Address *
             </Label>
             <Input
@@ -234,18 +234,18 @@ export function ConsultationBookingModal({ isOpen, onClose, consultationType }: 
               onChange={(e) => handleInputChange('email', e.target.value)}
               placeholder="For sending confirmation & calendar invite"
               className={cn(
-                "bg-[#1A1A1A] border-[#333333] text-[#E9E7E2]",
+                "bg-[#1A1A1A] border-[#333333] text-[#E9E7E2] h-12 text-base touch-manipulation",
                 errors.email && "border-red-500"
               )}
             />
             {errors.email && (
-              <p className="text-red-500 text-sm">{errors.email}</p>
+              <p className="text-red-500 text-sm mt-2">{errors.email}</p>
             )}
           </div>
 
           {/* Company Name */}
-          <div className="space-y-2">
-            <Label htmlFor="companyName" className="text-[#E9E7E2]">
+          <div className="space-y-3">
+            <Label htmlFor="companyName" className="text-[#E9E7E2] text-sm font-medium">
               Company Name / Brand
             </Label>
             <Input
@@ -253,13 +253,13 @@ export function ConsultationBookingModal({ isOpen, onClose, consultationType }: 
               value={formData.companyName}
               onChange={(e) => handleInputChange('companyName', e.target.value)}
               placeholder="Tell us about your business"
-              className="bg-[#1A1A1A] border-[#333333] text-[#E9E7E2]"
+              className="bg-[#1A1A1A] border-[#333333] text-[#E9E7E2] h-12 text-base touch-manipulation"
             />
           </div>
 
           {/* Website URL */}
-          <div className="space-y-2">
-            <Label htmlFor="websiteUrl" className="text-[#E9E7E2]">
+          <div className="space-y-3">
+            <Label htmlFor="websiteUrl" className="text-[#E9E7E2] text-sm font-medium">
               Website / Social Links
             </Label>
             <Input
@@ -268,22 +268,22 @@ export function ConsultationBookingModal({ isOpen, onClose, consultationType }: 
               onChange={(e) => handleInputChange('websiteUrl', e.target.value)}
               placeholder="Optional but helps us review your brand presence"
               className={cn(
-                "bg-[#1A1A1A] border-[#333333] text-[#E9E7E2]",
+                "bg-[#1A1A1A] border-[#333333] text-[#E9E7E2] h-12 text-base touch-manipulation",
                 errors.websiteUrl && "border-red-500"
               )}
             />
             {errors.websiteUrl && (
-              <p className="text-red-500 text-sm">{errors.websiteUrl}</p>
+              <p className="text-red-500 text-sm mt-2">{errors.websiteUrl}</p>
             )}
           </div>
 
           {/* Role */}
-          <div className="space-y-2">
-            <Label htmlFor="role" className="text-[#E9E7E2]">
+          <div className="space-y-3">
+            <Label htmlFor="role" className="text-[#E9E7E2] text-sm font-medium">
               Your Role
             </Label>
             <Select value={formData.role} onValueChange={(value) => handleInputChange('role', value)}>
-              <SelectTrigger className="bg-[#1A1A1A] border-[#333333] text-[#E9E7E2]">
+              <SelectTrigger className="bg-[#1A1A1A] border-[#333333] text-[#E9E7E2] h-12 text-base touch-manipulation">
                 <SelectValue placeholder="Are you the founder, marketing head, etc.?" />
               </SelectTrigger>
               <SelectContent>
@@ -297,8 +297,8 @@ export function ConsultationBookingModal({ isOpen, onClose, consultationType }: 
           </div>
 
           {/* Main Challenge */}
-          <div className="space-y-2">
-            <Label htmlFor="mainChallenge" className="text-[#E9E7E2]">
+          <div className="space-y-3">
+            <Label htmlFor="mainChallenge" className="text-[#E9E7E2] text-sm font-medium">
               Main Brand Challenge *
             </Label>
             <Select 
@@ -306,7 +306,7 @@ export function ConsultationBookingModal({ isOpen, onClose, consultationType }: 
               onValueChange={(value) => handleInputChange('mainChallenge', value)}
             >
               <SelectTrigger className={cn(
-                "bg-[#1A1A1A] border-[#333333] text-[#E9E7E2]",
+                "bg-[#1A1A1A] border-[#333333] text-[#E9E7E2] h-12 text-base touch-manipulation",
                 errors.mainChallenge && "border-red-500"
               )}>
                 <SelectValue placeholder="What are you currently struggling with?" />
@@ -320,14 +320,14 @@ export function ConsultationBookingModal({ isOpen, onClose, consultationType }: 
               </SelectContent>
             </Select>
             {errors.mainChallenge && (
-              <p className="text-red-500 text-sm">{errors.mainChallenge}</p>
+              <p className="text-red-500 text-sm mt-2">{errors.mainChallenge}</p>
             )}
           </div>
 
           {/* Other Challenge (conditional) */}
           {formData.mainChallenge === 'other' && (
-            <div className="space-y-2">
-              <Label htmlFor="otherChallenge" className="text-[#E9E7E2]">
+            <div className="space-y-3">
+              <Label htmlFor="otherChallenge" className="text-[#E9E7E2] text-sm font-medium">
                 Please describe your challenge *
               </Label>
               <Textarea
@@ -336,20 +336,20 @@ export function ConsultationBookingModal({ isOpen, onClose, consultationType }: 
                 onChange={(e) => handleInputChange('otherChallenge', e.target.value)}
                 placeholder="Tell us more about your specific challenge..."
                 className={cn(
-                  "bg-[#1A1A1A] border-[#333333] text-[#E9E7E2]",
+                  "bg-[#1A1A1A] border-[#333333] text-[#E9E7E2] min-h-[100px] text-base touch-manipulation",
                   errors.otherChallenge && "border-red-500"
                 )}
                 rows={3}
               />
               {errors.otherChallenge && (
-                <p className="text-red-500 text-sm">{errors.otherChallenge}</p>
+                <p className="text-red-500 text-sm mt-2">{errors.otherChallenge}</p>
               )}
             </div>
           )}
 
           {/* Session Goal */}
-          <div className="space-y-2">
-            <Label htmlFor="sessionGoal" className="text-[#E9E7E2]">
+          <div className="space-y-3">
+            <Label htmlFor="sessionGoal" className="text-[#E9E7E2] text-sm font-medium">
               What do you hope to achieve from this session?
             </Label>
             <Textarea
@@ -357,21 +357,21 @@ export function ConsultationBookingModal({ isOpen, onClose, consultationType }: 
               value={formData.sessionGoal}
               onChange={(e) => handleInputChange('sessionGoal', e.target.value)}
               placeholder="Helps us focus the consultation..."
-              className="bg-[#1A1A1A] border-[#333333] text-[#E9E7E2]"
+              className="bg-[#1A1A1A] border-[#333333] text-[#E9E7E2] min-h-[100px] text-base touch-manipulation"
               rows={3}
             />
           </div>
 
           {/* Preferred Date & Time */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-[#E9E7E2]">Preferred Date</Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            <div className="space-y-3">
+              <Label className="text-[#E9E7E2] text-sm font-medium">Preferred Date</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     className={cn(
-                      "w-full justify-start text-left font-normal bg-[#1A1A1A] border-[#333333] text-[#E9E7E2]",
+                      "w-full justify-start text-left font-normal bg-[#1A1A1A] border-[#333333] text-[#E9E7E2] h-12 text-base touch-manipulation",
                       !formData.preferredDate && "text-muted-foreground"
                     )}
                   >
@@ -395,10 +395,10 @@ export function ConsultationBookingModal({ isOpen, onClose, consultationType }: 
               </Popover>
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-[#E9E7E2]">Preferred Time</Label>
+            <div className="space-y-3">
+              <Label className="text-[#E9E7E2] text-sm font-medium">Preferred Time</Label>
               <Select value={formData.preferredTime} onValueChange={(value) => handleInputChange('preferredTime', value)}>
-                <SelectTrigger className="bg-[#1A1A1A] border-[#333333] text-[#E9E7E2]">
+                <SelectTrigger className="bg-[#1A1A1A] border-[#333333] text-[#E9E7E2] h-12 text-base touch-manipulation">
                   <Clock className="mr-2 h-4 w-4" />
                   <SelectValue placeholder="Select time" />
                 </SelectTrigger>
@@ -414,8 +414,8 @@ export function ConsultationBookingModal({ isOpen, onClose, consultationType }: 
           </div>
 
           {/* Additional Notes */}
-          <div className="space-y-2">
-            <Label htmlFor="additionalNotes" className="text-[#E9E7E2]">
+          <div className="space-y-3">
+            <Label htmlFor="additionalNotes" className="text-[#E9E7E2] text-sm font-medium">
               Anything else you'd like to share?
             </Label>
             <Textarea
@@ -423,25 +423,25 @@ export function ConsultationBookingModal({ isOpen, onClose, consultationType }: 
               value={formData.additionalNotes}
               onChange={(e) => handleInputChange('additionalNotes', e.target.value)}
               placeholder="Optional - any additional context or questions..."
-              className="bg-[#1A1A1A] border-[#333333] text-[#E9E7E2]"
+              className="bg-[#1A1A1A] border-[#333333] text-[#E9E7E2] min-h-[120px] text-base touch-manipulation"
               rows={4}
             />
           </div>
 
           {/* Submit Button */}
-          <div className="flex gap-4 pt-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-6">
             <Button
               type="button"
               variant="outline"
               onClick={handleClose}
-              className="flex-1 bg-transparent border-[#333333] text-[#E9E7E2] hover:bg-[#333333]"
+              className="flex-1 bg-transparent border-[#333333] text-[#E9E7E2] hover:bg-[#333333] h-12 text-base touch-manipulation"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 bg-[#E9E7E2] text-[#1A1A1A] hover:bg-[#D4D2CD]"
+              className="flex-1 bg-[#E9E7E2] text-[#1A1A1A] hover:bg-[#D4D2CD] h-12 text-base touch-manipulation"
             >
               {isSubmitting ? 'Booking...' : 'Book Consultation'}
             </Button>

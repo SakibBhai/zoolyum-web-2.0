@@ -20,15 +20,17 @@ export async function FeaturedProject() {
         <div className="relative overflow-hidden rounded-lg bg-[#1A1A1A] border border-[#333333]">
           <div className="grid lg:grid-cols-2 gap-0">
             {/* Image Section */}
-            <div className="relative overflow-hidden">
-              <div className="transform-gpu transition-transform duration-700 group-hover:scale-105">
+            <div className="relative overflow-hidden aspect-[4/3] lg:aspect-auto lg:min-h-[400px]">
+              <div className="transform-gpu transition-transform duration-700 group-hover:scale-105 w-full h-full">
                 <Image
-                  src="/placeholder.svg"
+                  src={featuredProject.featuredImage || "/placeholder.svg"}
                   alt={featuredProject.title}
-                  width={800}
-                  height={600}
-                  className="w-full aspect-[4/3] lg:aspect-auto lg:h-full object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                   priority
+                  placeholder="blur"
+                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
                 />
               </div>
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />

@@ -5,11 +5,14 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { AdminSidebar } from "@/components/admin/sidebar"
 import { useConditionalUser } from "@/hooks/use-conditional-user"
+import { Menu, X } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const user = useConditionalUser()
   const router = useRouter()
   const [isDevelopment, setIsDevelopment] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     // Check if we're in development mode
@@ -40,9 +43,35 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   if (isDevelopment) {
     return (
       <div className="flex min-h-screen bg-[#121212]">
-        <AdminSidebar />
-        <main className="flex-1 p-6 overflow-auto">
-          {children}
+        {/* Mobile Menu Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="fixed top-4 left-4 z-50 lg:hidden bg-[#1A1A1A] text-[#E9E7E2] hover:bg-[#252525]"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+          {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </Button>
+
+        {/* Mobile Overlay */}
+        {isMobileMenuOpen && (
+          <div 
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
+
+        {/* Sidebar */}
+        <AdminSidebar 
+          isMobileMenuOpen={isMobileMenuOpen} 
+          setIsMobileMenuOpen={setIsMobileMenuOpen}
+        />
+        
+        {/* Main Content */}
+        <main className="flex-1 lg:ml-0 transition-all duration-300">
+          <div className="p-4 sm:p-6 pt-16 lg:pt-6">
+            {children}
+          </div>
         </main>
       </div>
     )
@@ -62,9 +91,35 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   
   return (
     <div className="flex min-h-screen bg-[#121212]">
-      <AdminSidebar />
-      <main className="flex-1 p-6 overflow-auto">
-        {children}
+      {/* Mobile Menu Button */}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="fixed top-4 left-4 z-50 lg:hidden bg-[#1A1A1A] text-[#E9E7E2] hover:bg-[#252525]"
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+      >
+        {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+      </Button>
+
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <AdminSidebar 
+        isMobileMenuOpen={isMobileMenuOpen} 
+        setIsMobileMenuOpen={setIsMobileMenuOpen}
+      />
+      
+      {/* Main Content */}
+      <main className="flex-1 lg:ml-0 transition-all duration-300">
+        <div className="p-4 sm:p-6 pt-16 lg:pt-6 overflow-auto">
+          {children}
+        </div>
       </main>
     </div>
   )
