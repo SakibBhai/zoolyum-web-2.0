@@ -21,8 +21,10 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from '@/components/ui/use-toast'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { X, Plus, ArrowLeft } from 'lucide-react'
+import { X, Plus, ArrowLeft, Save, Loader2 } from 'lucide-react'
 import { PageTransition } from '@/components/page-transition'
+import { ImageUploader } from '@/components/admin/image-uploader'
+import { GalleryUploader } from '@/components/admin/gallery-uploader'
 import Link from 'next/link'
 
 const projectFormSchema = z.object({
@@ -42,6 +44,7 @@ const projectFormSchema = z.object({
   heroImageUrl: z.string().optional().refine((val) => !val || z.string().url().safeParse(val).success, {
     message: 'Must be a valid URL'
   }),
+  gallery: z.array(z.string()).default([]),
   year: z.string().optional(),
   client: z.string().optional(),
   duration: z.string().optional(),
@@ -83,6 +86,7 @@ export default function EditProjectPage() {
       category: '',
       imageUrl: '',
       heroImageUrl: '',
+      gallery: [],
       year: '',
       client: '',
       duration: '',
@@ -118,6 +122,7 @@ export default function EditProjectPage() {
           category: project.category || '',
           imageUrl: project.imageUrl || '',
           heroImageUrl: project.heroImageUrl || '',
+          gallery: project.gallery || [],
           year: project.year || '',
           client: project.client || '',
           duration: project.duration || '',
@@ -485,9 +490,9 @@ export default function EditProjectPage() {
               </div>
             </div>
 
-            {/* URLs */}
+            {/* Media Management */}
             <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-[#E9E7E2]">URLs & Media</h3>
+              <h3 className="text-lg font-semibold text-[#E9E7E2]">Media Management</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
@@ -495,14 +500,19 @@ export default function EditProjectPage() {
                   name="imageUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[#E9E7E2]">Thumbnail Image URL</FormLabel>
+                      <FormLabel className="text-[#E9E7E2]">Thumbnail Image</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="https://example.com/image.jpg" 
-                          className="bg-[#1A1A1A] border-[#333333] text-[#E9E7E2]"
-                          {...field}
+                        <ImageUploader
+                          label="Thumbnail Image"
+                          initialImageUrl={field.value || undefined}
+                          onImageChangeAction={field.onChange}
+                          folder="projects"
+                          helpText="Upload a thumbnail image for the project grid"
                         />
                       </FormControl>
+                      <FormDescription className="text-[#E9E7E2]/60">
+                        Used in project listings and cards
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -513,19 +523,54 @@ export default function EditProjectPage() {
                   name="heroImageUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[#E9E7E2]">Hero Image URL</FormLabel>
+                      <FormLabel className="text-[#E9E7E2]">Hero Image</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="https://example.com/hero.jpg" 
-                          className="bg-[#1A1A1A] border-[#333333] text-[#E9E7E2]"
-                          {...field}
+                        <ImageUploader
+                          label="Hero Image"
+                          initialImageUrl={field.value || undefined}
+                          onImageChangeAction={field.onChange}
+                          folder="projects"
+                          helpText="Upload a hero image for the project detail page"
                         />
                       </FormControl>
+                      <FormDescription className="text-[#E9E7E2]/60">
+                        Large image for project detail page header
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
+              
+              <div className="col-span-full">
+                <FormField
+                  control={form.control}
+                  name="gallery"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[#E9E7E2]">Project Gallery</FormLabel>
+                      <FormControl>
+                        <GalleryUploader
+                          label="Project Gallery"
+                          initialImages={field.value.map(url => ({ url })) || []}
+                          onImagesChange={(images) => {
+                            const urls = images.map(img => img.url)
+                            field.onChange(urls)
+                          }}
+                          helpText="Upload multiple images to showcase the project"
+                        />
+                      </FormControl>
+                      <FormDescription className="text-[#E9E7E2]/60">
+                        Additional images for the project gallery section
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Project URLs */}
+              <h4 className="text-md font-medium text-[#E9E7E2] mt-8 mb-4">Project Links</h4>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField

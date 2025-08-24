@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
-import { getCurrentUser } from '@/lib/stack-auth';
+import { isAdmin } from '@/lib/stack-auth';
+import { writeFile, mkdir } from 'fs/promises';
+import { join } from 'path';
+import { existsSync } from 'fs';
 
 // Validation schema for job creation/update
 const jobSchema = z.object({
@@ -22,6 +25,8 @@ const jobSchema = z.object({
   published: z.boolean().default(false),
   featured: z.boolean().default(false),
   applicationDeadline: z.string().optional().transform((val) => val ? new Date(val) : undefined),
+  imageUrl: z.string().optional().nullable(),
+  allowCvSubmission: z.boolean().default(true),
 });
 
 // GET /api/jobs - Fetch all published jobs with optional filtering
@@ -106,6 +111,8 @@ export async function GET(request: NextRequest) {
           experience: true,
           featured: true,
           applicationDeadline: true,
+          imageUrl: true,
+          allowCvSubmission: true,
           createdAt: true,
           _count: {
             select: {
@@ -138,29 +145,92 @@ export async function GET(request: NextRequest) {
 // POST /api/jobs - Create a new job (Admin only)
 export async function POST(request: NextRequest) {
   try {
-    // Check authentication
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    // Check if user is admin (in development, any authenticated user is admin)
-    const adminUser = await prisma.adminUser.findUnique({
-      where: { email: user.email || user.primaryEmail || '' },
-    });
-
-    if (!adminUser) {
+    // Authorization check
+    const authorized = await isAdmin();
+    if (!authorized) {
       return NextResponse.json(
         { error: 'Forbidden - Admin access required' },
         { status: 403 }
       );
     }
 
-    const body = await request.json();
-    const validatedData = jobSchema.parse(body);
+    const contentType = request.headers.get('content-type') || '';
+    let jobData: any = {};
+    let jobImage: File | null = null;
+
+    if (contentType.includes('application/json')) {
+      // Handle JSON data
+      jobData = await request.json();
+    } else {
+      // Handle form data
+      const formData = await request.formData();
+      
+      for (const [key, value] of formData.entries()) {
+        if (key === 'jobImage' && value instanceof File) {
+          jobImage = value;
+        } else if (key === 'skills') {
+          try {
+            jobData[key] = JSON.parse(value as string);
+          } catch {
+            jobData[key] = [];
+          }
+        } else if (key === 'published' || key === 'featured' || key === 'allowCvSubmission') {
+          jobData[key] = value === 'true';
+        } else if (key === 'salaryMin' || key === 'salaryMax') {
+          const numValue = parseInt(value as string);
+          jobData[key] = isNaN(numValue) ? null : numValue;
+        } else {
+          jobData[key] = value;
+        }
+      }
+    }
+
+    // Handle image upload if present
+    let imagePath = null;
+    if (jobImage && jobImage.size > 0) {
+      // Validate image
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(jobImage.type)) {
+        return NextResponse.json(
+          { error: 'Invalid image type. Only JPG, PNG, and WebP are allowed.' },
+          { status: 400 }
+        );
+      }
+
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (jobImage.size > maxSize) {
+        return NextResponse.json(
+          { error: 'Image size must be less than 5MB' },
+          { status: 400 }
+        );
+      }
+
+      // Create uploads directory if it doesn't exist
+      const uploadsDir = join(process.cwd(), 'public', 'uploads', 'jobs');
+      if (!existsSync(uploadsDir)) {
+        await mkdir(uploadsDir, { recursive: true });
+      }
+
+      // Generate unique filename
+      const timestamp = Date.now();
+      const extension = jobImage.name.split('.').pop();
+      const filename = `job-${timestamp}.${extension}`;
+      const filepath = join(uploadsDir, filename);
+
+      // Save file
+      const bytes = await jobImage.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      await writeFile(filepath, buffer);
+      
+      imagePath = `/uploads/jobs/${filename}`;
+    }
+
+    // Add image path to job data
+    if (imagePath) {
+      jobData.imageUrl = imagePath;
+    }
+
+    const validatedData = jobSchema.parse(jobData);
 
     // Generate slug from title
     const slug = validatedData.title
@@ -184,7 +254,6 @@ export async function POST(request: NextRequest) {
       data: {
         ...validatedData,
         slug,
-        createdBy: adminUser.id,
       },
     });
 

@@ -39,7 +39,7 @@ export default function ConditionalStackProvider({
     setIsClient(true);
     const hostname = window.location.hostname;
     const port = window.location.port;
-    const isDev = hostname === 'localhost' || hostname === '127.0.0.1' || port === '3000' || port === '3001';
+    const isDev = hostname === 'localhost' || hostname === '127.0.0.1' || port === '3000' || port === '3001' || port === '3002';
     setIsDevelopment(isDev);
     
     if (isDev) {

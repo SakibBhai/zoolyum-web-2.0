@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { RichTextEditor } from '@/components/admin/rich-text-editor'
+import { ImageUploader } from '@/components/admin/image-uploader'
 import { useToast } from '@/hooks/use-toast'
 import { ArrowLeft, Save, Eye } from 'lucide-react'
 import Link from 'next/link'
@@ -39,6 +40,8 @@ export default function NewBlogPostPage() {
     tags: []
   })
   const [tagsInput, setTagsInput] = useState('')
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+  const [isValidating, setIsValidating] = useState(false)
 
   // Auto-generate slug from title
   const generateSlug = (title: string) => {
@@ -57,6 +60,11 @@ export default function NewBlogPostPage() {
       title,
       slug: generateSlug(title)
     }))
+    
+    // Clear title error when user starts typing
+    if (fieldErrors.title) {
+      setFieldErrors(prev => ({ ...prev, title: '' }))
+    }
   }
 
   const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,13 +74,49 @@ export default function NewBlogPostPage() {
     setFormData(prev => ({ ...prev, tags }))
   }
 
+  // Enhanced validation function
+  const validateForm = () => {
+    const errors: Record<string, string> = {}
+    
+    if (!formData.title.trim()) {
+      errors.title = 'Title is required'
+    } else if (formData.title.length < 3) {
+      errors.title = 'Title must be at least 3 characters long'
+    } else if (formData.title.length > 200) {
+      errors.title = 'Title must be less than 200 characters'
+    }
+    
+    if (!formData.slug.trim()) {
+      errors.slug = 'Slug is required'
+    } else if (!/^[a-z0-9-]+$/.test(formData.slug)) {
+      errors.slug = 'Slug can only contain lowercase letters, numbers, and hyphens'
+    }
+    
+    if (!formData.excerpt.trim()) {
+      errors.excerpt = 'Excerpt is required'
+    } else if (formData.excerpt.length < 10) {
+      errors.excerpt = 'Excerpt must be at least 10 characters long'
+    } else if (formData.excerpt.length > 500) {
+      errors.excerpt = 'Excerpt must be less than 500 characters'
+    }
+    
+    if (!formData.content.trim()) {
+      errors.content = 'Content is required'
+    } else if (formData.content.length < 50) {
+      errors.content = 'Content must be at least 50 characters long'
+    }
+    
+    setFieldErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
   const handleSubmit = async (e: React.FormEvent, isDraft = false) => {
     e.preventDefault()
     
-    if (!formData.title.trim() || !formData.slug.trim() || !formData.excerpt.trim() || !formData.content.trim()) {
+    if (!isDraft && !validateForm()) {
       toast({
         title: 'Validation Error',
-        description: 'Please fill in all required fields (title, slug, excerpt, and content).',
+        description: 'Please fix the errors below before submitting.',
         variant: 'destructive'
       })
       return
@@ -188,9 +232,17 @@ export default function NewBlogPostPage() {
                     value={formData.title}
                     onChange={handleTitleChange}
                     placeholder="Enter blog post title"
-                    className="bg-[#252525] border-[#333] text-[#E9E7E2]"
+                    className={`bg-[#252525] border-[#333] text-[#E9E7E2] ${
+                      fieldErrors.title ? 'border-red-500' : ''
+                    }`}
                     required
                   />
+                  {fieldErrors.title && (
+                    <p className="text-red-500 text-sm">{fieldErrors.title}</p>
+                  )}
+                  <p className="text-[#E9E7E2]/60 text-sm">
+                    {formData.title.length}/200 characters
+                  </p>
                 </div>
                 
                 <div className="space-y-2">
@@ -198,11 +250,21 @@ export default function NewBlogPostPage() {
                   <Input
                     id="slug"
                     value={formData.slug}
-                    onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
+                    onChange={(e) => {
+                      setFormData(prev => ({ ...prev, slug: e.target.value }))
+                      if (fieldErrors.slug) {
+                        setFieldErrors(prev => ({ ...prev, slug: '' }))
+                      }
+                    }}
                     placeholder="blog-post-url-slug"
-                    className="bg-[#252525] border-[#333] text-[#E9E7E2]"
+                    className={`bg-[#252525] border-[#333] text-[#E9E7E2] ${
+                      fieldErrors.slug ? 'border-red-500' : ''
+                    }`}
                     required
                   />
+                  {fieldErrors.slug && (
+                    <p className="text-red-500 text-sm">{fieldErrors.slug}</p>
+                  )}
                   <p className="text-sm text-[#E9E7E2]/60">
                     URL: /blog/{formData.slug || 'your-slug'}
                   </p>
@@ -213,13 +275,23 @@ export default function NewBlogPostPage() {
                   <Textarea
                     id="excerpt"
                     value={formData.excerpt}
-                    onChange={(e) => setFormData(prev => ({ ...prev, excerpt: e.target.value }))}
+                    onChange={(e) => {
+                      setFormData(prev => ({ ...prev, excerpt: e.target.value }))
+                      if (fieldErrors.excerpt) {
+                        setFieldErrors(prev => ({ ...prev, excerpt: '' }))
+                      }
+                    }}
                     placeholder="Brief description of the blog post"
-                    className="bg-[#252525] border-[#333] text-[#E9E7E2] min-h-[100px]"
+                    className={`bg-[#252525] border-[#333] text-[#E9E7E2] min-h-[100px] ${
+                      fieldErrors.excerpt ? 'border-red-500' : ''
+                    }`}
                     required
                   />
+                  {fieldErrors.excerpt && (
+                    <p className="text-red-500 text-sm">{fieldErrors.excerpt}</p>
+                  )}
                   <p className="text-sm text-[#E9E7E2]/60">
-                    {formData.excerpt.length}/300 characters
+                    {formData.excerpt.length}/500 characters
                   </p>
                 </div>
               </CardContent>
@@ -233,14 +305,26 @@ export default function NewBlogPostPage() {
                   Write your blog post content using Markdown
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-2">
                 <RichTextEditor
                   value={formData.content}
-                  onChangeAction={(content) => setFormData(prev => ({ ...prev, content }))}
+                  onChangeAction={(content) => {
+                    setFormData(prev => ({ ...prev, content }))
+                    if (fieldErrors.content) {
+                      setFieldErrors(prev => ({ ...prev, content: '' }))
+                    }
+                  }}
                   placeholder="Write your blog post content here..."
                   minHeight="400px"
                   folder="blog"
+                  className={fieldErrors.content ? 'border-red-500' : ''}
                 />
+                {fieldErrors.content && (
+                  <p className="text-red-500 text-sm">{fieldErrors.content}</p>
+                )}
+                <p className="text-[#E9E7E2]/60 text-sm">
+                  {formData.content.replace(/<[^>]*>/g, '').length} characters
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -273,28 +357,13 @@ export default function NewBlogPostPage() {
                 <CardTitle className="text-[#E9E7E2]">Featured Image</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="imageUrl" className="text-[#E9E7E2]">Image URL</Label>
-                  <Input
-                    id="imageUrl"
-                    value={formData.imageUrl}
-                    onChange={(e) => setFormData(prev => ({ ...prev, imageUrl: e.target.value }))}
-                    placeholder="https://example.com/image.jpg"
-                    className="bg-[#252525] border-[#333] text-[#E9E7E2]"
-                  />
-                </div>
-                {formData.imageUrl && (
-                  <div className="aspect-video bg-[#252525] rounded-lg overflow-hidden">
-                    <img
-                      src={formData.imageUrl}
-                      alt="Featured image preview"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none'
-                      }}
-                    />
-                  </div>
-                )}
+                <ImageUploader
+                  label="Featured Image"
+                  initialImageUrl={formData.imageUrl}
+                  onImageChangeAction={(url) => setFormData(prev => ({ ...prev, imageUrl: url || '' }))}
+                  folder="blog"
+                  helpText="Upload a featured image for your blog post. Recommended size: 1200x630px for optimal social media sharing."
+                />
               </CardContent>
             </Card>
 
@@ -313,18 +382,26 @@ export default function NewBlogPostPage() {
                     placeholder="web design, branding, strategy"
                     className="bg-[#252525] border-[#333] text-[#E9E7E2]"
                   />
+                  <p className="text-sm text-[#E9E7E2]/60">
+                    Separate multiple tags with commas. Tags help readers find your content.
+                  </p>
                 </div>
                 {formData.tags.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {formData.tags.map((tag, index) => (
                       <span
                         key={index}
-                        className="px-2 py-1 bg-[#FF5001]/20 text-[#FF5001] rounded-md text-sm"
+                        className="px-3 py-1 bg-[#FF5001]/20 border border-[#FF5001]/30 text-[#FF5001] rounded-full text-sm"
                       >
-                        {tag}
+                        #{tag}
                       </span>
                     ))}
                   </div>
+                )}
+                {formData.tags.length > 10 && (
+                  <p className="text-yellow-500 text-sm">
+                    Consider using fewer tags (10 or less) for better organization.
+                  </p>
                 )}
               </CardContent>
             </Card>

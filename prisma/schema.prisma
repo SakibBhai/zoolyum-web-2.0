@@ -338,6 +338,8 @@ model Job {
   published           Boolean        @default(false)
   featured            Boolean        @default(false)
   applicationDeadline DateTime?      @map("application_deadline")
+  imageUrl            String?        @map("image_url")
+  allowCvSubmission   Boolean        @default(true) @map("allow_cv_submission")
   createdAt           DateTime       @default(now()) @map("created_at")
   updatedAt           DateTime       @updatedAt @map("updated_at")
   
@@ -361,6 +363,14 @@ model JobApplication {
   phone       String?
   resumeUrl   String?  @map("resume_url")
   coverLetter String?  @map("cover_letter")
+  // added fields
+  portfolioUrl      String?  @map("portfolio_url")
+  linkedinUrl       String?  @map("linkedin_url")
+  experience        String?
+  availability      String?
+  salaryExpectation Int?     @map("salary_expectation")
+  ipAddress         String?  @map("ip_address")
+  userAgent         String?  @map("user_agent")
   status      String   @default("pending")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")

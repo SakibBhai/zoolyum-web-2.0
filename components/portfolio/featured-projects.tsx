@@ -23,9 +23,9 @@ export function FeaturedProjects({ limit = 3 }: FeaturedProjectsProps) {
         setLoading(true);
         setError(null);
         
-        // Fetch active projects, limit to the specified number
+        // Fetch published projects, limit to the specified number
         const fetchedProjects = await fetchProjects({
-          status: 'active',
+          published: true,
           limit
         });
         

@@ -1,21 +1,18 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { getUser } from "@stackframe/stack"
+import { getCurrentUser, isAdmin } from "@/lib/stack-auth"
+import { z } from "zod"
 
 export async function GET(request: NextRequest) {
   try {
     // Check if user is authenticated and is admin
-    const user = await getUser()
+    const user = await getCurrentUser()
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Check if user is admin (you may need to adjust this based on your admin logic)
-    const adminUser = await prisma.adminUser.findUnique({
-      where: { email: user.primaryEmail || "" }
-    })
-
-    if (!adminUser) {
+    const authorized = await isAdmin()
+    if (!authorized) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
@@ -31,6 +28,9 @@ export async function GET(request: NextRequest) {
     if (jobId) {
       where.jobId = jobId
     }
+    if (status) {
+      where.status = status
+    }
 
     // Get applications with job details
     const applications = await prisma.jobApplication.findMany({
@@ -42,16 +42,36 @@ export async function GET(request: NextRequest) {
             title: true,
             department: true,
             location: true,
-            type: true
+            jobType: true,
+            employmentType: true,
           }
         }
       },
       orderBy: {
-        appliedAt: "desc"
+        createdAt: "desc"
       },
       skip: (page - 1) * limit,
       take: limit
     })
+
+    // Shape response for admin UI expectations
+    const shaped = applications.map((app) => ({
+      id: app.id,
+      fullName: `${app.firstName} ${app.lastName}`.trim(),
+      email: app.email,
+      phone: app.phone ?? null,
+      portfolioUrl: app.portfolioUrl ?? null,
+      resumeUrl: app.resumeUrl ?? null,
+      coverLetter: app.coverLetter ?? null,
+      appliedAt: app.createdAt,
+      job: {
+        id: app.job.id,
+        title: app.job.title,
+        department: app.job.department,
+        location: app.job.location,
+        type: app.job.jobType, // map to expected "type" field
+      }
+    }))
 
     // Get total count
     const totalCount = await prisma.jobApplication.count({ where })
@@ -59,13 +79,13 @@ export async function GET(request: NextRequest) {
     // Calculate stats
     const stats = {
       total: await prisma.jobApplication.count(),
-      pending: await prisma.jobApplication.count(), // All applications are pending by default
-      reviewed: 0, // You can add a status field later
-      shortlisted: 0 // You can add a status field later
+      pending: await prisma.jobApplication.count({ where: { status: "pending" } }),
+      reviewed: await prisma.jobApplication.count({ where: { status: "reviewed" } }),
+      shortlisted: await prisma.jobApplication.count({ where: { status: "shortlisted" } })
     }
 
     return NextResponse.json({
-      applications,
+      applications: shaped,
       stats,
       pagination: {
         page,
@@ -83,38 +103,67 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Update application status (for future use)
+// Update application status
 export async function PATCH(request: NextRequest) {
   try {
     // Check if user is authenticated and is admin
-    const user = await getUser()
+    const user = await getCurrentUser()
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const adminUser = await prisma.adminUser.findUnique({
-      where: { email: user.primaryEmail || "" }
-    })
-
-    if (!adminUser) {
+    const authorized = await isAdmin()
+    if (!authorized) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
-    const { applicationId, status, notes } = await request.json()
+    const body = await request.json()
 
-    if (!applicationId) {
-      return NextResponse.json(
-        { error: "Application ID is required" },
-        { status: 400 }
-      )
+    const schema = z.object({
+      applicationId: z.string().min(1, "applicationId is required"),
+      status: z.enum(["pending", "reviewed", "shortlisted"]).optional()
+    })
+
+    const parsed = schema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
     }
 
-    // For now, we'll just return success since we don't have status fields yet
-    // In the future, you can add status and notes fields to the JobApplication model
-    
-    return NextResponse.json({
-      message: "Application status updated successfully"
-    })
+    const { applicationId, status } = parsed.data
+
+    if (status) {
+      const updated = await prisma.jobApplication.update({
+        where: { id: applicationId },
+        data: { status },
+        include: {
+          job: {
+            select: { id: true, title: true, department: true, location: true, jobType: true, employmentType: true }
+          }
+        }
+      })
+
+      const shaped = {
+        id: updated.id,
+        fullName: `${updated.firstName} ${updated.lastName}`.trim(),
+        email: updated.email,
+        phone: updated.phone ?? null,
+        portfolioUrl: updated.portfolioUrl ?? null,
+        resumeUrl: updated.resumeUrl ?? null,
+        coverLetter: updated.coverLetter ?? null,
+        appliedAt: updated.createdAt,
+        job: {
+          id: updated.job.id,
+          title: updated.job.title,
+          department: updated.job.department,
+          location: updated.job.location,
+          type: updated.job.jobType,
+        }
+      }
+
+      return NextResponse.json({ message: "Application updated", application: shaped })
+    }
+
+    return NextResponse.json({ message: "No changes requested" })
   } catch (error) {
     console.error("Error updating application status:", error)
     return NextResponse.json(

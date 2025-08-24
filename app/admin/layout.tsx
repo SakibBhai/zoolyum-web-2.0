@@ -17,7 +17,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                      window.location.hostname === '127.0.0.1' ||
                      window.location.hostname.includes('192.168') ||
                      window.location.port === '3000' ||
-                     window.location.port === '3001'
+      window.location.port === '3001' ||
+      window.location.port === '3002'
     setIsDevelopment(isDevMode)
   }, [])
 

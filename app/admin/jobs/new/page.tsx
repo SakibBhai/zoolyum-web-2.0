@@ -31,30 +31,34 @@ interface JobFormData {
   perks: string;
   skills: string[];
   experience: string;
-  featured: boolean;
   published: boolean;
+  featured: boolean;
   applicationDeadline: string;
+  jobImage?: File | null;
+  allowCvSubmission: boolean;
 }
 
 const initialFormData: JobFormData = {
-  title: '',
-  department: '',
-  location: '',
-  jobType: 'Full-time',
-  employmentType: 'Permanent',
-  salaryMin: '',
-  salaryMax: '',
-  salaryCurrency: 'USD',
-  description: '',
-  requirements: '',
-  responsibilities: '',
-  perks: '',
-  skills: [],
-  experience: '',
-  featured: false,
-  published: false,
-  applicationDeadline: '',
-};
+    title: '',
+    department: '',
+    location: '',
+    jobType: 'Full-time',
+    employmentType: 'Remote',
+    salaryMin: '',
+    salaryMax: '',
+    salaryCurrency: 'BDT',
+    description: '',
+    requirements: '',
+    responsibilities: '',
+    perks: '',
+    skills: [],
+    experience: '',
+    published: false,
+    featured: false,
+    applicationDeadline: '',
+    jobImage: null,
+    allowCvSubmission: true,
+  };
 
 const jobTypes = [
   'Full-time',
@@ -99,6 +103,7 @@ const locations = [
 ];
 
 const currencies = [
+  'BDT',
   'USD',
   'EUR',
   'GBP',
@@ -111,13 +116,52 @@ export default function NewJobPage() {
   const [formData, setFormData] = useState<JobFormData>(initialFormData);
   const [loading, setLoading] = useState(false);
   const [newSkill, setNewSkill] = useState('');
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageError, setImageError] = useState<string>('');
 
   const handleInputChange = (field: keyof JobFormData, value: string | boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value,
-    }));
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    setImageError('');
+    
+    if (!file) {
+      setFormData(prev => ({ ...prev, jobImage: null }));
+      setImagePreview(null);
+      return;
+    }
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setImageError('Please select a valid image file (JPG, PNG, WebP)');
+      return;
+    }
+
+    // Validate file size (5MB limit)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      setImageError('Image size must be less than 5MB');
+      return;
+    }
+
+    setFormData(prev => ({ ...prev, jobImage: file }));
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setImagePreview(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeImage = () => {
+     setFormData(prev => ({ ...prev, jobImage: null }));
+     setImagePreview(null);
+     setImageError('');
+   };
 
   const addSkill = () => {
     if (newSkill.trim() && !formData.skills.includes(newSkill.trim())) {
@@ -147,20 +191,39 @@ export default function NewJobPage() {
     try {
       setLoading(true);
       
-      const submitData = {
-        ...formData,
-        published: asDraft ? false : formData.published,
-        salaryMin: formData.salaryMin ? parseInt(formData.salaryMin) : undefined,
-        salaryMax: formData.salaryMax ? parseInt(formData.salaryMax) : undefined,
-        applicationDeadline: formData.applicationDeadline || undefined,
-      };
+      // Create FormData for file upload
+      const formDataToSend = new FormData();
+      
+      // Add all form fields except jobImage
+      Object.entries(formData).forEach(([key, value]) => {
+        if (key === 'jobImage') {
+          if (value instanceof File) {
+            formDataToSend.append('jobImage', value);
+          }
+        } else if (key === 'skills') {
+          formDataToSend.append('skills', JSON.stringify(value));
+        } else if (value !== null && value !== undefined && value !== '') {
+          formDataToSend.append(key, value.toString());
+        }
+      });
+      
+      // Add publishing status
+      formDataToSend.append('published', (asDraft ? false : formData.published).toString());
+      
+      // Add processed salary values
+      if (formData.salaryMin) {
+        formDataToSend.append('salaryMin', formData.salaryMin);
+      }
+      if (formData.salaryMax) {
+        formDataToSend.append('salaryMax', formData.salaryMax);
+      }
+      if (formData.applicationDeadline) {
+        formDataToSend.append('applicationDeadline', formData.applicationDeadline);
+      }
 
       const response = await fetch('/api/jobs', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(submitData),
+        body: formDataToSend, // Don't set Content-Type header for FormData
       });
 
       if (!response.ok) {
@@ -323,6 +386,64 @@ export default function NewJobPage() {
               </CardContent>
             </Card>
 
+            {/* Job Image Upload */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Job Image</CardTitle>
+                <CardDescription>
+                  Upload an image for this job posting (optional)
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="jobImage">Job Image</Label>
+                  <div className="mt-2">
+                    {imagePreview ? (
+                      <div className="relative">
+                        <img
+                          src={imagePreview}
+                          alt="Job preview"
+                          className="w-full max-w-md h-48 object-cover rounded-lg border"
+                        />
+                        <button
+                          type="button"
+                          onClick={removeImage}
+                          className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                        <input
+                          id="jobImage"
+                          type="file"
+                          accept="image/jpeg,image/jpg,image/png,image/webp"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                        />
+                        <label
+                          htmlFor="jobImage"
+                          className="cursor-pointer flex flex-col items-center space-y-2"
+                        >
+                          <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                          </svg>
+                          <span className="text-sm text-gray-600">Click to upload image</span>
+                          <span className="text-xs text-gray-400">JPG, PNG, WebP up to 5MB</span>
+                        </label>
+                      </div>
+                    )}
+                    {imageError && (
+                      <p className="text-sm text-red-600 mt-2">{imageError}</p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Job Description */}
             <Card>
               <CardHeader>
@@ -432,7 +553,7 @@ export default function NewJobPage() {
               <CardHeader>
                 <CardTitle>Salary Information</CardTitle>
                 <CardDescription>
-                  Optional salary range details
+                  Specify salary range in your preferred currency
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -447,7 +568,9 @@ export default function NewJobPage() {
                     </SelectTrigger>
                     <SelectContent>
                       {currencies.map((currency) => (
-                        <SelectItem key={currency} value={currency}>{currency}</SelectItem>
+                        <SelectItem key={currency} value={currency}>
+                          {currency === 'BDT' ? 'BDT (৳)' : currency}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -456,25 +579,82 @@ export default function NewJobPage() {
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <Label htmlFor="salaryMin">Min Salary</Label>
-                    <Input
-                      id="salaryMin"
-                      type="number"
-                      value={formData.salaryMin}
-                      onChange={(e) => handleInputChange('salaryMin', e.target.value)}
-                      placeholder="50000"
-                    />
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
+                        {formData.salaryCurrency === 'BDT' ? '৳' : formData.salaryCurrency}
+                      </span>
+                      <Input
+                        id="salaryMin"
+                        type="number"
+                        value={formData.salaryMin}
+                        onChange={(e) => handleInputChange('salaryMin', e.target.value)}
+                        placeholder={formData.salaryCurrency === 'BDT' ? '50000' : '50000'}
+                        className="pl-12"
+                        min="0"
+                      />
+                    </div>
                   </div>
                   <div>
                     <Label htmlFor="salaryMax">Max Salary</Label>
-                    <Input
-                      id="salaryMax"
-                      type="number"
-                      value={formData.salaryMax}
-                      onChange={(e) => handleInputChange('salaryMax', e.target.value)}
-                      placeholder="80000"
-                    />
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
+                        {formData.salaryCurrency === 'BDT' ? '৳' : formData.salaryCurrency}
+                      </span>
+                      <Input
+                        id="salaryMax"
+                        type="number"
+                        value={formData.salaryMax}
+                        onChange={(e) => handleInputChange('salaryMax', e.target.value)}
+                        placeholder={formData.salaryCurrency === 'BDT' ? '80000' : '80000'}
+                        className="pl-12"
+                        min="0"
+                      />
+                    </div>
                   </div>
                 </div>
+                
+                {formData.salaryMin && formData.salaryMax && parseInt(formData.salaryMin) > parseInt(formData.salaryMax) && (
+                  <p className="text-sm text-red-600">
+                    Minimum salary cannot be greater than maximum salary
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* CV Submission Settings */}
+            <Card>
+              <CardHeader>
+                <CardTitle>CV Submission Settings</CardTitle>
+                <CardDescription>
+                  Configure how applicants can submit their CVs
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="allowCvSubmission">Allow CV Submission</Label>
+                    <p className="text-sm text-gray-600">
+                      Enable applicants to upload their CVs when applying
+                    </p>
+                  </div>
+                  <Switch
+                    id="allowCvSubmission"
+                    checked={formData.allowCvSubmission}
+                    onCheckedChange={(checked) => handleInputChange('allowCvSubmission', checked)}
+                  />
+                </div>
+
+                {formData.allowCvSubmission && (
+                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <h4 className="font-medium text-blue-900 mb-2">CV Submission Requirements</h4>
+                    <ul className="text-sm text-blue-800 space-y-1">
+                      <li>• Maximum file size: 3MB</li>
+                      <li>• Supported formats: PDF, DOC, DOCX</li>
+                      <li>• Files will be securely stored and accessible to admins</li>
+                      <li>• Applicants will receive confirmation upon successful submission</li>
+                    </ul>
+                  </div>
+                )}
               </CardContent>
             </Card>
 

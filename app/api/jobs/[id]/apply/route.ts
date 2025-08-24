@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 // Validation schema for job application
 const applicationSchema = z.object({
@@ -32,19 +32,16 @@ export async function POST(
   { params }: RouteParams
 ) {
   try {
-    const { id: jobId } = params;
+    const { id: jobId } = await params;
     const body = await request.json();
     const validatedData = applicationSchema.parse(body);
 
     // Check if job exists and is published
     const job = await prisma.job.findUnique({
-      where: { 
-        id: jobId,
-        published: true,
-      },
+      where: { id: jobId },
     });
 
-    if (!job) {
+    if (!job || !job.published) {
       return NextResponse.json(
         { error: 'Job not found or not available for applications' },
         { status: 404 }
@@ -57,6 +54,23 @@ export async function POST(
         { error: 'Application deadline has passed' },
         { status: 400 }
       );
+    }
+
+    // Enforce CV requirement and validate format when job requires CV submission
+    if (job.allowCvSubmission) {
+      if (!validatedData.resumeUrl) {
+        return NextResponse.json(
+          { error: 'CV/Resume is required for this application' },
+          { status: 400 }
+        );
+      }
+      const lowerUrl = validatedData.resumeUrl.toLowerCase();
+      if (!/(\.pdf|\.doc|\.docx)$/.test(lowerUrl)) {
+        return NextResponse.json(
+          { error: 'Invalid resume format. Allowed formats: PDF, DOC, DOCX' },
+          { status: 400 }
+        );
+      }
     }
 
     // Check if user has already applied for this job
@@ -91,8 +105,9 @@ export async function POST(
     });
 
     // Send confirmation email to applicant
-    try {
-      await resend.emails.send({
+    if (resend) {
+      try {
+        await resend.emails.send({
         from: process.env.EMAIL_FROM || 'noreply@featuresdigital.com',
         to: validatedData.email,
         subject: `Application Received - ${job.title}`,
@@ -114,17 +129,17 @@ export async function POST(
             <p>Best regards,<br>Features Digital Team</p>
           </div>
         `,
-      });
-    } catch (emailError) {
-      console.error('Failed to send confirmation email:', emailError);
-      // Don't fail the application if email fails
-    }
+        });
+      } catch (emailError) {
+        console.error('Failed to send confirmation email:', emailError);
+        // Don't fail the application if email fails
+      }
 
-    // Send notification email to HR/Admin
-    try {
-      const hrEmail = process.env.HR_EMAIL || process.env.ADMIN_EMAIL;
-      if (hrEmail) {
-        await resend.emails.send({
+      // Send notification email to HR/Admin
+      try {
+        const hrEmail = process.env.HR_EMAIL || process.env.ADMIN_EMAIL;
+        if (hrEmail) {
+          await resend.emails.send({
           from: process.env.EMAIL_FROM || 'noreply@featuresdigital.com',
           to: hrEmail,
           subject: `New Job Application - ${job.title}`,
@@ -154,11 +169,12 @@ export async function POST(
               <p><a href="${process.env.NEXTAUTH_URL}/admin/applications/${application.id}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Review Application</a></p>
             </div>
           `,
-        });
+          });
+        }
+      } catch (emailError) {
+        console.error('Failed to send HR notification email:', emailError);
+        // Don't fail the application if email fails
       }
-    } catch (emailError) {
-      console.error('Failed to send HR notification email:', emailError);
-      // Don't fail the application if email fails
     }
 
     return NextResponse.json(
