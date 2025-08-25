@@ -53,6 +53,20 @@ const projectFormSchema = z.object({
   challenge: z.string().optional(),
   solution: z.string().optional(),
   technologies: z.array(z.string()).default([]),
+  process: z.array(z.object({
+    title: z.string(),
+    description: z.string()
+  })).default([]),
+  results: z.object({
+    metrics: z.array(z.string()).default([]),
+    impact: z.string().optional()
+  }).default({ metrics: [], impact: '' }),
+  testimonial: z.object({
+    quote: z.string().optional(),
+    author: z.string().optional(),
+    company: z.string().optional(),
+    image: z.string().optional()
+  }).default({ quote: '', author: '', company: '', image: '' }),
   projectUrl: z.string().optional().refine((val) => !val || z.string().url().safeParse(val).success, {
     message: 'Must be a valid URL'
   }),
@@ -74,6 +88,8 @@ export default function EditProjectPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [newService, setNewService] = useState('')
   const [newTechnology, setNewTechnology] = useState('')
+  const [newProcessStep, setNewProcessStep] = useState({ title: '', description: '' })
+  const [newMetric, setNewMetric] = useState('')
   const [errors, setErrors] = useState<string[]>([])
   
   const form = useForm<ProjectFormValues>({
@@ -95,6 +111,17 @@ export default function EditProjectPage() {
       challenge: '',
       solution: '',
       technologies: [],
+      process: [],
+      results: {
+        metrics: [],
+        impact: ''
+      },
+      testimonial: {
+        quote: '',
+        author: '',
+        company: '',
+        image: ''
+      },
       projectUrl: '',
       githubUrl: '',
       published: false,
@@ -131,6 +158,17 @@ export default function EditProjectPage() {
           challenge: project.challenge || '',
           solution: project.solution || '',
           technologies: project.technologies || [],
+          process: project.process || [],
+          results: {
+            metrics: project.results?.metrics || [],
+            impact: project.results?.impact || ''
+          },
+          testimonial: {
+            quote: project.testimonial?.quote || '',
+            author: project.testimonial?.author || '',
+            company: project.testimonial?.company || '',
+            image: project.testimonial?.image || ''
+          },
           projectUrl: project.projectUrl || '',
           githubUrl: project.githubUrl || '',
           published: project.published || false,
@@ -180,6 +218,34 @@ export default function EditProjectPage() {
   const removeTechnology = (technologyToRemove: string) => {
     const currentTechnologies = form.getValues('technologies')
     form.setValue('technologies', currentTechnologies.filter(tech => tech !== technologyToRemove))
+  }
+
+  const addProcessStep = () => {
+    if (newProcessStep.title.trim() && newProcessStep.description.trim()) {
+      const currentProcess = form.getValues('process')
+      form.setValue('process', [...currentProcess, { ...newProcessStep }])
+      setNewProcessStep({ title: '', description: '' })
+    }
+  }
+
+  const removeProcessStep = (index: number) => {
+    const currentProcess = form.getValues('process')
+    form.setValue('process', currentProcess.filter((_, i) => i !== index))
+  }
+
+  const addMetric = () => {
+    if (newMetric.trim()) {
+      const currentResults = form.getValues('results')
+      const updatedMetrics = [...currentResults.metrics, newMetric.trim()]
+      form.setValue('results', { ...currentResults, metrics: updatedMetrics })
+      setNewMetric('')
+    }
+  }
+
+  const removeMetric = (index: number) => {
+    const currentResults = form.getValues('results')
+    const updatedMetrics = currentResults.metrics.filter((_, i) => i !== index)
+    form.setValue('results', { ...currentResults, metrics: updatedMetrics })
   }
 
   // Auto-generate slug from title
@@ -487,6 +553,187 @@ export default function EditProjectPage() {
                     </button>
                   </Badge>
                 ))}
+              </div>
+            </div>
+
+            {/* Process Steps */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-[#E9E7E2]">Process Steps</h3>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Step title"
+                  value={newProcessStep.title}
+                  onChange={(e) => setNewProcessStep({ ...newProcessStep, title: e.target.value })}
+                  className="bg-[#1A1A1A] border-[#333333] text-[#E9E7E2] flex-1"
+                />
+                <Input
+                  placeholder="Step description"
+                  value={newProcessStep.description}
+                  onChange={(e) => setNewProcessStep({ ...newProcessStep, description: e.target.value })}
+                  className="bg-[#1A1A1A] border-[#333333] text-[#E9E7E2] flex-1"
+                />
+                <Button type="button" onClick={addProcessStep} variant="outline">
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {form.watch('process').map((step, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-[#1A1A1A] border border-[#333333] rounded">
+                    <div>
+                      <div className="font-medium text-[#E9E7E2]">{step.title}</div>
+                      <div className="text-sm text-[#E9E7E2]/60">{step.description}</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeProcessStep(index)}
+                      className="text-red-400 hover:text-red-300"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Results & Impact */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-[#E9E7E2]">Results & Impact</h3>
+              
+              {/* Metrics */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-[#E9E7E2]">Key Metrics</label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Add a metric (e.g., 50% increase in conversions)"
+                    value={newMetric}
+                    onChange={(e) => setNewMetric(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addMetric())}
+                    className="bg-[#1A1A1A] border-[#333333] text-[#E9E7E2]"
+                  />
+                  <Button type="button" onClick={addMetric} variant="outline">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {form.watch('results.metrics').map((metric, index) => (
+                    <Badge key={index} variant="secondary" className="bg-[#333333] text-[#E9E7E2]">
+                      {metric}
+                      <button
+                        type="button"
+                        onClick={() => removeMetric(index)}
+                        className="ml-2 hover:text-red-400"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Impact Description */}
+              <FormField
+                control={form.control}
+                name="results.impact"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-[#E9E7E2]">Impact Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Describe the overall impact and outcomes of this project..."
+                        className="bg-[#1A1A1A] border-[#333333] text-[#E9E7E2] min-h-[100px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription className="text-[#E9E7E2]/60">
+                      Summarize the key outcomes and business impact
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Client Testimonial */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-[#E9E7E2]">Client Testimonial</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="testimonial.quote"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-2">
+                      <FormLabel className="text-[#E9E7E2]">Quote</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Enter the client's testimonial quote..."
+                          className="bg-[#1A1A1A] border-[#333333] text-[#E9E7E2] min-h-[100px]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="testimonial.author"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[#E9E7E2]">Author Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="John Doe"
+                          className="bg-[#1A1A1A] border-[#333333] text-[#E9E7E2]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="testimonial.company"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[#E9E7E2]">Company</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Company Name"
+                          className="bg-[#1A1A1A] border-[#333333] text-[#E9E7E2]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="testimonial.image"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-2">
+                      <FormLabel className="text-[#E9E7E2]">Author Image</FormLabel>
+                      <FormControl>
+                        <ImageUploader
+                          label="Author Image"
+                          initialImageUrl={field.value || undefined}
+                          onImageChangeAction={field.onChange}
+                          folder="testimonials"
+                          helpText="Upload an image of the testimonial author"
+                        />
+                      </FormControl>
+                      <FormDescription className="text-[#E9E7E2]/60">
+                        Optional image of the person giving the testimonial
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
 
