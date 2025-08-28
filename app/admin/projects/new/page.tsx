@@ -300,13 +300,13 @@ export default function NewProjectPage() {
     <PageTransition>
       <div className="container mx-auto py-8">
         <div className="mb-8">
-        <h1 className="text-3xl font-bold">Create New Project</h1>
-        <p className="text-muted-foreground mt-2">
-          Add a new project to your portfolio
-        </p>
-      </div>
+          <h1 className="text-3xl font-bold">Create New Project</h1>
+          <p className="text-muted-foreground mt-2">
+            Add a new project to your portfolio
+          </p>
+        </div>
 
-      {errors.length > 0 && (
+        {errors.length > 0 && (
         <div className="mb-6 p-4 border border-red-200 bg-red-50 rounded-lg">
           <h3 className="text-red-800 font-medium mb-2">Please fix the following errors:</h3>
           <ul className="text-red-700 text-sm space-y-1">
@@ -838,7 +838,7 @@ export default function NewProjectPage() {
             </div>
           </div>
 
-          {/* Services */
+          {/* Services */}
           <div className="space-y-4">
             <h2 className="text-xl font-semibold border-b pb-2">Services</h2>
             <div className="space-y-4">
@@ -1042,7 +1042,6 @@ export default function NewProjectPage() {
           </div>
         </form>
       </Form>
-        </div>
       </div>
     </PageTransition>
   )

@@ -1,4 +1,6 @@
 {
+  "typeRoots": ["./node_modules/@types"],
+  "types": ["d3-array"],
   "compilerOptions": {
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,

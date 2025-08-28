@@ -250,7 +250,7 @@ export default function AdminDashboard() {
                         </p>
                         <p className="text-xs text-gray-500 mt-0.5">{activity.date}</p>
                       </div>
-                      <Badge variant="outline" className="text-xs flex-shrink-0">
+                      <Badge className="text-xs flex-shrink-0 border">
                         {activity.type}
                       </Badge>
                     </motion.div>
@@ -277,25 +277,25 @@ export default function AdminDashboard() {
           <CardContent className="pt-0">
             <div className="grid grid-cols-1 gap-2 sm:gap-3">
               <Link href="/admin/dashboard/blog/new">
-                <Button variant="outline" className="w-full justify-start h-10 sm:h-12 text-sm sm:text-base touch-manipulation hover:bg-gray-50">
+                <Button className="w-full justify-start h-10 sm:h-12 text-sm sm:text-base touch-manipulation hover:bg-gray-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground">
                   <MessageSquare className="h-4 w-4 mr-2 flex-shrink-0" />
                   <span className="truncate">Create New Blog Post</span>
                 </Button>
               </Link>
               <Link href="/admin/dashboard/projects/new">
-                <Button variant="outline" className="w-full justify-start h-10 sm:h-12 text-sm sm:text-base touch-manipulation hover:bg-gray-50">
+                <Button className="w-full justify-start h-10 sm:h-12 text-sm sm:text-base touch-manipulation hover:bg-gray-50">
                   <Briefcase className="h-4 w-4 mr-2 flex-shrink-0" />
                   <span className="truncate">Add New Project</span>
                 </Button>
               </Link>
               <Link href="/admin/contacts">
-                <Button variant="outline" className="w-full justify-start h-10 sm:h-12 text-sm sm:text-base touch-manipulation hover:bg-gray-50">
+                <Button className="w-full justify-start h-10 sm:h-12 text-sm sm:text-base touch-manipulation hover:bg-gray-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground">
                   <Users className="h-4 w-4 mr-2 flex-shrink-0" />
                   <span className="truncate">View All Contacts</span>
                 </Button>
               </Link>
               <Link href="/admin/testimonials">
-                <Button variant="outline" className="w-full justify-start h-10 sm:h-12 text-sm sm:text-base touch-manipulation hover:bg-gray-50">
+                <Button className="w-full justify-start h-10 sm:h-12 text-sm sm:text-base touch-manipulation hover:bg-gray-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground">
                   <Star className="h-4 w-4 mr-2 flex-shrink-0" />
                   <span className="truncate">Manage Testimonials</span>
                 </Button>
