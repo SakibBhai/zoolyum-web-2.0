@@ -55,6 +55,12 @@ function handleApiError(error: unknown): NextResponse {
 // GET /api/team - Get all team members
 export async function GET() {
   try {
+    // Check if DATABASE_URL is available during build
+    if (!process.env.DATABASE_URL) {
+      console.warn("DATABASE_URL not available, returning empty team members array");
+      return NextResponse.json([]);
+    }
+    
     const teamMembers = await getAllTeamMembers();
     return NextResponse.json(teamMembers);
   } catch (error) {
@@ -70,6 +76,11 @@ export async function POST(request: NextRequest) {
     
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Ensure DATABASE_URL is present for write operations
+    if (!process.env.DATABASE_URL) {
+      return NextResponse.json({ error: "Database not configured" }, { status: 500 });
     }
 
     const data = (await request.json()) as Partial<TeamMemberData>;

@@ -4,5 +4,15 @@
   "buildCommand": "prisma generate && corepack enable && pnpm run build",
   "env": {
     "COREPACK_ENABLE_STRICT": "1"
+  },
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 10
+    }
+  },
+  "build": {
+    "env": {
+      "DATABASE_URL": "@database_url"
+    }
   }
 }

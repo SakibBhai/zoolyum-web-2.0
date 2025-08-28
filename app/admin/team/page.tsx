@@ -3,6 +3,9 @@ import { TeamTable } from "./team-table";
 import { TeamPageHeader } from "./team-page-header";
 import { TeamMembersSkeleton } from "./team-members-skeleton";
 
+// Force dynamic rendering for admin pages
+export const dynamic = 'force-dynamic';
+
 // Server Component - Main page wrapper
 export default function TeamPage() {
   return (
@@ -26,6 +29,12 @@ async function TeamMembersContent() {
 // Server-side data fetching function
 async function getTeamMembers() {
   try {
+    // Only fetch if DATABASE_URL is available
+    if (!process.env.DATABASE_URL) {
+      console.warn("DATABASE_URL not available, returning empty team members array");
+      return [];
+    }
+    
     const { getAllTeamMembers } = await import("@/lib/team-operations");
     return await getAllTeamMembers();
   } catch (error) {
