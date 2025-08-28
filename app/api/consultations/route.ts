@@ -76,8 +76,8 @@ export async function POST(request: NextRequest) {
       additionalNotes: body.additionalNotes,
       consultationType: body.consultationType || 'brand_strategy',
       status: 'PENDING' as const,
-      ipAddress: ip,
-      userAgent: userAgent,
+      ipAddress: ip || undefined,
+      userAgent: userAgent || undefined,
     }
     
     const consultation = await createConsultation(consultationData)

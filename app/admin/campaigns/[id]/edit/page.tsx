@@ -43,7 +43,7 @@ interface FormField {
 export default function EditCampaignPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -53,11 +53,22 @@ export default function EditCampaignPage({
     { name: "name", label: "Full Name", type: "text", required: true },
     { name: "email", label: "Email Address", type: "email", required: true },
   ]);
+  const [campaignId, setCampaignId] = useState<string>("");
 
   useEffect(() => {
+    async function initializeParams() {
+      const resolvedParams = await params;
+      setCampaignId(resolvedParams.id);
+    }
+    initializeParams();
+  }, [params]);
+
+  useEffect(() => {
+    if (!campaignId) return;
+    
     async function fetchCampaign() {
       try {
-        const response = await fetch(`/api/campaigns/${params.id}`);
+        const response = await fetch(`/api/campaigns/${campaignId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch campaign');
         }
@@ -80,7 +91,7 @@ export default function EditCampaignPage({
       }
     }
     fetchCampaign();
-  }, [params.id]);
+  }, [campaignId]);
 
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev: any) => ({ ...prev, [field]: value }));
@@ -149,7 +160,7 @@ export default function EditCampaignPage({
     setLoading(true);
 
     const formData = new FormData(e.target as HTMLFormElement);
-    const result = await updateCampaign(params.id, formData);
+    const result = await updateCampaign(campaignId, formData);
 
     setLoading(false);
 

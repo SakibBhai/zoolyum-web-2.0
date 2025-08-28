@@ -7,9 +7,9 @@ const prisma = new PrismaClient();
 // GET /api/homepage/about - Get about section content
 export async function GET() {
   try {
-    const about = await prisma.homepageAbout.findFirst({
-      where: { isActive: true },
-      orderBy: { createdAt: 'desc' }
+    const about = await prisma.homepage_about.findFirst({
+      where: { is_active: true },
+      orderBy: { created_at: 'desc' }
     });
 
     if (!about) {
@@ -48,21 +48,24 @@ export async function PUT(request: NextRequest) {
     const { title, subtitle, description, image, ctaText, ctaUrl } = body;
 
     // Deactivate existing about sections
-    await prisma.homepageAbout.updateMany({
-      where: { isActive: true },
-      data: { isActive: false }
+    await prisma.homepage_about.updateMany({
+      where: { is_active: true },
+      data: { is_active: false }
     });
 
     // Create new active about section
-    const about = await prisma.homepageAbout.create({
+    const { createId } = await import('@paralleldrive/cuid2');
+    const about = await prisma.homepage_about.create({
       data: {
+        id: createId(),
         title,
         subtitle,
         description,
         image,
-        ctaText,
-        ctaUrl,
-        isActive: true
+        cta_text: ctaText,
+        cta_url: ctaUrl,
+        is_active: true,
+        updated_at: new Date()
       }
     });
 
@@ -90,15 +93,18 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { title, subtitle, description, image, ctaText, ctaUrl } = body;
 
-    const about = await prisma.homepageAbout.create({
+    const { createId } = await import('@paralleldrive/cuid2');
+    const about = await prisma.homepage_about.create({
       data: {
+        id: createId(),
         title,
         subtitle,
         description,
         image,
-        ctaText,
-        ctaUrl,
-        isActive: false // New sections start as inactive
+        cta_text: ctaText,
+        cta_url: ctaUrl,
+        is_active: false, // New sections start as inactive
+        updated_at: new Date()
       }
     });
 

@@ -317,7 +317,6 @@ export default function NewBlogPostPage() {
                   placeholder="Write your blog post content here..."
                   minHeight="400px"
                   folder="blog"
-                  className={fieldErrors.content ? 'border-red-500' : ''}
                 />
                 {fieldErrors.content && (
                   <p className="text-red-500 text-sm">{fieldErrors.content}</p>

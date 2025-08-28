@@ -3,9 +3,9 @@ import { fetchContact, updateContact, deleteContact } from '@/lib/contact-operat
 import { getCurrentUser } from '@/lib/stack-auth'
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 // GET /api/contacts/[id] - Fetch single contact (Admin only)

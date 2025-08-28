@@ -12,7 +12,7 @@ export async function GET(
   try {
     const { id } = await params;
     
-    const section = await prisma.homepageSection.findUnique({
+    const section = await prisma.homepage_sections.findUnique({
       where: { id }
     });
 
@@ -51,17 +51,15 @@ export async function PUT(
     const body = await request.json();
     const { sectionType, title, subtitle, content, isVisible, order, metadata, isActive } = body;
 
-    const section = await prisma.homepageSection.update({
+    const section = await prisma.homepage_sections.update({
       where: { id },
       data: {
-        sectionType,
+        section_type: sectionType,
         title,
         subtitle,
-        content,
-        isVisible,
-        order,
-        metadata,
-        isActive
+        description: content,
+        is_active: isActive,
+        order
       }
     });
 
@@ -91,7 +89,7 @@ export async function DELETE(
 
     const { id } = await params;
 
-    await prisma.homepageSection.delete({
+    await prisma.homepage_sections.delete({
       where: { id }
     });
 

@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 export async function GET() {
   try {
     const sections = await prisma.homepage_sections.findMany({
-      where: { isActive: true },
+      where: { is_active: true },
       orderBy: { order: 'asc' }
     });
 
@@ -16,28 +16,28 @@ export async function GET() {
       // Return default sections if none exist
       return NextResponse.json([
         {
-          sectionType: "our_team",
-          title: "Our Team",
-          subtitle: "Meet the Experts",
-          content: "Our diverse team of strategists, designers, and marketers brings years of experience to every project.",
-          isVisible: true,
-          order: 1
+          section_type: "our_team",
+        title: "Our Team",
+        subtitle: "Meet the Experts",
+        description: "Our diverse team of strategists, designers, and marketers brings years of experience to every project.",
+        is_active: true,
+        order: 1
         },
         {
-          sectionType: "client_success",
-          title: "Client Success",
-          subtitle: "What Our Clients Say",
-          content: "Hear from the businesses we've helped transform and grow.",
-          isVisible: true,
-          order: 2
+          section_type: "client_success",
+        title: "Client Success",
+        subtitle: "What Our Clients Say",
+        description: "Hear from the businesses we've helped transform and grow.",
+        is_active: true,
+        order: 2
         },
         {
-          sectionType: "get_started",
-          title: "Get Started",
-          subtitle: "Ready to Transform Your Brand?",
-          content: "Let's discuss how we can help your business achieve its full potential.",
-          isVisible: true,
-          order: 3
+          section_type: "get_started",
+        title: "Get Started",
+        subtitle: "Ready to Transform Your Brand?",
+        description: "Let's discuss how we can help your business achieve its full potential.",
+        is_active: true,
+        order: 3
         }
       ]);
     }
@@ -68,14 +68,13 @@ export async function POST(request: NextRequest) {
 
     const section = await prisma.homepage_sections.create({
       data: {
-        sectionType,
+        section_type: sectionType,
         title,
         subtitle,
-        content,
-        isVisible: isVisible !== undefined ? isVisible : true,
+        description: content,
+        is_active: isVisible !== undefined ? isVisible : true,
         order: order || 0,
-        metadata: metadata || {},
-        isActive: true
+        metadata: metadata || {}
       }
     });
 
@@ -112,26 +111,25 @@ export async function PUT(request: NextRequest) {
 
     // Delete existing sections
     await prisma.homepage_sections.deleteMany({
-      where: { isActive: true }
+      where: { is_active: true }
     });
 
     // Create new sections
     const newSections = await prisma.homepage_sections.createMany({
       data: sections.map((section: any, index: number) => ({
-        sectionType: section.sectionType,
+        section_type: section.sectionType,
         title: section.title,
         subtitle: section.subtitle || '',
-        content: section.content || '',
-        isVisible: section.isVisible !== undefined ? section.isVisible : true,
+        description: section.content || '',
+        is_active: section.isVisible !== undefined ? section.isVisible : true,
         order: section.order || index,
-        metadata: section.metadata || {},
-        isActive: true
+        metadata: section.metadata || {}
       }))
     });
 
     // Fetch and return the created sections
     const createdSections = await prisma.homepage_sections.findMany({
-      where: { isActive: true },
+      where: { is_active: true },
       orderBy: { order: 'asc' }
     });
 

@@ -21,9 +21,9 @@ const applicationSchema = z.object({
 });
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 // POST /api/jobs/[id]/apply - Submit job application

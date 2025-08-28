@@ -235,8 +235,9 @@ export default function NewCampaignPage() {
           <CardContent>
             <CampaignMediaUploader
               images={formData.imageUrls}
-              videoUrls={formData.videoUrls}
-              onChange={handleMediaChange}
+              videos={formData.videoUrls}
+              onImagesChange={(images) => handleMediaChange(images, formData.videoUrls)}
+              onVideosChange={(videos) => handleMediaChange(formData.imageUrls, videos)}
             />
           </CardContent>
         </Card>

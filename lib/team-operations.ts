@@ -58,14 +58,36 @@ export async function getAllTeamMembers(): Promise<TeamMemberWithStatus[]> {
 export async function getTeamMemberById(id: string) {
   try {
     const teamMember = await prisma.teamMember.findUnique({
-      where: { id }
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        position: true,
+        designation: true,
+        website_tag: true,
+        bio: true,
+        image_url: true,
+        email: true,
+        linkedin: true,
+        twitter: true,
+        status: true,
+        order: true,
+        featured: true,
+        createdAt: true,
+        updatedAt: true
+      }
     });
 
     if (!teamMember) {
       throw new Error('Team member not found');
     }
 
-    return teamMember;
+    // Map Prisma field names to TypeScript interface names
+    return {
+      ...teamMember,
+      websiteTag: teamMember.website_tag,
+      imageUrl: teamMember.image_url
+    };
   } catch (error) {
     console.error('Error fetching team member:', error);
     throw new Error('Failed to fetch team member');

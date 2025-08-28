@@ -7,9 +7,9 @@ const prisma = new PrismaClient();
 // GET /api/homepage/hero - Get hero section content
 export async function GET() {
   try {
-    const hero = await prisma.homepageHero.findFirst({
-      where: { isActive: true },
-      orderBy: { createdAt: 'desc' }
+    const hero = await prisma.homepage_hero.findFirst({
+      where: { is_active: true },
+      orderBy: { created_at: 'desc' }
     });
 
     if (!hero) {
@@ -48,21 +48,24 @@ export async function PUT(request: NextRequest) {
     const { title, subtitle, description, primaryCta, secondaryCta, backgroundImage } = body;
 
     // Deactivate existing hero sections
-    await prisma.homepageHero.updateMany({
-      where: { isActive: true },
-      data: { isActive: false }
+    await prisma.homepage_hero.updateMany({
+      where: { is_active: true },
+      data: { is_active: false }
     });
 
     // Create new active hero section
-    const hero = await prisma.homepageHero.create({
+    const { createId } = await import('@paralleldrive/cuid2');
+    const hero = await prisma.homepage_hero.create({
       data: {
+        id: createId(),
         title,
         subtitle,
         description,
-        primaryCta,
-        secondaryCta,
-        backgroundImage,
-        isActive: true
+        primary_cta: primaryCta,
+        secondary_cta: secondaryCta,
+        background_image: backgroundImage,
+        is_active: true,
+        updated_at: new Date()
       }
     });
 
@@ -90,15 +93,18 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { title, subtitle, description, primaryCta, secondaryCta, backgroundImage } = body;
 
-    const hero = await prisma.homepageHero.create({
+    const { createId } = await import('@paralleldrive/cuid2');
+    const hero = await prisma.homepage_hero.create({
       data: {
+        id: createId(),
         title,
         subtitle,
         description,
-        primaryCta,
-        secondaryCta,
-        backgroundImage,
-        isActive: false // New sections start as inactive
+        primary_cta: primaryCta,
+        secondary_cta: secondaryCta,
+        background_image: backgroundImage,
+        is_active: false, // New sections start as inactive
+        updated_at: new Date()
       }
     });
 

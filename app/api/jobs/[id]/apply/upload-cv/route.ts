@@ -5,9 +5,9 @@ import { existsSync } from 'fs';
 import { prisma } from '@/lib/prisma';
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 // POST /api/jobs/[id]/apply/upload-cv - Upload CV for job application
@@ -16,7 +16,7 @@ export async function POST(
   { params }: RouteParams
 ) {
   try {
-    const { id: jobId } = params;
+    const { id: jobId } = await params;
     const formData = await request.formData();
     const cvFile = formData.get('cv') as File;
     const applicantEmail = formData.get('email') as string;

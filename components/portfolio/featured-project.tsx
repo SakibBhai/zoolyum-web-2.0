@@ -23,7 +23,7 @@ export async function FeaturedProject() {
             <div className="relative overflow-hidden aspect-[4/3] lg:aspect-auto lg:min-h-[400px]">
               <div className="transform-gpu transition-transform duration-700 group-hover:scale-105 w-full h-full">
                 <Image
-                  src={featuredProject.featuredImage || "/placeholder.svg"}
+                  src={featuredProject.hero_image_url || featuredProject.image_url || "/placeholder.svg"}
                   alt={featuredProject.title}
                   fill
                   className="object-cover"

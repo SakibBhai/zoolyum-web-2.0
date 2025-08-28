@@ -91,7 +91,7 @@ export function FeaturedProjects({ limit = 3 }: FeaturedProjectsProps) {
             key={project.id}
             title={project.title}
             category={project.category}
-            image={project.image || "/placeholder.svg?height=400&width=600"}
+            image={project.image_url || "/placeholder.svg?height=400&width=600"}
             slug={project.slug}
             priority={index < 2}
           />

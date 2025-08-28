@@ -57,9 +57,9 @@ const serviceFormSchema = z.object({
 type ServiceFormValues = z.infer<typeof serviceFormSchema>;
 
 interface EditServicePageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function EditServicePage({ params }: EditServicePageProps) {
@@ -67,6 +67,7 @@ export default function EditServicePage({ params }: EditServicePageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [service, setService] = useState<Service | null>(null);
+  const [serviceId, setServiceId] = useState<string>('');
 
   const form = useForm<ServiceFormValues>({
     resolver: zodResolver(serviceFormSchema),
@@ -83,9 +84,19 @@ export default function EditServicePage({ params }: EditServicePageProps) {
   });
 
   useEffect(() => {
+    const initializeParams = async () => {
+      const resolvedParams = await params;
+      setServiceId(resolvedParams.id);
+    };
+    initializeParams();
+  }, [params]);
+
+  useEffect(() => {
+    if (!serviceId) return;
+    
     const loadService = async () => {
       try {
-        const serviceData = await fetchService(params.id);
+        const serviceData = await fetchService(serviceId);
         if (!serviceData) {
           toast({
             title: "Error",
@@ -121,7 +132,7 @@ export default function EditServicePage({ params }: EditServicePageProps) {
     };
 
     loadService();
-  }, [params.id, form, router]);
+  }, [serviceId, form, router]);
 
   // Auto-generate slug from title
   const handleTitleChange = (title: string) => {

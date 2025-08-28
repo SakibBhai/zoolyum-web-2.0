@@ -27,18 +27,18 @@ const jobUpdateSchema = z.object({
 });
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 // GET /api/jobs/[id] - Fetch a specific job by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const job = await prisma.job.findUnique({
       where: { id },
@@ -58,7 +58,7 @@ export async function GET(
 // PUT /api/jobs/[id] - Update a job (Admin only)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authorized = await isAdmin();
@@ -97,7 +97,7 @@ export async function PUT(
 // DELETE /api/jobs/[id] - Delete a job (Admin only)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authorized = await isAdmin();

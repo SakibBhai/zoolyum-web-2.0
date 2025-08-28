@@ -1,18 +1,39 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "installCommand": "pnpm install",
-  "buildCommand": "prisma generate && corepack enable && pnpm run build",
-  "env": {
-    "COREPACK_ENABLE_STRICT": "1"
-  },
+  "buildCommand": "prisma generate && pnpm run build",
   "functions": {
     "app/api/**/*.ts": {
-      "maxDuration": 10
+      "maxDuration": 30
     }
   },
-  "build": {
-    "env": {
-      "DATABASE_URL": "@database_url"
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
     }
-  }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    }
+  ]
 }

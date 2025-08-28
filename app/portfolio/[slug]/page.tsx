@@ -17,6 +17,35 @@ interface PortfolioPageProps {
   }>
 }
 
+interface GalleryItem {
+  image_url?: string
+  image?: string
+  title?: string
+  description?: string
+}
+
+interface ProcessStep {
+  title: string
+  description: string
+}
+
+interface ResultMetric {
+  value: string
+  label: string
+}
+
+interface ProjectResults {
+  metrics?: ResultMetric[]
+  impact?: string
+}
+
+interface ProjectTestimonial {
+  quote?: string
+  author?: string
+  company?: string
+  image?: string
+}
+
 // Fetch project data directly from database
 async function getProject(slug: string) {
   try {
@@ -51,7 +80,7 @@ export async function generateMetadata({ params }: PortfolioPageProps): Promise<
     openGraph: {
       title: portfolio.title,
       description: portfolio.description,
-      images: [portfolio.hero_image_url || portfolio.imageUrl || '']
+      images: [portfolio.hero_image_url || portfolio.image_url || '']
     }
   }
 }
@@ -73,7 +102,7 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
           {/* Hero Section */}
           <section className="relative h-[60vh] min-h-[500px] overflow-hidden rounded-2xl mb-16">
             <Image
-              src={portfolio.hero_image_url || portfolio.imageUrl || '/placeholder.svg?height=600&width=1200'}
+              src={portfolio.hero_image_url || portfolio.image_url || '/placeholder.svg?height=600&width=1200'}
               alt={portfolio.title}
               fill
               className="object-cover"
@@ -239,12 +268,12 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
           )}
 
           {/* Project Gallery */}
-          {portfolio.gallery && portfolio.gallery.length > 0 && (
+          {portfolio.gallery && Array.isArray(portfolio.gallery) && portfolio.gallery.length > 0 && (
             <section className="py-16 border-t border-[#E9E7E2]/10">
               <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <h2 className="text-3xl font-bold mb-12">Project Gallery</h2>
                 <div className="grid md:grid-cols-2 gap-8">
-                  {portfolio.gallery.map((item: any, index: number) => (
+                  {(portfolio.gallery as GalleryItem[]).map((item, index) => (
                     <div key={index} className="group">
                       <div className="aspect-[4/3] relative overflow-hidden rounded-lg mb-4">
                         <Image
@@ -298,13 +327,13 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
           )}
 
           {/* Our Approach */}
-          {portfolio.process && portfolio.process.length > 0 && (
+          {portfolio.process && Array.isArray(portfolio.process) && portfolio.process.length > 0 && (
             <section className="py-16 border-t border-[#E9E7E2]/10">
               <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="max-w-6xl mx-auto">
                   <h2 className="text-3xl font-bold mb-12 text-center">Our Approach</h2>
                   <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {portfolio.process.map((step: any, index: number) => (
+                    {(portfolio.process as unknown as ProcessStep[]).map((step, index) => (
                       <div key={index} className="text-center">
                         <div className="w-16 h-16 bg-orange-400 rounded-full flex items-center justify-center mx-auto mb-4">
                           <span className="text-black font-bold text-lg">
@@ -328,24 +357,33 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
             <section className="py-16 border-t border-[#E9E7E2]/10">
               <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <h2 className="text-3xl font-bold mb-12 text-center">Results</h2>
-                {portfolio.results.metrics && portfolio.results.metrics.length > 0 && (
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-                    {portfolio.results.metrics.map((result: any, index: number) => (
-                      <div key={index} className="text-center">
-                        <div className="text-4xl lg:text-5xl font-bold mb-2 text-[#E9E7E2]">
-                          {result.value}
+                {(() => {
+                  const results = portfolio.results as ProjectResults;
+                  const metrics = results?.metrics;
+                  
+                  if (!metrics || !Array.isArray(metrics) || metrics.length === 0) {
+                    return null;
+                  }
+                  
+                  return (
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+                      {(metrics as ResultMetric[]).map((result, index) => (
+                        <div key={index} className="text-center">
+                          <div className="text-4xl lg:text-5xl font-bold mb-2 text-[#E9E7E2]">
+                            {result.value}
+                          </div>
+                          <div className="text-[#E9E7E2]/60">
+                            {result.label}
+                          </div>
                         </div>
-                        <div className="text-[#E9E7E2]/60">
-                          {result.label}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {portfolio.results.impact && (
+                      ))}
+                    </div>
+                  );
+                })()}
+                {(portfolio.results as ProjectResults).impact && (
                   <div className="mt-12 max-w-4xl mx-auto text-center">
                     <p className="text-lg text-[#E9E7E2]/80 leading-relaxed">
-                      {portfolio.results.impact}
+                      {(portfolio.results as ProjectResults).impact}
                     </p>
                   </div>
                 )}
@@ -375,7 +413,7 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
           )}
 
           {/* Client Feedback */}
-          {portfolio.testimonial && portfolio.testimonial.quote && (
+          {portfolio.testimonial && (portfolio.testimonial as ProjectTestimonial).quote && (
             <section className="py-16 border-t border-[#E9E7E2]/10">
               <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <h2 className="text-3xl font-bold mb-12 text-center">Client Feedback</h2>
@@ -383,15 +421,15 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
                   <div className="mb-8">
                     <div className="text-6xl text-orange-400 mb-6">"</div>
                     <blockquote className="text-2xl text-[#E9E7E2] leading-relaxed mb-8 italic">
-                      {portfolio.testimonial.quote}
+                      {(portfolio.testimonial as ProjectTestimonial).quote}
                     </blockquote>
                   </div>
                   <div className="flex items-center justify-center gap-4">
-                    {portfolio.testimonial.image && (
+                    {(portfolio.testimonial as ProjectTestimonial).image && (
                       <div className="w-12 h-12 rounded-full overflow-hidden">
                         <Image
-                          src={portfolio.testimonial.image}
-                          alt={portfolio.testimonial.author || 'Client'}
+                          src={(portfolio.testimonial as ProjectTestimonial).image!}
+                          alt={(portfolio.testimonial as ProjectTestimonial).author || 'Client'}
                           width={48}
                           height={48}
                           className="object-cover"
@@ -399,14 +437,14 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
                       </div>
                     )}
                     <div className="text-left">
-                      {portfolio.testimonial.author && (
+                      {(portfolio.testimonial as ProjectTestimonial).author && (
                         <div className="text-orange-400 font-semibold">
-                          {portfolio.testimonial.author}
+                          {(portfolio.testimonial as ProjectTestimonial).author}
                         </div>
                       )}
-                      {portfolio.testimonial.company && (
+                      {(portfolio.testimonial as ProjectTestimonial).company && (
                         <div className="text-[#E9E7E2]/60 text-sm">
-                          {portfolio.testimonial.company}
+                          {(portfolio.testimonial as ProjectTestimonial).company}
                         </div>
                       )}
                     </div>

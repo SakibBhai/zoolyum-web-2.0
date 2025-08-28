@@ -8,9 +8,9 @@ import {
 import { getCurrentUser } from '@/lib/stack-auth'
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 // GET /api/consultations/[id] - Get specific consultation (Admin only)
