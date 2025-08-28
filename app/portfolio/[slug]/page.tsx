@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { ArrowLeft, ExternalLink, Github, Calendar, User, Clock, Target, Lightbulb, Cog, Trophy } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { prisma } from '@/lib/prisma'
 
 interface PortfolioPageProps {
   params: Promise<{
@@ -16,18 +17,17 @@ interface PortfolioPageProps {
   }>
 }
 
-// Fetch project data from API
+// Fetch project data directly from database
 async function getProject(slug: string) {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/projects/slug/${slug}`, {
-      cache: 'no-store' // Ensure fresh data for dynamic content
+    const project = await prisma.project.findFirst({
+      where: { 
+        slug: slug,
+        published: true // Only return published projects for public access
+      },
     })
     
-    if (!response.ok) {
-      return null
-    }
-    
-    return await response.json()
+    return project
   } catch (error) {
     console.error('Error fetching project:', error)
     return null

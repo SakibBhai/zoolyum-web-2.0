@@ -1,4 +1,4 @@
-import { query } from "./postgres";
+import { prisma } from "@/lib/prisma";
 
 // Types
 export interface Testimonial {
@@ -60,23 +60,20 @@ export function validateTestimonialData(data: any) {
 export async function createTestimonial(
   data: Omit<Testimonial, "id" | "createdAt" | "updatedAt">
 ): Promise<Testimonial> {
-  const result = await query(
-    `INSERT INTO testimonials (name, position, company, content, rating, image_url, featured, approved, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
-     RETURNING *`,
-    [
-      data.name,
-      data.position,
-      data.company,
-      data.content,
-      data.rating || 5,
-      data.imageUrl,
-      data.featured || false,
-      data.approved || false,
-    ]
-  );
+  const testimonial = await prisma.testimonial.create({
+    data: {
+      name: data.name,
+      position: data.position,
+      company: data.company,
+      content: data.content,
+      rating: data.rating || 5,
+      imageUrl: data.imageUrl,
+      featured: data.featured || false,
+      approved: data.approved || false,
+    },
+  });
 
-  return mapTestimonialFromDb(result.rows[0]);
+  return mapTestimonialFromDb(testimonial);
 }
 
 export async function fetchTestimonials(
@@ -89,113 +86,95 @@ export async function fetchTestimonials(
 ): Promise<Testimonial[]> {
   const { limit = 50, offset = 0, approved, featured } = options;
 
-  let whereClause = "";
-  const params: any[] = [];
-  let paramCount = 1;
-
-  const conditions: string[] = [];
+  const where: any = {};
 
   if (approved !== undefined) {
-    conditions.push(`approved = $${paramCount}`);
-    params.push(approved);
-    paramCount++;
+    where.approved = approved;
   }
 
   if (featured !== undefined) {
-    conditions.push(`featured = $${paramCount}`);
-    params.push(featured);
-    paramCount++;
+    where.featured = featured;
   }
 
-  if (conditions.length > 0) {
-    whereClause = `WHERE ${conditions.join(" AND ")}`;
-  }
+  const testimonials = await prisma.testimonial.findMany({
+    where,
+    orderBy: { createdAt: 'desc' },
+    take: limit,
+    skip: offset,
+  });
 
-  params.push(limit, offset);
-
-  const result = await query(
-    `SELECT * FROM testimonials ${whereClause} ORDER BY created_at DESC LIMIT $${paramCount} OFFSET $${
-      paramCount + 1
-    }`,
-    params
-  );
-
-  return result.rows.map(mapTestimonialFromDb);
+  return testimonials.map(mapTestimonialFromDb);
 }
 
 export async function fetchTestimonial(
   id: string
 ): Promise<Testimonial | null> {
-  const result = await query(`SELECT * FROM testimonials WHERE id = $1`, [id]);
+  const testimonial = await prisma.testimonial.findUnique({
+    where: { id },
+  });
 
-  return result.rows.length > 0 ? mapTestimonialFromDb(result.rows[0]) : null;
+  return testimonial ? mapTestimonialFromDb(testimonial) : null;
 }
 
 export async function updateTestimonial(
   id: string,
   data: Partial<Testimonial>
 ): Promise<Testimonial | null> {
-  const fields = [];
-  const values = [];
-  let paramCount = 1;
+  const updateData: any = {};
 
   Object.entries(data).forEach(([key, value]) => {
     if (value !== undefined && key !== "id" && key !== "createdAt") {
-      const dbKey =
-        key === "imageUrl"
-          ? "image_url"
-          : key === "updatedAt"
-          ? "updated_at"
-          : key;
-      fields.push(`${dbKey} = $${paramCount}`);
-      values.push(value);
-      paramCount++;
+      updateData[key] = value;
     }
   });
 
-  if (fields.length === 0) return null;
+  if (Object.keys(updateData).length === 0) return null;
 
-  fields.push(`updated_at = NOW()`);
-  values.push(id);
+  const testimonial = await prisma.testimonial.update({
+    where: { id },
+    data: updateData,
+  });
 
-  const result = await query(
-    `UPDATE testimonials SET ${fields.join(
-      ", "
-    )} WHERE id = $${paramCount} RETURNING *`,
-    values
-  );
-
-  return result.rows.length > 0 ? mapTestimonialFromDb(result.rows[0]) : null;
+  return testimonial ? mapTestimonialFromDb(testimonial) : null;
 }
 
 export async function deleteTestimonial(id: string): Promise<boolean> {
-  const result = await query(`DELETE FROM testimonials WHERE id = $1`, [id]);
-
-  return result?.rowCount ? result.rowCount > 0 : false;
+  try {
+    await prisma.testimonial.delete({
+      where: { id },
+    });
+    return true;
+  } catch (error) {
+    return false;
+  }
 }
 
 // Featured testimonials
 export async function getFeaturedTestimonials(
   limit = 6
 ): Promise<Testimonial[]> {
-  const result = await query(
-    `SELECT * FROM testimonials WHERE featured = true AND approved = true ORDER BY created_at DESC LIMIT $1`,
-    [limit]
-  );
+  const testimonials = await prisma.testimonial.findMany({
+    where: {
+      featured: true,
+      approved: true,
+    },
+    orderBy: { createdAt: 'desc' },
+    take: limit,
+  });
 
-  return result.rows.map(mapTestimonialFromDb);
+  return testimonials.map(mapTestimonialFromDb);
 }
 
 export async function setTestimonialFeatured(
   id: string,
   featured: boolean
 ): Promise<Testimonial | null> {
-  const result = await query(
-    `UPDATE testimonials SET featured = $1, updated_at = NOW() WHERE id = $2 RETURNING *`,
-    [featured, id]
-  );
+  const testimonial = await prisma.testimonial.update({
+    where: { id },
+    data: { featured },
+  });
 
-  return result.rows.length > 0 ? mapTestimonialFromDb(result.rows[0]) : null;
+  return testimonial ? mapTestimonialFromDb(testimonial) : null;
 }
 
 // Approval
@@ -203,51 +182,50 @@ export async function approveTestimonial(
   id: string,
   approved: boolean
 ): Promise<Testimonial | null> {
-  const result = await query(
-    `UPDATE testimonials SET approved = $1, updated_at = NOW() WHERE id = $2 RETURNING *`,
-    [approved, id]
-  );
+  const testimonial = await prisma.testimonial.update({
+    where: { id },
+    data: { approved },
+  });
 
-  return result.rows.length > 0 ? mapTestimonialFromDb(result.rows[0]) : null;
+  return testimonial ? mapTestimonialFromDb(testimonial) : null;
 }
 
 // Statistics
 export async function getTestimonialStats(): Promise<TestimonialStats> {
-  const [totalResult, statusResult, ratingResult, monthlyResult] =
-    await Promise.all([
-      query(`SELECT COUNT(*) as total FROM testimonials`),
-      query(`
-      SELECT 
-        COUNT(CASE WHEN approved = true THEN 1 END) as approved,
-        COUNT(CASE WHEN approved = false THEN 1 END) as pending,
-        COUNT(CASE WHEN featured = true THEN 1 END) as featured
-      FROM testimonials
-    `),
-      query(
-        `SELECT AVG(rating) as average_rating FROM testimonials WHERE approved = true`
-      ),
-      query(`
-      SELECT 
-        COUNT(CASE WHEN created_at >= date_trunc('month', CURRENT_DATE) THEN 1 END) as this_month,
-        COUNT(CASE WHEN created_at >= date_trunc('month', CURRENT_DATE - INTERVAL '1 month') 
-                   AND created_at < date_trunc('month', CURRENT_DATE) THEN 1 END) as last_month
-      FROM testimonials
-    `),
-    ]);
+  const [total, approved, pending, featured, avgRating, thisMonth, lastMonth] = await Promise.all([
+    prisma.testimonial.count(),
+    prisma.testimonial.count({ where: { approved: true } }),
+    prisma.testimonial.count({ where: { approved: false } }),
+    prisma.testimonial.count({ where: { featured: true } }),
+    prisma.testimonial.aggregate({
+      where: { approved: true },
+      _avg: { rating: true },
+    }),
+    prisma.testimonial.count({
+      where: {
+        createdAt: {
+          gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+        },
+      },
+    }),
+    prisma.testimonial.count({
+      where: {
+        createdAt: {
+          gte: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
+          lt: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+        },
+      },
+    }),
+  ]);
 
-  const total = parseInt(totalResult.rows[0].total);
-  const statusData = statusResult.rows[0];
-  const averageRating = parseFloat(ratingResult.rows[0].average_rating) || 0;
-  const thisMonth = parseInt(monthlyResult.rows[0].this_month);
-  const lastMonth = parseInt(monthlyResult.rows[0].last_month);
-  const growth =
-    lastMonth > 0 ? ((thisMonth - lastMonth) / lastMonth) * 100 : 0;
+  const averageRating = avgRating._avg.rating || 0;
+  const growth = lastMonth > 0 ? ((thisMonth - lastMonth) / lastMonth) * 100 : 0;
 
   return {
     total,
-    approved: parseInt(statusData.approved),
-    pending: parseInt(statusData.pending),
-    featured: parseInt(statusData.featured),
+    approved,
+    pending,
+    featured,
     averageRating: Math.round(averageRating * 100) / 100,
     thisMonth,
     lastMonth,
@@ -259,9 +237,11 @@ export async function getTestimonialStats(): Promise<TestimonialStats> {
 export async function getTestimonialById(
   id: string
 ): Promise<Testimonial | null> {
-  const result = await query(`SELECT * FROM testimonials WHERE id = $1`, [id]);
+  const testimonial = await prisma.testimonial.findUnique({
+    where: { id },
+  });
 
-  return result.rows.length > 0 ? mapTestimonialFromDb(result.rows[0]) : null;
+  return testimonial ? mapTestimonialFromDb(testimonial) : null;
 }
 
 // Helper function to map database rows to TypeScript objects
@@ -273,10 +253,10 @@ function mapTestimonialFromDb(row: any): Testimonial {
     company: row.company,
     content: row.content,
     rating: row.rating,
-    imageUrl: row.image_url,
+    imageUrl: row.imageUrl,
     featured: row.featured,
     approved: row.approved,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
+    createdAt: new Date(row.createdAt),
+    updatedAt: new Date(row.updatedAt),
   };
 }
