@@ -51,7 +51,7 @@ export async function generateMetadata({ params }: PortfolioPageProps): Promise<
     openGraph: {
       title: portfolio.title,
       description: portfolio.description,
-      images: [portfolio.coverImage]
+      images: [portfolio.hero_image_url || portfolio.imageUrl || '']
     }
   }
 }
@@ -475,20 +475,24 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
 
 export async function generateStaticParams() {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/projects`, {
-      cache: 'no-store'
-    })
-    
-    if (!response.ok) {
+    // If DATABASE_URL is not set during build (e.g., preview), avoid crashing
+    if (!process.env.DATABASE_URL) {
+      console.warn('DATABASE_URL not available at build time; skipping static params for portfolio')
       return []
     }
-    
-    const projects = await response.json()
-    return projects.map((project: any) => ({
-      slug: project.slug,
-    }))
+
+    const projects = await prisma.project.findMany({
+      where: { published: true },
+      select: { slug: true },
+      orderBy: { createdAt: 'desc' },
+    })
+
+    return projects
+      .map(p => p.slug)
+      .filter((slug): slug is string => typeof slug === 'string' && slug.length > 0)
+      .map(slug => ({ slug }))
   } catch (error) {
-    console.error('Error generating static params:', error)
+    console.error('Error generating static params (portfolio):', error)
     return []
   }
 }
