@@ -13,6 +13,20 @@ const nextConfig = {
         hostname: '**',
       },
     ],
+    localPatterns: [
+      {
+        pathname: '/placeholder.svg**',
+        search: '',
+      },
+      {
+        pathname: '/zoolyum-logo.png**',
+        search: '',
+      },
+      {
+        pathname: '/**',
+        search: '',
+      },
+    ],
     formats: ['image/webp', 'image/avif'],
   },
   experimental: {
