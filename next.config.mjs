@@ -23,7 +23,7 @@ const nextConfig = {
   },
   poweredByHeader: false,
   compress: true,
-  swcMinify: true,
+
 };
 
 export default nextConfig;

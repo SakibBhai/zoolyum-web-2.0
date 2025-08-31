@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/stack-auth';
 import { PrismaClient } from '@prisma/client';
+import { createId } from '@paralleldrive/cuid2';
 
 const prisma = new PrismaClient();
 
 // GET /api/homepage/statistics - Get all statistics
 export async function GET() {
   try {
-    const statistics = await prisma.homepageStatistic.findMany({
-      where: { isActive: true },
+    const statistics = await prisma.homepage_statistics.findMany({
+      where: { is_active: true },
       orderBy: { order: 'asc' }
     });
 
@@ -46,13 +47,15 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { label, value, suffix, order } = body;
 
-    const statistic = await prisma.homepageStatistic.create({
+    const statistic = await prisma.homepage_statistics.create({
       data: {
+        id: createId(),
         label,
         value,
         suffix,
         order: order || 0,
-        isActive: true
+        is_active: true,
+        updated_at: new Date()
       }
     });
 
@@ -88,24 +91,26 @@ export async function PUT(request: NextRequest) {
     }
 
     // Delete existing statistics
-    await prisma.homepageStatistic.deleteMany({
-      where: { isActive: true }
+    await prisma.homepage_statistics.deleteMany({
+      where: { is_active: true }
     });
 
     // Create new statistics
-    const newStatistics = await prisma.homepageStatistic.createMany({
+    const newStatistics = await prisma.homepage_statistics.createMany({
       data: statistics.map((stat: any, index: number) => ({
+        id: createId(),
         label: stat.label,
         value: stat.value,
         suffix: stat.suffix || '',
         order: stat.order || index,
-        isActive: true
+        is_active: true,
+        updated_at: new Date()
       }))
     });
 
     // Fetch and return the created statistics
-    const createdStatistics = await prisma.homepageStatistic.findMany({
-      where: { isActive: true },
+    const createdStatistics = await prisma.homepage_statistics.findMany({
+      where: { is_active: true },
       orderBy: { order: 'asc' }
     });
 

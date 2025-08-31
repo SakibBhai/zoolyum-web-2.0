@@ -12,7 +12,7 @@ export async function GET(
   try {
     const { id } = await params;
     
-    const menuItem = await prisma.navigationMenu.findUnique({
+    const menuItem = await prisma.navigation_menu.findUnique({
       where: { id }
     });
 
@@ -49,18 +49,16 @@ export async function PUT(
 
     const { id } = await params;
     const body = await request.json();
-    const { label, url, type, order, isVisible, parentId, isActive } = body;
+    const { label, url, order, parent_id: parentId, is_active: isActive } = body;
 
-    const menuItem = await prisma.navigationMenu.update({
+    const menuItem = await prisma.navigation_menu.update({
       where: { id },
       data: {
         label,
         url,
-        type,
         order,
-        isVisible,
-        parentId,
-        isActive
+        parent_id: parentId,
+        is_active: isActive
       }
     });
 
@@ -90,7 +88,7 @@ export async function DELETE(
 
     const { id } = await params;
 
-    await prisma.navigationMenu.delete({
+    await prisma.navigation_menu.delete({
       where: { id }
     });
 

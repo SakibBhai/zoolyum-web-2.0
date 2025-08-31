@@ -12,7 +12,7 @@ export async function GET(
   try {
     const { id } = await params;
     
-    const service = await prisma.homepageService.findUnique({
+    const service = await prisma.homepage_services.findUnique({
       where: { id }
     });
 
@@ -51,14 +51,14 @@ export async function PUT(
     const body = await request.json();
     const { title, description, icon, order, isActive } = body;
 
-    const service = await prisma.homepageService.update({
+    const service = await prisma.homepage_services.update({
       where: { id },
       data: {
         title,
         description,
         icon,
         order,
-        isActive
+        is_active: isActive
       }
     });
 
@@ -88,7 +88,7 @@ export async function DELETE(
 
     const { id } = await params;
 
-    await prisma.homepageService.delete({
+    await prisma.homepage_services.delete({
       where: { id }
     });
 

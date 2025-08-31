@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/stack-auth';
 import { PrismaClient } from '@prisma/client';
+import { createId } from '@paralleldrive/cuid2';
 
 const prisma = new PrismaClient();
 
 // GET /api/homepage/services - Get all homepage services
 export async function GET() {
   try {
-    const services = await prisma.homepageService.findMany({
-      where: { isActive: true },
+    const services = await prisma.homepage_services.findMany({
+      where: { is_active: true },
       orderBy: { order: 'asc' }
     });
 
@@ -60,13 +61,15 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { title, description, icon, order } = body;
 
-    const service = await prisma.homepageService.create({
+    const service = await prisma.homepage_services.create({
       data: {
+        id: createId(),
         title,
         description,
         icon,
         order: order || 0,
-        isActive: true
+        is_active: true,
+        updated_at: new Date()
       }
     });
 
@@ -102,24 +105,26 @@ export async function PUT(request: NextRequest) {
     }
 
     // Delete existing services
-    await prisma.homepageService.deleteMany({
-      where: { isActive: true }
+    await prisma.homepage_services.deleteMany({
+      where: { is_active: true }
     });
 
     // Create new services
-    const newServices = await prisma.homepageService.createMany({
+    const newServices = await prisma.homepage_services.createMany({
       data: services.map((service: any, index: number) => ({
+        id: createId(),
         title: service.title,
         description: service.description,
         icon: service.icon || '',
         order: service.order || index,
-        isActive: true
+        is_active: true,
+        updated_at: new Date()
       }))
     });
 
     // Fetch and return the created services
-    const createdServices = await prisma.homepageService.findMany({
-      where: { isActive: true },
+    const createdServices = await prisma.homepage_services.findMany({
+      where: { is_active: true },
       orderBy: { order: 'asc' }
     });
 

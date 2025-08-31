@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
         description,
         content,
         category,
-        imageUrl: image_url,
+        image_url,
         hero_image_url,
         year,
         client,

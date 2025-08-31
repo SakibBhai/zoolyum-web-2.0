@@ -242,7 +242,7 @@ export async function deleteConsultation(id: string): Promise<boolean> {
     [id]
   );
 
-  return result.rowCount > 0;
+  return result.rowCount !== null && result.rowCount > 0;
 }
 
 export async function getConsultationStats(): Promise<ConsultationStats> {
@@ -298,7 +298,7 @@ export async function getConsultationStats(): Promise<ConsultationStats> {
   const growth = lastMonth > 0 ? ((thisMonth - lastMonth) / lastMonth) * 100 : 0;
 
   return {
-    total: Object.values(statusCounts).reduce((sum: number, count: number) => sum + count, 0),
+    total: Object.values(statusCounts).reduce((sum: number, count: unknown) => sum + (Number(count) || 0), 0),
     pending: statusCounts.pending || 0,
     confirmed: statusCounts.confirmed || 0,
     completed: statusCounts.completed || 0,

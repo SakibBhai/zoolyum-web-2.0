@@ -1,4 +1,5 @@
 import { prisma } from './prisma';
+import { createId } from '@paralleldrive/cuid2';
 
 export interface TeamMemberData {
   name: string;
@@ -46,6 +47,8 @@ export async function getAllTeamMembers(): Promise<TeamMemberWithStatus[]> {
 
     return teamMembers.map(member => ({
       ...member,
+      websiteTag: member.website_tag,
+      imageUrl: member.image_url,
       statusDisplay: member.status === 'ACTIVE' ? 'Active' : 'Inactive'
     }));
   } catch (error) {
@@ -99,10 +102,13 @@ export async function createTeamMember(data: TeamMemberData) {
   try {
     const teamMember = await prisma.teamMember.create({
       data: {
+        id: createId(),
         name: data.name,
         position: data.position,
+        designation: data.designation,
+        website_tag: data.websiteTag,
         bio: data.bio,
-        imageUrl: data.imageUrl,
+        image_url: data.imageUrl,
         email: data.email,
         linkedin: data.linkedin,
         twitter: data.twitter,
@@ -127,8 +133,10 @@ export async function updateTeamMember(id: string, data: Partial<TeamMemberData>
       data: {
         ...(data.name && { name: data.name }),
         ...(data.position !== undefined && { position: data.position }),
+        ...(data.designation !== undefined && { designation: data.designation }),
+        ...(data.websiteTag !== undefined && { website_tag: data.websiteTag }),
         ...(data.bio !== undefined && { bio: data.bio }),
-        ...(data.imageUrl !== undefined && { imageUrl: data.imageUrl }),
+        ...(data.imageUrl !== undefined && { image_url: data.imageUrl }),
         ...(data.email !== undefined && { email: data.email }),
         ...(data.linkedin !== undefined && { linkedin: data.linkedin }),
         ...(data.twitter !== undefined && { twitter: data.twitter }),

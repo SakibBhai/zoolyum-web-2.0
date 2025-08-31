@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/stack-auth';
 import { prisma } from '@/lib/prisma';
+import { createId } from '@paralleldrive/cuid2';
 
 // GET /api/site/settings - Get site settings
 export async function GET() {
   try {
-    const settings = await prisma.SiteSettings.findFirst();
+    const settings = await prisma.site_settings.findFirst();
 
     if (!settings) {
       // Return default settings if none exist
@@ -68,44 +69,46 @@ export async function PUT(request: NextRequest) {
     } = body;
 
     // Check if settings exist
-    const existingSettings = await prisma.SiteSettings.findFirst();
+    const existingSettings = await prisma.site_settings.findFirst();
     
     let settings;
     if (existingSettings) {
       // Update existing settings
-      settings = await prisma.SiteSettings.update({
+      settings = await prisma.site_settings.update({
         where: { id: existingSettings.id },
         data: {
-          siteName,
-          siteDescription,
-          logoUrl,
-          faviconUrl,
-          primaryColor,
-          secondaryColor,
-          footerText,
-          socialLinks: socialLinks || {},
-          seoTitle,
-          seoDescription,
-          seoKeywords,
-          googleAnalytics
+          site_name: siteName,
+          site_description: siteDescription,
+          logo_url: logoUrl,
+          favicon_url: faviconUrl,
+          primary_color: primaryColor,
+          secondary_color: secondaryColor,
+          footer_text: footerText,
+          social_links: socialLinks || {},
+          seo_title: seoTitle,
+          seo_description: seoDescription,
+          seo_keywords: seoKeywords,
+          google_analytics: googleAnalytics
         }
       });
     } else {
       // Create new settings
-      settings = await prisma.SiteSettings.create({
+      settings = await prisma.site_settings.create({
         data: {
-          siteName,
-          siteDescription,
-          logoUrl,
-          faviconUrl,
-          primaryColor,
-          secondaryColor,
-          footerText,
-          socialLinks: socialLinks || {},
-          seoTitle,
-          seoDescription,
-          seoKeywords,
-          googleAnalytics
+          id: createId(),
+          updated_at: new Date(),
+          site_name: siteName,
+          site_description: siteDescription,
+          logo_url: logoUrl,
+          favicon_url: faviconUrl,
+          primary_color: primaryColor,
+          secondary_color: secondaryColor,
+          footer_text: footerText,
+          social_links: socialLinks || {},
+          seo_title: seoTitle,
+          seo_description: seoDescription,
+          seo_keywords: seoKeywords,
+          google_analytics: googleAnalytics
         }
       });
     }
@@ -147,20 +150,22 @@ export async function POST(request: NextRequest) {
       googleAnalytics
     } = body;
 
-    const settings = await prisma.SiteSettings.create({
+    const settings = await prisma.site_settings.create({
       data: {
-        siteName,
-        siteDescription,
-        logoUrl,
-        faviconUrl,
-        primaryColor,
-        secondaryColor,
-        footerText,
-        socialLinks: socialLinks || {},
-        seoTitle,
-        seoDescription,
-        seoKeywords,
-        googleAnalytics
+        id: createId(),
+        updated_at: new Date(),
+        site_name: siteName,
+        site_description: siteDescription,
+        logo_url: logoUrl,
+        favicon_url: faviconUrl,
+        primary_color: primaryColor,
+        secondary_color: secondaryColor,
+        footer_text: footerText,
+        social_links: socialLinks || {},
+        seo_title: seoTitle,
+        seo_description: seoDescription,
+        seo_keywords: seoKeywords,
+        google_analytics: googleAnalytics
       }
     });
 

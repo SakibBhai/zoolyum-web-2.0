@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/stack-auth';
 import { PrismaClient } from '@prisma/client';
+import { createId } from '@paralleldrive/cuid2';
 
 const prisma = new PrismaClient();
 
 // GET /api/site/navigation - Get navigation menu items
 export async function GET() {
   try {
-    const menuItems = await prisma.navigationMenu.findMany({
-      where: { isActive: true },
-      orderBy: { order: 'asc' }
+    const menuItems = await prisma.navigation_menu.findMany({
+      where: { is_active: true },
+        orderBy: { order: 'asc' }
     });
 
     if (menuItems.length === 0) {
@@ -75,17 +76,17 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { label, url, type, order, isVisible, parentId } = body;
+    const { label, url, order, parent_id: parentId } = body;
 
-    const menuItem = await prisma.navigationMenu.create({
+    const menuItem = await prisma.navigation_menu.create({
       data: {
+        id: createId(),
         label,
         url,
-        type: type || 'internal',
         order: order || 0,
-        isVisible: isVisible !== undefined ? isVisible : true,
-        parentId: parentId || null,
-        isActive: true
+        parent_id: parentId || null,
+        is_active: true,
+        updated_at: new Date()
       }
     });
 
@@ -121,26 +122,26 @@ export async function PUT(request: NextRequest) {
     }
 
     // Delete existing menu items
-    await prisma.navigationMenu.deleteMany({
-      where: { isActive: true }
+    await prisma.navigation_menu.deleteMany({
+      where: { is_active: true }
     });
 
     // Create new menu items
-    const newMenuItems = await prisma.navigationMenu.createMany({
+    const newMenuItems = await prisma.navigation_menu.createMany({
       data: menuItems.map((item: any, index: number) => ({
+        id: createId(),
         label: item.label,
         url: item.url,
-        type: item.type || 'internal',
         order: item.order || index,
-        isVisible: item.isVisible !== undefined ? item.isVisible : true,
-        parentId: item.parentId || null,
-        isActive: true
+        parent_id: item.parentId || null,
+        is_active: true,
+        updated_at: new Date()
       }))
     });
 
     // Fetch and return the created menu items
-    const createdMenuItems = await prisma.navigationMenu.findMany({
-      where: { isActive: true },
+    const createdMenuItems = await prisma.navigation_menu.findMany({
+      where: { is_active: true },
       orderBy: { order: 'asc' }
     });
 

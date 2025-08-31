@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/stack-auth';
 import { PrismaClient } from '@prisma/client';
+import { createId } from '@paralleldrive/cuid2';
 
 const prisma = new PrismaClient();
 
@@ -68,13 +69,14 @@ export async function POST(request: NextRequest) {
 
     const section = await prisma.homepage_sections.create({
       data: {
+        id: createId(),
         section_type: sectionType,
         title,
         subtitle,
         description: content,
         is_active: isVisible !== undefined ? isVisible : true,
         order: order || 0,
-        metadata: metadata || {}
+        updated_at: new Date()
       }
     });
 
@@ -117,13 +119,14 @@ export async function PUT(request: NextRequest) {
     // Create new sections
     const newSections = await prisma.homepage_sections.createMany({
       data: sections.map((section: any, index: number) => ({
+        id: createId(),
         section_type: section.sectionType,
         title: section.title,
         subtitle: section.subtitle || '',
         description: section.content || '',
         is_active: section.isVisible !== undefined ? section.isVisible : true,
         order: section.order || index,
-        metadata: section.metadata || {}
+        updated_at: new Date()
       }))
     });
 

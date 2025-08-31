@@ -12,7 +12,7 @@ export async function GET(
   try {
     const { id } = await params;
     
-    const statistic = await prisma.homepageStatistic.findUnique({
+    const statistic = await prisma.homepage_statistics.findUnique({
       where: { id }
     });
 
@@ -51,14 +51,14 @@ export async function PUT(
     const body = await request.json();
     const { label, value, suffix, order, isActive } = body;
 
-    const statistic = await prisma.homepageStatistic.update({
+    const statistic = await prisma.homepage_statistics.update({
       where: { id },
       data: {
         label,
         value,
         suffix,
         order,
-        isActive
+        is_active: isActive
       }
     });
 
@@ -88,7 +88,7 @@ export async function DELETE(
 
     const { id } = await params;
 
-    await prisma.homepageStatistic.delete({
+    await prisma.homepage_statistics.delete({
       where: { id }
     });
 

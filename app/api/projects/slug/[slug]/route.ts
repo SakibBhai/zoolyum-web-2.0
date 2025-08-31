@@ -23,8 +23,8 @@ export async function GET(
     // Allow admin access to all projects via query parameter
     const isAdmin = request.nextUrl.searchParams.get('admin') === 'true';
     
-    // Only return active projects for public access
-    if (project.status !== 'active' && !isAdmin) {
+    // Only return published projects for public access
+    if (!project.published && !isAdmin) {
       return NextResponse.json(
         { error: 'Project not found' },
         { status: 404 }
