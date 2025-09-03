@@ -76,7 +76,7 @@ export async function POST(
     // Check if user has already applied for this job
     const existingApplication = await prisma.jobApplication.findFirst({
       where: {
-        jobId,
+        jobId: jobId,
         email: validatedData.email,
       },
     });
@@ -97,10 +97,12 @@ export async function POST(
     // Create job application
     const application = await prisma.jobApplication.create({
       data: {
-        ...validatedData,
-        jobId,
-        ipAddress,
-        userAgent,
+        name: `${validatedData.firstName} ${validatedData.lastName}`,
+        email: validatedData.email,
+        phone: validatedData.phone,
+        resume_url: validatedData.resumeUrl,
+        cover_letter: validatedData.coverLetter,
+        job_id: jobId,
       },
     });
 

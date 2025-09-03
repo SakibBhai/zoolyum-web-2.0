@@ -16,15 +16,15 @@ export async function FeaturedProject() {
 
   return (
     <div className="group">
-      <Link href={`/portfolio/${featuredProject.slug}`} className="block">
+      <Link href={`/portfolio/${featuredProject.id}`} className="block">
         <div className="relative overflow-hidden rounded-lg bg-[#1A1A1A] border border-[#333333]">
           <div className="grid lg:grid-cols-2 gap-0">
             {/* Image Section */}
             <div className="relative overflow-hidden aspect-[4/3] lg:aspect-auto lg:min-h-[400px]">
               <div className="transform-gpu transition-transform duration-700 group-hover:scale-105 w-full h-full">
                 <Image
-                  src={featuredProject.hero_image_url || featuredProject.image_url || "/placeholder.svg"}
-                  alt={featuredProject.title}
+                  src="/placeholder.svg"
+                  alt={featuredProject.name}
                   fill
                   className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 50vw"
@@ -45,15 +45,15 @@ export async function FeaturedProject() {
               </div>
               
               <span className="text-[#FF5001] text-sm font-medium mb-2">
-                {featuredProject.category || 'General'}
+                {featuredProject.type || 'General'}
               </span>
               
               <h2 className="text-3xl lg:text-4xl font-bold mb-4 group-hover:text-[#FF5001] transition-colors">
-                {featuredProject.title}
+                {featuredProject.name}
               </h2>
               
               <p className="text-[#E9E7E2]/80 text-lg mb-6 line-clamp-4">
-                {featuredProject.overview || 'No description available.'}
+                {featuredProject.description || 'No description available.'}
               </p>
               
               <div className="inline-flex items-center text-[#FF5001] font-medium group/link">

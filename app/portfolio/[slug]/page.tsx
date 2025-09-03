@@ -50,10 +50,13 @@ interface ProjectTestimonial {
 async function getProject(slug: string) {
   try {
     const project = await prisma.project.findFirst({
-      where: { 
-        slug: slug,
-        published: true // Only return published projects for public access
+      where: {
+        name: slug, // Using name field instead of slug
+        status: { not: 'planning' } // Only return non-planning projects for public access
       },
+      include: {
+        clients: true
+      }
     })
     
     return project
@@ -75,12 +78,11 @@ export async function generateMetadata({ params }: PortfolioPageProps): Promise<
   }
 
   return {
-    title: `${portfolio.title} | Zoolyum Portfolio`,
+    title: `${portfolio.name} | Zoolyum Portfolio`,
     description: portfolio.description,
     openGraph: {
-      title: portfolio.title,
-      description: portfolio.description,
-      images: [portfolio.hero_image_url || portfolio.image_url || '']
+      title: portfolio.name,
+      description: portfolio.description || undefined
     }
   }
 }
@@ -102,8 +104,8 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
           {/* Hero Section */}
           <section className="relative h-[60vh] min-h-[500px] overflow-hidden rounded-2xl mb-16">
             <Image
-              src={portfolio.hero_image_url || portfolio.image_url || '/placeholder.svg?height=600&width=1200'}
-              alt={portfolio.title}
+              src={'/placeholder.svg?height=600&width=1200'}
+              alt={portfolio.name}
               fill
               className="object-cover"
               priority
@@ -112,16 +114,16 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
             <div className="absolute bottom-8 left-8 right-8">
               <div className="flex items-center gap-2 mb-4">
                 <Badge variant="secondary" className="bg-[#E9E7E2]/20 text-[#E9E7E2] border-[#E9E7E2]/30">
-                  {portfolio.category}
+                  {portfolio.type || 'Project'}
                 </Badge>
-                {portfolio.year && (
+                {portfolio.start_date && (
                   <Badge variant="secondary" className="bg-[#E9E7E2]/20 text-[#E9E7E2] border-[#E9E7E2]/30">
-                    {portfolio.year}
+                    {new Date(portfolio.start_date).getFullYear()}
                   </Badge>
                 )}
               </div>
               <h1 className="text-4xl lg:text-6xl font-bold text-white mb-4">
-                {portfolio.title}
+                {portfolio.name}
               </h1>
               <p className="text-xl text-[#E9E7E2]/90 max-w-3xl">
                 {portfolio.description}
@@ -143,65 +145,51 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
                     Portfolio
                   </Link>
                   <span className="mx-2">/</span>
-                  <span>{portfolio.category}</span>
+                  <span>{portfolio.type || 'Project'}</span>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                {portfolio.year && (
+                {portfolio.start_date && (
                   <div>
                     <h3 className="text-sm font-semibold text-[#E9E7E2]/60 uppercase tracking-wider mb-2">
                       Year
                     </h3>
-                    <p className="text-[#E9E7E2]">{portfolio.year}</p>
+                    <p className="text-[#E9E7E2]">{new Date(portfolio.start_date).getFullYear()}</p>
                   </div>
                 )}
                 <div>
                   <h3 className="text-sm font-semibold text-[#E9E7E2]/60 uppercase tracking-wider mb-2">
                     Category
                   </h3>
-                  <p className="text-[#E9E7E2]">{portfolio.category}</p>
+                  <p className="text-[#E9E7E2]">{portfolio.type || 'Project'}</p>
                 </div>
-                {portfolio.client && (
+                {portfolio.clients && (
                   <div>
                     <h3 className="text-sm font-semibold text-[#E9E7E2]/60 uppercase tracking-wider mb-2">
                       Client
                     </h3>
-                    <p className="text-[#E9E7E2]">{portfolio.client}</p>
+                    <p className="text-[#E9E7E2]">{portfolio.clients.name}</p>
                   </div>
                 )}
-                {portfolio.duration && (
+                {portfolio.start_date && portfolio.end_date && (
                   <div>
                     <h3 className="text-sm font-semibold text-[#E9E7E2]/60 uppercase tracking-wider mb-2">
                       Duration
                     </h3>
-                    <p className="text-[#E9E7E2]">{portfolio.duration}</p>
+                    <p className="text-[#E9E7E2]">
+                      {Math.ceil((new Date(portfolio.end_date).getTime() - new Date(portfolio.start_date).getTime()) / (1000 * 60 * 60 * 24 * 30))} months
+                    </p>
                   </div>
                 )}
               </div>
 
-              {portfolio.services && portfolio.services.length > 0 && (
-                <div className="mb-8">
-                  <h3 className="text-sm font-semibold text-[#E9E7E2]/60 uppercase tracking-wider mb-4">
-                    Services
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {portfolio.services.map((service: string, index: number) => (
-                      <span
-                        key={index}
-                        className="px-3 py-1 bg-[#E9E7E2]/10 text-[#E9E7E2] rounded-full text-sm"
-                      >
-                        {service}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
+
             </div>
           </section>
 
           {/* Project Overview */}
-          {portfolio.overview && (
+          {portfolio.description && (
             <section className="py-16 border-t border-[#E9E7E2]/10">
               <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="grid lg:grid-cols-3 gap-12">
@@ -209,7 +197,7 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
                     <h2 className="text-3xl font-bold mb-6">Project Overview</h2>
                     <div className="prose prose-lg prose-invert max-w-none">
                       <p className="text-[#E9E7E2]/80 leading-relaxed">
-                        {portfolio.overview}
+                        {portfolio.description}
                       </p>
                     </div>
                   </div>
@@ -218,47 +206,36 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
                     <div className="bg-[#E9E7E2]/5 rounded-lg p-6">
                       <h3 className="text-xl font-semibold mb-6">Essentials</h3>
                       <div className="space-y-4">
-                        {portfolio.client && (
+                        {portfolio.clients && (
                           <div>
                             <h4 className="text-sm font-semibold text-[#E9E7E2]/60 uppercase tracking-wider mb-1">
                               Client
                             </h4>
-                            <p className="text-[#E9E7E2]">{portfolio.client}</p>
+                            <p className="text-[#E9E7E2]">{portfolio.clients.name}</p>
                           </div>
                         )}
-                        {portfolio.year && (
+                        {portfolio.start_date && (
                           <div>
                             <h4 className="text-sm font-semibold text-[#E9E7E2]/60 uppercase tracking-wider mb-1">
                               Year
                             </h4>
-                            <p className="text-[#E9E7E2]">{portfolio.year}</p>
+                            <p className="text-[#E9E7E2]">{new Date(portfolio.start_date).getFullYear()}</p>
                           </div>
                         )}
-                        {portfolio.duration && (
+                        {portfolio.end_date && (
                           <div>
                             <h4 className="text-sm font-semibold text-[#E9E7E2]/60 uppercase tracking-wider mb-1">
                               Duration
                             </h4>
-                            <p className="text-[#E9E7E2]">{portfolio.duration}</p>
+                            <p className="text-[#E9E7E2]">
+                              {portfolio.start_date && portfolio.end_date ? 
+                                Math.ceil((new Date(portfolio.end_date).getTime() - new Date(portfolio.start_date).getTime()) / (1000 * 60 * 60 * 24 * 30)) + ' months'
+                                : 'N/A'
+                              }
+                            </p>
                           </div>
                         )}
-                        {portfolio.services && portfolio.services.length > 0 && (
-                          <div>
-                            <h4 className="text-sm font-semibold text-[#E9E7E2]/60 uppercase tracking-wider mb-1">
-                              Services
-                            </h4>
-                            <div className="flex flex-wrap gap-1">
-                              {portfolio.services.map((service: string, index: number) => (
-                                <span
-                                  key={index}
-                                  className="px-2 py-1 bg-[#E9E7E2]/10 text-[#E9E7E2] rounded text-xs"
-                                >
-                                  {service}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
+
                       </div>
                     </div>
                   </div>
@@ -267,192 +244,17 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
             </section>
           )}
 
-          {/* Project Gallery */}
-          {portfolio.gallery && Array.isArray(portfolio.gallery) && portfolio.gallery.length > 0 && (
-            <section className="py-16 border-t border-[#E9E7E2]/10">
-              <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <h2 className="text-3xl font-bold mb-12">Project Gallery</h2>
-                <div className="grid md:grid-cols-2 gap-8">
-                  {(portfolio.gallery as GalleryItem[]).map((item, index) => (
-                    <div key={index} className="group">
-                      <div className="aspect-[4/3] relative overflow-hidden rounded-lg mb-4">
-                        <Image
-                          src={item.image_url || item.image || '/placeholder-image.jpg'}
-                          alt={item.title || `Gallery image ${index + 1}`}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <h3 className="text-xl font-semibold">{item.title}</h3>
-                        <p className="text-[#E9E7E2]/80">{item.description}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
-          )}
 
-          {/* The Challenge & Solution */}
-          {(portfolio.challenge || portfolio.solution) && (
-            <section className="py-16 border-t border-[#E9E7E2]/10">
-              <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="grid lg:grid-cols-2 gap-16">
-                  {portfolio.challenge && (
-                    <div>
-                      <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
-                        <Lightbulb className="w-8 h-8 text-orange-400" />
-                        The Challenge
-                      </h2>
-                      <p className="text-lg text-[#E9E7E2]/80 leading-relaxed">
-                        {portfolio.challenge}
-                      </p>
-                    </div>
-                  )}
-                  {portfolio.solution && (
-                    <div>
-                      <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
-                        <Cog className="w-8 h-8 text-orange-400" />
-                        The Solution
-                      </h2>
-                      <p className="text-lg text-[#E9E7E2]/80 leading-relaxed">
-                        {portfolio.solution}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </section>
-          )}
 
-          {/* Our Approach */}
-          {portfolio.process && Array.isArray(portfolio.process) && portfolio.process.length > 0 && (
-            <section className="py-16 border-t border-[#E9E7E2]/10">
-              <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="max-w-6xl mx-auto">
-                  <h2 className="text-3xl font-bold mb-12 text-center">Our Approach</h2>
-                  <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {(portfolio.process as unknown as ProcessStep[]).map((step, index) => (
-                      <div key={index} className="text-center">
-                        <div className="w-16 h-16 bg-orange-400 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <span className="text-black font-bold text-lg">
-                            {String(index + 1).padStart(2, '0')}
-                          </span>
-                        </div>
-                        <h3 className="text-xl font-semibold mb-3">{step.title}</h3>
-                        <p className="text-[#E9E7E2]/70 text-sm leading-relaxed">
-                          {step.description}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </section>
-          )}
 
-          {/* Results */}
-          {portfolio.results && (
-            <section className="py-16 border-t border-[#E9E7E2]/10">
-              <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <h2 className="text-3xl font-bold mb-12 text-center">Results</h2>
-                {(() => {
-                  const results = portfolio.results as ProjectResults;
-                  const metrics = results?.metrics;
-                  
-                  if (!metrics || !Array.isArray(metrics) || metrics.length === 0) {
-                    return null;
-                  }
-                  
-                  return (
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-                      {(metrics as ResultMetric[]).map((result, index) => (
-                        <div key={index} className="text-center">
-                          <div className="text-4xl lg:text-5xl font-bold mb-2 text-[#E9E7E2]">
-                            {result.value}
-                          </div>
-                          <div className="text-[#E9E7E2]/60">
-                            {result.label}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  );
-                })()}
-                {(portfolio.results as ProjectResults).impact && (
-                  <div className="mt-12 max-w-4xl mx-auto text-center">
-                    <p className="text-lg text-[#E9E7E2]/80 leading-relaxed">
-                      {(portfolio.results as ProjectResults).impact}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </section>
-          )}
 
-          {/* Expertise Areas */}
-          {portfolio.technologies && portfolio.technologies.length > 0 && (
-            <section className="py-16 border-t border-[#E9E7E2]/10">
-              <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="max-w-4xl mx-auto">
-                  <h2 className="text-3xl font-bold mb-8">Expertise Areas</h2>
-                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                    {portfolio.technologies.map((tech: string, index: number) => (
-                      <div
-                        key={index}
-                        className="p-4 bg-[#E9E7E2]/5 rounded-lg text-center hover:bg-[#E9E7E2]/10 transition-colors"
-                      >
-                        <span className="text-[#E9E7E2]">{tech}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </section>
-          )}
 
-          {/* Client Feedback */}
-          {portfolio.testimonial && (portfolio.testimonial as ProjectTestimonial).quote && (
-            <section className="py-16 border-t border-[#E9E7E2]/10">
-              <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <h2 className="text-3xl font-bold mb-12 text-center">Client Feedback</h2>
-                <div className="max-w-4xl mx-auto text-center">
-                  <div className="mb-8">
-                    <div className="text-6xl text-orange-400 mb-6">"</div>
-                    <blockquote className="text-2xl text-[#E9E7E2] leading-relaxed mb-8 italic">
-                      {(portfolio.testimonial as ProjectTestimonial).quote}
-                    </blockquote>
-                  </div>
-                  <div className="flex items-center justify-center gap-4">
-                    {(portfolio.testimonial as ProjectTestimonial).image && (
-                      <div className="w-12 h-12 rounded-full overflow-hidden">
-                        <Image
-                          src={(portfolio.testimonial as ProjectTestimonial).image!}
-                          alt={(portfolio.testimonial as ProjectTestimonial).author || 'Client'}
-                          width={48}
-                          height={48}
-                          className="object-cover"
-                        />
-                      </div>
-                    )}
-                    <div className="text-left">
-                      {(portfolio.testimonial as ProjectTestimonial).author && (
-                        <div className="text-orange-400 font-semibold">
-                          {(portfolio.testimonial as ProjectTestimonial).author}
-                        </div>
-                      )}
-                      {(portfolio.testimonial as ProjectTestimonial).company && (
-                        <div className="text-[#E9E7E2]/60 text-sm">
-                          {(portfolio.testimonial as ProjectTestimonial).company}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-          )}
+
+
+
+
+
+
 
           {/* Explore More Projects */}
           <section className="py-16 border-t border-[#E9E7E2]/10">
@@ -520,15 +322,14 @@ export async function generateStaticParams() {
     }
 
     const projects = await prisma.project.findMany({
-      where: { published: true },
-      select: { slug: true },
+      select: { id: true, name: true },
       orderBy: { createdAt: 'desc' },
     })
 
     return projects
-      .map(p => p.slug)
-      .filter((slug): slug is string => typeof slug === 'string' && slug.length > 0)
-      .map(slug => ({ slug }))
+      .map(p => p.id)
+      .filter((id): id is string => typeof id === 'string' && id.length > 0)
+      .map(id => ({ slug: id }))
   } catch (error) {
     console.error('Error generating static params (portfolio):', error)
     return []

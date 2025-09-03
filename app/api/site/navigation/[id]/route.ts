@@ -49,14 +49,14 @@ export async function PUT(
 
     const { id } = await params;
     const body = await request.json();
-    const { label, url, order, parent_id: parentId, is_active: isActive } = body;
+    const { title, url, order_index: orderIndex, parent_id: parentId, is_active: isActive } = body;
 
     const menuItem = await prisma.navigation_menu.update({
       where: { id },
       data: {
-        label,
+        title,
         url,
-        order,
+        order_index: orderIndex,
         parent_id: parentId,
         is_active: isActive
       }

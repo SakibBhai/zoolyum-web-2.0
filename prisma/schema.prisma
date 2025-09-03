@@ -398,3 +398,131 @@ model transactions {
   invoices         invoices?   @relation(fields: [invoice_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   projects         Project?    @relation(fields: [project_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
+
+model homepage_about {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String    @db.VarChar(255)
+  subtitle    String?   @db.VarChar(500)
+  description String?
+  image       String?   @db.VarChar(500)
+  cta_text    String?   @db.VarChar(100)
+  cta_url     String?   @db.VarChar(500)
+  is_active   Boolean   @default(true)
+  created_at  DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime  @default(now()) @db.Timestamptz(6)
+}
+
+model homepage_hero {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title            String    @db.VarChar(255)
+  subtitle         String?   @db.VarChar(500)
+  description      String?
+  primary_cta      String?   @db.VarChar(500)
+  secondary_cta    String?   @db.VarChar(500)
+  background_image String?   @db.VarChar(500)
+  is_active        Boolean   @default(true)
+  created_at       DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime  @default(now()) @db.Timestamptz(6)
+}
+
+model homepage_services {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String    @db.VarChar(255)
+  description String?
+  icon        String?   @db.VarChar(500)
+  order       Int?      @default(0)
+  is_active   Boolean   @default(true)
+  created_at  DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime  @default(now()) @db.Timestamptz(6)
+}
+
+model homepage_statistics {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  label      String    @db.VarChar(255)
+  value      String    @db.VarChar(100)
+  suffix     String?   @db.VarChar(50)
+  order      Int?      @default(0)
+  is_active  Boolean   @default(true)
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at DateTime  @default(now()) @db.Timestamptz(6)
+}
+
+model homepage_sections {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  section_type String    @db.VarChar(100)
+  title        String    @db.VarChar(255)
+  subtitle     String?   @db.VarChar(500)
+  description  String?
+  order        Int?      @default(0)
+  is_active    Boolean   @default(true)
+  created_at   DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime  @default(now()) @db.Timestamptz(6)
+}
+
+model navigation_menu {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String    @db.VarChar(255)
+  url         String?   @db.VarChar(500)
+  parent_id   String?   @db.Uuid
+  order_index Int?      @default(0)
+  is_active   Boolean   @default(true)
+  created_at  DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime  @default(now()) @db.Timestamptz(6)
+  parent      navigation_menu? @relation("NavigationMenuParent", fields: [parent_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children    navigation_menu[] @relation("NavigationMenuParent")
+}
+
+model site_settings {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  key         String    @unique @db.VarChar(255)
+  value       String?
+  type        String?   @default("text") @db.VarChar(50)
+  description String?   @db.VarChar(500)
+  is_active   Boolean   @default(true)
+  created_at  DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime  @default(now()) @db.Timestamptz(6)
+}
+
+model job {
+  id                  String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title               String           @db.VarChar(255)
+  description         String?
+  requirements        String?
+  location            String?          @db.VarChar(255)
+  type                String?          @default("full-time") @db.VarChar(50)
+  salary_min          Decimal?         @db.Decimal(12, 2)
+  salary_max          Decimal?         @db.Decimal(12, 2)
+  department          String?          @db.VarChar(255)
+  experience_min      Int?             @default(0)
+  experience_max      Int?
+  published           Boolean          @default(false)
+  applicationDeadline DateTime?        @db.Timestamptz(6)
+  allowCvSubmission   Boolean          @default(true)
+  is_active           Boolean          @default(true)
+  posted_date         DateTime         @default(now()) @db.Timestamptz(6)
+  closing_date        DateTime?        @db.Timestamptz(6)
+  created_at          DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime         @default(now()) @db.Timestamptz(6)
+  applications        jobApplication[]
+}
+
+model jobApplication {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  job_id          String    @db.Uuid
+  name            String    @db.VarChar(255)
+  email           String    @db.VarChar(255)
+  phone           String?   @db.VarChar(50)
+  resume_url      String?   @db.VarChar(500)
+  cover_letter    String?
+  status          String    @default("pending") @db.VarChar(50)
+  notes           String?
+  applied_at      DateTime  @default(now()) @db.Timestamptz(6)
+  reviewed_at     DateTime? @db.Timestamptz(6)
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime  @default(now()) @db.Timestamptz(6)
+  job             job       @relation(fields: [job_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([job_id], map: "idx_job_applications_job_id")
+  @@index([email], map: "idx_job_applications_email")
+  @@index([status], map: "idx_job_applications_status")
+}

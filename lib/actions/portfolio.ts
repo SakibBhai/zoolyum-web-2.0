@@ -6,15 +6,15 @@ export async function getProjectCategories(): Promise<string[]> {
   try {
     const projects = await prisma.project.findMany({
       select: {
-        category: true,
+        type: true,
       },
       orderBy: {
-        category: 'asc',
+        type: 'asc',
       },
     })
 
     // Get unique categories and filter out null/undefined values
-    const uniqueCategories = [...new Set(projects.map(item => item.category).filter(Boolean))]
+    const uniqueCategories = [...new Set(projects.map(item => item.type).filter(Boolean))] as string[]
     return uniqueCategories
   } catch (error) {
     console.error('Error fetching project categories:', error)

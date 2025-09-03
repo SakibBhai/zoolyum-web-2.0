@@ -6,10 +6,9 @@ import { prisma } from '@/lib/prisma'
 
 interface Project {
   id: string
-  title: string
-  overview: string | null
-  category: string | null
-  slug: string
+  name: string
+  description: string | null
+  type: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -23,7 +22,7 @@ async function getProjects({ category, limit }: ProjectsGridProps = {}): Promise
   const whereClause: any = {}
   
   if (category && category !== 'all') {
-    whereClause.category = category
+    whereClause.type = category
   }
 
   const projects = await prisma.project.findMany({
@@ -61,13 +60,13 @@ export async function ProjectsGrid({ category, limit }: ProjectsGridProps) {
           key={project.id}
           className="group h-full"
         >
-          <Link href={`/portfolio/${project.slug}`} className="block h-full">
+          <Link href={`/portfolio/${project.id}`} className="block h-full">
             <Card className="h-full bg-[#1A1A1A] border-[#333333] overflow-hidden transform-gpu transition-all duration-300 hover:scale-105 flex flex-col">
               <div className="overflow-hidden">
                 <div className="transform-gpu transition-transform duration-700 group-hover:scale-110">
                   <Image
                     src="/placeholder.svg"
-                    alt={project.title}
+                    alt={project.name}
                     width={600}
                     height={400}
                     className="w-full aspect-[4/3] sm:aspect-[16/10] lg:aspect-[4/3] object-cover"
@@ -77,12 +76,12 @@ export async function ProjectsGrid({ category, limit }: ProjectsGridProps) {
                 </div>
               </div>
               <CardContent className="p-4 sm:p-5 md:p-6 flex-1 flex flex-col">
-                <span className="text-[#FF5001] text-xs sm:text-sm font-medium">{project.category || 'General'}</span>
+                <span className="text-[#FF5001] text-xs sm:text-sm font-medium">{project.type || 'General'}</span>
                 <h3 className="text-lg sm:text-xl font-bold mt-1 group-hover:text-[#FF5001] transition-colors line-clamp-2">
-                  {project.title}
+                  {project.name}
                 </h3>
                 <p className="text-[#E9E7E2]/70 mt-2 text-sm sm:text-base leading-relaxed flex-1 line-clamp-3">
-                  {project.overview || 'No description available.'}
+                  {project.description || 'No description available.'}
                 </p>
                 <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-[#333333]">
                   <span className="text-[#FF5001] font-medium inline-flex items-center group/link text-sm sm:text-base">

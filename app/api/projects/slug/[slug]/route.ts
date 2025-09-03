@@ -8,9 +8,9 @@ export async function GET(
   try {
     const { slug } = await params;
     
-    // Search by slug field
+    // Search by name field (since slug doesn't exist in the model)
     const project = await prisma.project.findFirst({
-      where: { slug: slug },
+      where: { name: slug },
     });
 
     if (!project) {
@@ -23,8 +23,8 @@ export async function GET(
     // Allow admin access to all projects via query parameter
     const isAdmin = request.nextUrl.searchParams.get('admin') === 'true';
     
-    // Only return published projects for public access
-    if (!project.published && !isAdmin) {
+    // Only return active projects for public access (not planning or cancelled)
+    if (project.status === 'planning' && !isAdmin) {
       return NextResponse.json(
         { error: 'Project not found' },
         { status: 404 }

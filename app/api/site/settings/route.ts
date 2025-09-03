@@ -68,52 +68,45 @@ export async function PUT(request: NextRequest) {
       googleAnalytics
     } = body;
 
-    // Check if settings exist
-    const existingSettings = await prisma.site_settings.findFirst();
-    
-    let settings;
-    if (existingSettings) {
-      // Update existing settings
-      settings = await prisma.site_settings.update({
-        where: { id: existingSettings.id },
-        data: {
-          site_name: siteName,
-          site_description: siteDescription,
-          logo_url: logoUrl,
-          favicon_url: faviconUrl,
-          primary_color: primaryColor,
-          secondary_color: secondaryColor,
-          footer_text: footerText,
-          social_links: socialLinks || {},
-          seo_title: seoTitle,
-          seo_description: seoDescription,
-          seo_keywords: seoKeywords,
-          google_analytics: googleAnalytics
-        }
-      });
-    } else {
-      // Create new settings
-      settings = await prisma.site_settings.create({
-        data: {
-          id: createId(),
-          updated_at: new Date(),
-          site_name: siteName,
-          site_description: siteDescription,
-          logo_url: logoUrl,
-          favicon_url: faviconUrl,
-          primary_color: primaryColor,
-          secondary_color: secondaryColor,
-          footer_text: footerText,
-          social_links: socialLinks || {},
-          seo_title: seoTitle,
-          seo_description: seoDescription,
-          seo_keywords: seoKeywords,
-          google_analytics: googleAnalytics
-        }
-      });
+    // Define settings to update
+    const settingsToUpdate = [
+      { key: 'site_name', value: siteName },
+      { key: 'site_description', value: siteDescription },
+      { key: 'logo_url', value: logoUrl },
+      { key: 'favicon_url', value: faviconUrl },
+      { key: 'primary_color', value: primaryColor },
+      { key: 'secondary_color', value: secondaryColor },
+      { key: 'footer_text', value: footerText },
+      { key: 'social_links', value: JSON.stringify(socialLinks || {}) },
+      { key: 'seo_title', value: seoTitle },
+      { key: 'seo_description', value: seoDescription },
+      { key: 'seo_keywords', value: seoKeywords },
+      { key: 'google_analytics', value: googleAnalytics }
+    ];
+
+    // Update or create each setting
+    const updatedSettings = [];
+    for (const setting of settingsToUpdate) {
+      if (setting.value !== undefined && setting.value !== null) {
+        const upsertedSetting = await prisma.site_settings.upsert({
+          where: { key: setting.key },
+          update: {
+            value: setting.value,
+            updated_at: new Date()
+          },
+          create: {
+            id: createId(),
+            key: setting.key,
+            value: setting.value,
+            type: 'text',
+            is_active: true
+          }
+        });
+        updatedSettings.push(upsertedSetting);
+      }
     }
 
-    return NextResponse.json(settings);
+    return NextResponse.json(updatedSettings);
   } catch (error) {
     console.error('Error updating site settings:', error);
     return NextResponse.json(
@@ -150,26 +143,40 @@ export async function POST(request: NextRequest) {
       googleAnalytics
     } = body;
 
-    const settings = await prisma.site_settings.create({
-      data: {
-        id: createId(),
-        updated_at: new Date(),
-        site_name: siteName,
-        site_description: siteDescription,
-        logo_url: logoUrl,
-        favicon_url: faviconUrl,
-        primary_color: primaryColor,
-        secondary_color: secondaryColor,
-        footer_text: footerText,
-        social_links: socialLinks || {},
-        seo_title: seoTitle,
-        seo_description: seoDescription,
-        seo_keywords: seoKeywords,
-        google_analytics: googleAnalytics
-      }
-    });
+    // Define settings to create
+    const settingsToCreate = [
+      { key: 'site_name', value: siteName },
+      { key: 'site_description', value: siteDescription },
+      { key: 'logo_url', value: logoUrl },
+      { key: 'favicon_url', value: faviconUrl },
+      { key: 'primary_color', value: primaryColor },
+      { key: 'secondary_color', value: secondaryColor },
+      { key: 'footer_text', value: footerText },
+      { key: 'social_links', value: JSON.stringify(socialLinks || {}) },
+      { key: 'seo_title', value: seoTitle },
+      { key: 'seo_description', value: seoDescription },
+      { key: 'seo_keywords', value: seoKeywords },
+      { key: 'google_analytics', value: googleAnalytics }
+    ];
 
-    return NextResponse.json(settings, { status: 201 });
+    // Create each setting
+    const createdSettings = [];
+    for (const setting of settingsToCreate) {
+      if (setting.value !== undefined && setting.value !== null) {
+        const createdSetting = await prisma.site_settings.create({
+          data: {
+            id: createId(),
+            key: setting.key,
+            value: setting.value,
+            type: 'text',
+            is_active: true
+          }
+        });
+        createdSettings.push(createdSetting);
+      }
+    }
+
+    return NextResponse.json(createdSettings, { status: 201 });
   } catch (error) {
     console.error('Error creating site settings:', error);
     return NextResponse.json(

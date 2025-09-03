@@ -42,13 +42,12 @@ export async function GET(request: NextRequest) {
             title: true,
             department: true,
             location: true,
-            jobType: true,
-            employmentType: true,
+            type: true,
           }
         }
       },
       orderBy: {
-        createdAt: "desc"
+        created_at: "desc"
       },
       skip: (page - 1) * limit,
       take: limit
@@ -57,19 +56,18 @@ export async function GET(request: NextRequest) {
     // Shape response for admin UI expectations
     const shaped = applications.map((app) => ({
       id: app.id,
-      fullName: `${app.firstName} ${app.lastName}`.trim(),
+      fullName: app.name,
       email: app.email,
       phone: app.phone ?? null,
-      portfolioUrl: app.portfolioUrl ?? null,
-      resumeUrl: app.resumeUrl ?? null,
-      coverLetter: app.coverLetter ?? null,
-      appliedAt: app.createdAt,
+      resumeUrl: app.resume_url ?? null,
+      coverLetter: app.cover_letter ?? null,
+      appliedAt: app.created_at,
       job: {
         id: app.job.id,
         title: app.job.title,
         department: app.job.department,
         location: app.job.location,
-        type: app.job.jobType, // map to expected "type" field
+        type: app.job.type,
       }
     }))
 
@@ -137,26 +135,25 @@ export async function PATCH(request: NextRequest) {
         data: { status },
         include: {
           job: {
-            select: { id: true, title: true, department: true, location: true, jobType: true, employmentType: true }
+            select: { id: true, title: true, department: true, location: true, type: true }
           }
         }
       })
 
       const shaped = {
         id: updated.id,
-        fullName: `${updated.firstName} ${updated.lastName}`.trim(),
+        fullName: updated.name,
         email: updated.email,
         phone: updated.phone ?? null,
-        portfolioUrl: updated.portfolioUrl ?? null,
-        resumeUrl: updated.resumeUrl ?? null,
-        coverLetter: updated.coverLetter ?? null,
-        appliedAt: updated.createdAt,
+        resumeUrl: updated.resume_url ?? null,
+        coverLetter: updated.cover_letter ?? null,
+        appliedAt: updated.created_at,
         job: {
           id: updated.job.id,
           title: updated.job.title,
           department: updated.job.department,
           location: updated.job.location,
-          type: updated.job.jobType,
+          type: updated.job.type,
         }
       }
 

@@ -11,21 +11,16 @@ const jobSchema = z.object({
   title: z.string().min(1, 'Title is required').max(255),
   department: z.string().min(1, 'Department is required').max(100),
   location: z.string().min(1, 'Location is required').max(100),
-  jobType: z.enum(['Full-time', 'Part-time', 'Contract', 'Internship']),
-  employmentType: z.enum(['Remote', 'On-site', 'Hybrid']),
-  salaryMin: z.number().optional(),
-  salaryMax: z.number().optional(),
-  salaryCurrency: z.string().optional().default('USD'),
+  type: z.string().default('full-time'),
+  salary_min: z.number().optional(),
+  salary_max: z.number().optional(),
   description: z.string().min(1, 'Description is required'),
   requirements: z.string().min(1, 'Requirements are required'),
   responsibilities: z.string().min(1, 'Responsibilities are required'),
-  perks: z.string().optional(),
-  skills: z.array(z.string()).default([]),
-  experience: z.string().optional(),
+  experience_min: z.number().optional(),
+  experience_max: z.number().optional(),
   published: z.boolean().default(false),
-  featured: z.boolean().default(false),
   applicationDeadline: z.string().optional().transform((val) => val ? new Date(val) : undefined),
-  imageUrl: z.string().optional().nullable(),
   allowCvSubmission: z.boolean().default(true),
 });
 
@@ -90,30 +85,25 @@ export async function GET(request: NextRequest) {
       prisma.job.findMany({
         where,
         orderBy: [
-          { featured: 'desc' },
-          { createdAt: 'desc' },
+          { created_at: 'desc' },
         ],
         take: pageSize,
         skip,
         select: {
           id: true,
           title: true,
-          slug: true,
           department: true,
           location: true,
-          jobType: true,
-          employmentType: true,
-          salaryMin: true,
-          salaryMax: true,
-          salaryCurrency: true,
+          type: true,
+          salary_min: true,
+          salary_max: true,
           description: true,
-          skills: true,
-          experience: true,
-          featured: true,
+          requirements: true,
+          experience_min: true,
+          experience_max: true,
           applicationDeadline: true,
-          imageUrl: true,
           allowCvSubmission: true,
-          createdAt: true,
+          created_at: true,
           _count: {
             select: {
               applications: true,
@@ -232,15 +222,9 @@ export async function POST(request: NextRequest) {
 
     const validatedData = jobSchema.parse(jobData);
 
-    // Generate slug from title
-    const slug = validatedData.title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-
-    // Check if slug already exists
-    const existingJob = await prisma.job.findUnique({
-      where: { slug },
+    // Check if a job with this title already exists
+    const existingJob = await prisma.job.findFirst({
+      where: { title: validatedData.title },
     });
 
     if (existingJob) {
@@ -251,10 +235,7 @@ export async function POST(request: NextRequest) {
     }
 
     const job = await prisma.job.create({
-      data: {
-        ...validatedData,
-        slug,
-      },
+      data: validatedData,
     });
 
     return NextResponse.json(job, { status: 201 });

@@ -40,16 +40,27 @@ export async function getAllTeamMembers(): Promise<TeamMemberWithStatus[]> {
   try {
     const teamMembers = await prisma.teamMember.findMany({
       orderBy: [
-        { order: 'asc' },
         { createdAt: 'desc' }
       ]
     });
 
     return teamMembers.map(member => ({
-      ...member,
-      websiteTag: member.website_tag,
-      imageUrl: member.image_url,
-      statusDisplay: member.status === 'ACTIVE' ? 'Active' : 'Inactive'
+      id: member.id,
+      name: member.name,
+      position: member.role, // Map role to position
+      designation: member.department, // Map department to designation
+      websiteTag: member.employee_id, // Map employee_id to websiteTag
+      bio: member.bio,
+      imageUrl: member.avatar, // Map avatar to imageUrl
+      email: member.email,
+      linkedin: null, // Not available in current schema
+      twitter: null, // Not available in current schema
+      status: member.is_active ? 'active' : 'inactive',
+      order: 0, // Default value since not in schema
+      featured: false, // Default value since not in schema
+      createdAt: member.createdAt || new Date(),
+      updatedAt: member.updatedAt || new Date(),
+      statusDisplay: member.is_active ? 'Active' : 'Inactive'
     }));
   } catch (error) {
     console.error('Error fetching team members:', error);
@@ -65,17 +76,14 @@ export async function getTeamMemberById(id: string) {
       select: {
         id: true,
         name: true,
-        position: true,
-        designation: true,
-        website_tag: true,
+        role: true,
+        department: true,
         bio: true,
-        image_url: true,
+        avatar: true,
         email: true,
-        linkedin: true,
-        twitter: true,
-        status: true,
-        order: true,
-        featured: true,
+        phone: true,
+        employee_id: true,
+        is_active: true,
         createdAt: true,
         updatedAt: true
       }
@@ -87,9 +95,21 @@ export async function getTeamMemberById(id: string) {
 
     // Map Prisma field names to TypeScript interface names
     return {
-      ...teamMember,
-      websiteTag: teamMember.website_tag,
-      imageUrl: teamMember.image_url
+      id: teamMember.id,
+      name: teamMember.name,
+      position: teamMember.role, // Map role to position
+      designation: teamMember.department, // Map department to designation
+      websiteTag: teamMember.employee_id, // Map employee_id to websiteTag
+      bio: teamMember.bio,
+      imageUrl: teamMember.avatar, // Map avatar to imageUrl
+      email: teamMember.email,
+      linkedin: null, // Not available in current schema
+      twitter: null, // Not available in current schema
+      status: teamMember.is_active ? 'ACTIVE' : 'INACTIVE',
+      order: 0, // Default value since not in schema
+      featured: false, // Default value since not in schema
+      createdAt: teamMember.createdAt || new Date(), // Ensure non-null Date
+      updatedAt: teamMember.updatedAt || new Date() // Ensure non-null Date
     };
   } catch (error) {
     console.error('Error fetching team member:', error);
@@ -102,19 +122,16 @@ export async function createTeamMember(data: TeamMemberData) {
   try {
     const teamMember = await prisma.teamMember.create({
       data: {
-        id: createId(),
         name: data.name,
-        position: data.position,
-        designation: data.designation,
-        website_tag: data.websiteTag,
+        role: data.position || 'Team Member', // Map position to role
+        department: data.designation || 'General', // Map designation to department
+        employee_id: data.websiteTag || createId(), // Map websiteTag to employee_id
         bio: data.bio,
-        image_url: data.imageUrl,
-        email: data.email,
-        linkedin: data.linkedin,
-        twitter: data.twitter,
-        status: data.status || 'ACTIVE',
-        order: data.order || 0,
-        featured: data.featured || false
+        avatar: data.imageUrl, // Map imageUrl to avatar
+        email: data.email || '',
+        phone: null, // Not provided in interface
+        is_active: data.status ? data.status === 'ACTIVE' : true // Map status to is_active boolean
+        // linkedin, twitter, order, featured are not available in current schema
       }
     });
 
@@ -132,17 +149,15 @@ export async function updateTeamMember(id: string, data: Partial<TeamMemberData>
       where: { id },
       data: {
         ...(data.name && { name: data.name }),
-        ...(data.position !== undefined && { position: data.position }),
-        ...(data.designation !== undefined && { designation: data.designation }),
-        ...(data.websiteTag !== undefined && { website_tag: data.websiteTag }),
+        ...(data.position !== undefined && { role: data.position }), // Map position to role
+        ...(data.designation !== undefined && { department: data.designation }), // Map designation to department
+        ...(data.websiteTag !== undefined && { employee_id: data.websiteTag }), // Map websiteTag to employee_id
         ...(data.bio !== undefined && { bio: data.bio }),
-        ...(data.imageUrl !== undefined && { image_url: data.imageUrl }),
+        ...(data.imageUrl !== undefined && { avatar: data.imageUrl }), // Map imageUrl to avatar
         ...(data.email !== undefined && { email: data.email }),
-        ...(data.linkedin !== undefined && { linkedin: data.linkedin }),
-        ...(data.twitter !== undefined && { twitter: data.twitter }),
-        ...(data.status && { status: data.status }),
-        ...(data.order !== undefined && { order: data.order }),
-        ...(data.featured !== undefined && { featured: data.featured })
+        // linkedin and twitter are not available in current schema
+        ...(data.status && { is_active: data.status === 'active' }) // Map status to is_active boolean
+        // order and featured are not available in current schema
       }
     });
 
@@ -172,10 +187,9 @@ export async function getActiveTeamMembers() {
   try {
     const teamMembers = await prisma.teamMember.findMany({
       where: {
-        status: 'ACTIVE'
+        is_active: true
       },
       orderBy: [
-        { order: 'asc' },
         { createdAt: 'desc' }
       ]
     });
@@ -192,11 +206,10 @@ export async function getFeaturedTeamMembers() {
   try {
     const teamMembers = await prisma.teamMember.findMany({
       where: {
-        status: 'ACTIVE',
-        featured: true
+        is_active: true
+        // featured field is not available in current schema, so returning all active members
       },
       orderBy: [
-        { order: 'asc' },
         { createdAt: 'desc' }
       ]
     });

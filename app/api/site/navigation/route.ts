@@ -10,7 +10,7 @@ export async function GET() {
   try {
     const menuItems = await prisma.navigation_menu.findMany({
       where: { is_active: true },
-        orderBy: { order: 'asc' }
+        orderBy: { order_index: 'asc' }
     });
 
     if (menuItems.length === 0) {
@@ -76,14 +76,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { label, url, order, parent_id: parentId } = body;
+    const { title, url, order_index: orderIndex, parent_id: parentId } = body;
 
     const menuItem = await prisma.navigation_menu.create({
       data: {
         id: createId(),
-        label,
+        title,
         url,
-        order: order || 0,
+        order_index: orderIndex || 0,
         parent_id: parentId || null,
         is_active: true,
         updated_at: new Date()
@@ -130,9 +130,9 @@ export async function PUT(request: NextRequest) {
     const newMenuItems = await prisma.navigation_menu.createMany({
       data: menuItems.map((item: any, index: number) => ({
         id: createId(),
-        label: item.label,
+        title: item.title || item.label,
         url: item.url,
-        order: item.order || index,
+        order_index: item.order_index || item.order || index,
         parent_id: item.parentId || null,
         is_active: true,
         updated_at: new Date()
@@ -142,7 +142,7 @@ export async function PUT(request: NextRequest) {
     // Fetch and return the created menu items
     const createdMenuItems = await prisma.navigation_menu.findMany({
       where: { is_active: true },
-      orderBy: { order: 'asc' }
+      orderBy: { order_index: 'asc' }
     });
 
     return NextResponse.json(createdMenuItems);
