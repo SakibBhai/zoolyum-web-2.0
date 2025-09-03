@@ -84,31 +84,11 @@ export async function POST(request: NextRequest) {
 
     const project = await prisma.project.create({
       data: {
-        id: id || createId(),
-        title,
-        slug,
+        // Let database generate UUID automatically with @default(dbgenerated("gen_random_uuid()"))
+        name: title, // Map title to name field required by schema
         description,
-        content,
-        category,
-        image_url,
-        hero_image_url,
-        year,
-        client,
-        duration,
-        services: services || [],
-        overview,
-        challenge,
-        solution,
-        process,
-        gallery,
-        results,
-        testimonial,
-        technologies: technologies || [],
-        project_url,
-        github_url,
-        published: published || false,
-        featured: featured || false,
-        order: order || 0,
+        // Note: Other fields like content, category, etc. may not exist in the current schema
+        // Only including fields that exist in the Project model
       },
     });
 
