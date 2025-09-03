@@ -13,11 +13,11 @@ import Image from 'next/image'
 
 interface Project {
   id: string
-  title: string
+  name: string
   slug: string
   overview: string
   content?: string
-  category: string
+  type: string
   imageUrl?: string
   heroImageUrl?: string
   year?: string

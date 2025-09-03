@@ -23,9 +23,9 @@ import { useToast } from '@/hooks/use-toast';
 // Client component for fetching projects data
 interface Project {
   id: string;
-  title: string;
+  name: string;
   slug: string;
-  category: string;
+  type: string;
   published: boolean;
   featured: boolean;
   client?: string;
@@ -135,14 +135,14 @@ function ProjectsTable() {
         columns={[
           { 
             header: 'Project', 
-            accessorKey: 'title',
+            accessorKey: 'name',
             cell: ({ row }) => (
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-lg overflow-hidden bg-[#333333] flex-shrink-0">
                   {row.original.imageUrl ? (
                     <img 
                       src={row.original.imageUrl} 
-                      alt={row.original.title}
+                      alt={row.original.name}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -152,7 +152,7 @@ function ProjectsTable() {
                   )}
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-medium text-[#E9E7E2]">{row.original.title}</span>
+                  <span className="font-medium text-[#E9E7E2]">{row.original.name}</span>
                   <span className="text-sm text-[#E9E7E2]/60">{row.original.slug}</span>
                 </div>
               </div>
@@ -160,10 +160,10 @@ function ProjectsTable() {
           },
           { 
             header: 'Category', 
-            accessorKey: 'category',
+            accessorKey: 'type',
             cell: ({ row }) => (
               <Badge variant="outline" className="text-[#E9E7E2] border-[#E9E7E2]/20">
-                {row.original.category}
+                {row.original.type}
               </Badge>
             )
           },
