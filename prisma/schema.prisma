@@ -488,6 +488,7 @@ model job {
   title               String           @db.VarChar(255)
   description         String?
   requirements        String?
+  responsibilities    String?
   location            String?          @db.VarChar(255)
   type                String?          @default("full-time") @db.VarChar(50)
   salary_min          Decimal?         @db.Decimal(12, 2)
