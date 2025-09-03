@@ -31,8 +31,20 @@ export function FeaturedProjects({ limit = 3 }: FeaturedProjectsProps) {
         
         setProjects(fetchedProjects);
       } catch (err) {
-        console.error('Error fetching featured projects:', err);
-        setError('Failed to load projects');
+        // Enhanced error logging with detailed information
+        const errorDetails = {
+          message: err instanceof Error ? err.message : 'Unknown error',
+          stack: err instanceof Error ? err.stack : undefined,
+          timestamp: new Date().toISOString(),
+          component: 'FeaturedProjects',
+          params: { status: 'active', limit }
+        };
+        
+        console.error('Error fetching featured projects:', errorDetails);
+        
+        // Set user-friendly error message
+        const userMessage = err instanceof Error ? err.message : 'Failed to load projects';
+        setError(userMessage);
       } finally {
         setLoading(false);
       }
@@ -65,7 +77,43 @@ export function FeaturedProjects({ limit = 3 }: FeaturedProjectsProps) {
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-[#E9E7E2]/60">{error}</p>
+        <div className="max-w-md mx-auto">
+          <p className="text-[#E9E7E2]/60 mb-4">{error}</p>
+          <button 
+            onClick={() => {
+              setError(null);
+              // Trigger reload by calling loadProjects again
+              const loadProjects = async () => {
+                try {
+                  setLoading(true);
+                  setError(null);
+                  const fetchedProjects = await fetchProjects({
+                    status: 'active',
+                    limit
+                  });
+                  setProjects(fetchedProjects);
+                } catch (err) {
+                  const errorDetails = {
+                    message: err instanceof Error ? err.message : 'Unknown error',
+                    stack: err instanceof Error ? err.stack : undefined,
+                    timestamp: new Date().toISOString(),
+                    component: 'FeaturedProjects',
+                    params: { status: 'active', limit }
+                  };
+                  console.error('Error fetching featured projects:', errorDetails);
+                  const userMessage = err instanceof Error ? err.message : 'Failed to load projects';
+                  setError(userMessage);
+                } finally {
+                  setLoading(false);
+                }
+              };
+              loadProjects();
+            }}
+            className="px-4 py-2 bg-[#333333] hover:bg-[#444444] text-[#E9E7E2] rounded-lg transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }
