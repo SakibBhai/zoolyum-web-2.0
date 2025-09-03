@@ -5,19 +5,19 @@ import { createId } from '@paralleldrive/cuid2';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const published = searchParams.get('published');
-    const category = searchParams.get('category');
+    const status = searchParams.get('status');
+    const type = searchParams.get('type');
     const limitParam = searchParams.get('limit');
     const limit = limitParam ? parseInt(limitParam, 10) : undefined;
 
     const whereClause: any = {};
     
-    if (published !== null) {
-      whereClause.published = published === 'true';
+    if (status) {
+      whereClause.status = status;
     }
     
-    if (category) {
-      whereClause.category = category;
+    if (type) {
+      whereClause.type = type;
     }
 
     const queryOptions: any = {

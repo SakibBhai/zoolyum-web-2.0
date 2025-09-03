@@ -135,12 +135,41 @@ export async function DELETE(
       );
     }
 
-    await prisma.project.delete({
-      where: { id },
+    // Use a transaction to delete related records first, then the project
+    await prisma.$transaction(async (tx) => {
+      // Delete related content calendar entries
+      await tx.content_calendar.deleteMany({
+        where: { project_id: id },
+      });
+
+      // Delete related tasks
+      await tx.tasks.deleteMany({
+        where: { project_id: id },
+      });
+
+      // Delete related transactions
+      await tx.transactions.deleteMany({
+        where: { project_id: id },
+      });
+
+      // Delete related invoices
+      await tx.invoices.deleteMany({
+        where: { project_id: id },
+      });
+
+      // Delete related recurring invoices
+      await tx.recurring_invoices.deleteMany({
+        where: { project_id: id },
+      });
+
+      // Finally delete the project
+      await tx.project.delete({
+        where: { id },
+      });
     });
 
     return NextResponse.json(
-      { message: 'Project deleted successfully' },
+      { message: 'Project and all related data deleted successfully' },
       { status: 200 }
     );
   } catch (error) {
