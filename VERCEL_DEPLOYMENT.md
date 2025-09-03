@@ -17,6 +17,11 @@ In your Vercel project dashboard, go to **Settings > Environment Variables** and
 NEXTAUTH_SECRET=<generate-with-openssl-rand-base64-32>
 NEXTAUTH_URL=https://your-domain.vercel.app
 
+# Stack Auth (Required for Admin Authentication)
+STACK_PROJECT_ID=your-stack-project-id
+STACK_PUBLISHABLE_CLIENT_KEY=your-stack-publishable-key
+STACK_SECRET_SERVER_KEY=your-stack-secret-key
+
 # Database (Required)
 DATABASE_URL=postgresql://username:password@hostname:port/database?sslmode=require
 
@@ -152,7 +157,18 @@ vercel
    # Clear browser cookies and try again
    ```
 
-4. **Environment Variable Issues**:
+4. **Stack Auth Console Errors**:
+   ```bash
+   # Error: "Welcome to Stack Auth! It seems that you haven't provided a project ID"
+   # Solution:
+   # 1. Go to https://app.stack-auth.com/
+   # 2. Create a project or select existing one
+   # 3. Copy STACK_PROJECT_ID, STACK_PUBLISHABLE_CLIENT_KEY, STACK_SECRET_SERVER_KEY
+   # 4. Add these to Vercel Environment Variables
+   # 5. Redeploy the application
+   ```
+
+5. **Environment Variable Issues**:
    ```bash
    # Check variable names are exact
    # Ensure no trailing spaces

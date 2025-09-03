@@ -101,6 +101,18 @@ The project uses the following Vercel configuration:
 }
 ```
 
+## Documentation
+
+### Setup Guides
+- [Database Setup](DATABASE_SETUP.md) - PostgreSQL and Prisma configuration
+- [Stack Auth Setup](STACK_AUTH_SETUP.md) - Authentication system configuration
+- [R2 Storage Setup](R2_SETUP.md) - Cloudflare R2 file storage setup
+- [Vercel Deployment](VERCEL_DEPLOYMENT.md) - Complete deployment guide
+
+### Troubleshooting
+- [Stack Auth Console Error Fix](STACK_AUTH_VERCEL_FIX.md) - Fix Stack Auth errors after Vercel deployment
+- [Security Guide](SECURITY.md) - Security best practices and troubleshooting
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
