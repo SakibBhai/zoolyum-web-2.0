@@ -51,7 +51,7 @@ async function getProject(slug: string) {
   try {
     const project = await prisma.project.findFirst({
       where: {
-        name: slug, // Using name field instead of slug
+        id: slug, // Using id field to match the slug parameter
         status: { not: 'planning' } // Only return non-planning projects for public access
       },
       include: {
