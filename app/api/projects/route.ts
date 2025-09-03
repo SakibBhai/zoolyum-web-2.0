@@ -47,48 +47,50 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const {
-      id,
-      title,
-      slug,
+      name,
       description,
-      content,
-      category,
-      image_url,
-      hero_image_url,
-      year,
-      client,
-      duration,
-      services,
-      overview,
-      challenge,
-      solution,
-      process,
-      gallery,
-      results,
-      testimonial,
-      technologies,
-      project_url,
-      github_url,
-      published,
-      featured,
-      order
+      client_id,
+      status,
+      priority,
+      type,
+      start_date,
+      end_date,
+      budget,
+      estimated_budget,
+      actual_budget,
+      progress,
+      manager,
+      created_by,
+      tasks_total,
+      tasks_completed
     } = body;
 
     // Validate required fields
-    if (!title || !slug || !description || !category) {
+    if (!name) {
       return NextResponse.json(
-        { error: 'Missing required fields: title, slug, description, category' },
+        { error: 'Missing required field: name' },
         { status: 400 }
       );
     }
 
     const project = await prisma.project.create({
       data: {
-        // Let database generate UUID automatically with @default(dbgenerated("gen_random_uuid()"))
-        name: title, // Map title to name field required by schema
+        name,
         description,
-        // Note: Other fields like content, category, etc. may not exist in the current schema
-        // Only including fields that exist in the Project model
+        client_id,
+        status: status || 'planning',
+        priority: priority || 'medium',
+        type: type || 'General',
+        start_date: start_date ? new Date(start_date) : null,
+        end_date: end_date ? new Date(end_date) : null,
+        budget: budget || 0,
+        estimated_budget: estimated_budget || 0,
+        actual_budget: actual_budget || 0,
+        progress: progress || 0,
+        manager,
+        created_by,
+        tasks_total: tasks_total || 0,
+        tasks_completed: tasks_completed || 0,
       },
     });
 

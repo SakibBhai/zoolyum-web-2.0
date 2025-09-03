@@ -23,32 +23,24 @@ export interface Testimonial {
 
 export interface Project {
   id: string;
-  title: string;
-  slug: string;
+  name: string;
   description: string | null;
-  content: string | null;
-  category: string;
-  image_url: string | null;
-  hero_image_url: string | null;
-  year: string;
-  client: string | null;
-  duration: string | null;
-  services: string[];
-  overview: string | null;
-  challenge: string | null;
-  solution: string | null;
-  process: ProcessStep[];
-  gallery: GalleryImage[];
-  results: Result[];
-  testimonial: Testimonial | null;
-  technologies: string[];
-  project_url: string | null;
-  github_url: string | null;
-  published: boolean;
-  featured: boolean;
-  order: number | null;
-  createdAt: Date;
-  updatedAt: Date;
+  client_id: string | null;
+  status: string | null;
+  priority: string | null;
+  type: string | null;
+  start_date: Date | null;
+  end_date: Date | null;
+  budget: number | null;
+  estimated_budget: number | null;
+  actual_budget: number | null;
+  progress: number | null;
+  manager: string | null;
+  created_by: string | null;
+  tasks_total: number | null;
+  tasks_completed: number | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
 }
 
 // Project interface now matches database schema directly
@@ -65,49 +57,41 @@ export function addComputedFieldsToArray(projects: Project[]): ProjectWithComput
 }
 
 export interface CreateProjectData {
-  title: string;
-  slug?: string;
+  name: string;
   description?: string;
-  content?: string;
-  category: string;
-  image_url?: string;
-  hero_image_url?: string;
-  year: string;
-  client?: string;
-  duration?: string;
-  services?: string[];
-  overview?: string;
-  challenge?: string;
-  solution?: string;
-  process?: ProcessStep[];
-  gallery?: GalleryImage[];
-  results?: Result[];
-  testimonial?: Testimonial;
-  technologies?: string[];
-  project_url?: string;
-  github_url?: string;
-  published?: boolean;
-  featured?: boolean;
-  order?: number;
+  client_id?: string;
+  status?: string;
+  priority?: string;
+  type?: string;
+  start_date?: Date;
+  end_date?: Date;
+  budget?: number;
+  estimated_budget?: number;
+  actual_budget?: number;
+  progress?: number;
+  manager?: string;
+  created_by?: string;
+  tasks_total?: number;
+  tasks_completed?: number;
 }
 
 export interface UpdateProjectData extends Partial<CreateProjectData> {}
 
 // Fetch all projects with optional filtering
 export async function fetchProjects(params?: {
-  published?: boolean;
-  category?: string;
+  status?: string;
+  type?: string;
   limit?: number;
 }): Promise<ProjectWithComputed[]> {
   try {
     const searchParams = new URLSearchParams();
     
-    if (params?.published !== undefined) {
-      searchParams.append('published', params.published.toString());
+    if (params?.status) {
+      searchParams.append('status', params.status);
     }
     
-    if (params?.category) {
-      searchParams.append('category', params.category);
+    if (params?.type) {
+      searchParams.append('type', params.type);
     }
     
     if (params?.limit) {
@@ -185,10 +169,10 @@ export async function fetchProjectBySlug(slug: string, isAdmin: boolean = false)
   }
 }
 
-// Fetch a single project by title
-export async function fetchProjectByTitle(title: string, isAdmin: boolean = false): Promise<ProjectWithComputed | null> {
-  const projects = await fetchProjects({ published: isAdmin ? undefined : true });
-  const project = projects.find(p => p.title.toLowerCase() === title.toLowerCase());
+// Fetch a single project by name
+export async function fetchProjectByName(name: string, isAdmin: boolean = false): Promise<ProjectWithComputed | null> {
+  const projects = await fetchProjects({ status: isAdmin ? undefined : 'active' });
+  const project = projects.find(p => p.name.toLowerCase() === name.toLowerCase());
   return project || null;
 }
 

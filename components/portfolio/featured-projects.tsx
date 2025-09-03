@@ -23,9 +23,9 @@ export function FeaturedProjects({ limit = 3 }: FeaturedProjectsProps) {
         setLoading(true);
         setError(null);
         
-        // Fetch published projects, limit to the specified number
+        // Fetch active projects, limit to the specified number
         const fetchedProjects = await fetchProjects({
-          published: true,
+          status: 'active',
           limit
         });
         
@@ -89,10 +89,10 @@ export function FeaturedProjects({ limit = 3 }: FeaturedProjectsProps) {
         {projects.map((project, index) => (
           <PortfolioItem
             key={project.id}
-            title={project.title}
-            category={project.category}
+            name={project.name}
+            type={project.type || 'General'}
             image={project.image_url || "/placeholder.svg?height=400&width=600"}
-            slug={project.slug}
+            id={project.id}
             priority={index < 2}
           />
         ))}
@@ -120,16 +120,16 @@ export function FeaturedProjects({ limit = 3 }: FeaturedProjectsProps) {
 
 // Portfolio Item Component
 function PortfolioItem({
-  title,
-  category,
+  name,
+  type,
   image,
-  slug,
+  id,
   priority = false,
 }: {
-  title: string;
-  category: string;
+  name: string;
+  type: string;
   image: string;
-  slug: string;
+  id: string;
   priority?: boolean;
 }) {
   return (
@@ -137,7 +137,7 @@ function PortfolioItem({
       <div className="aspect-[4/3] bg-[#212121] overflow-hidden relative">
         <Image
           src={image || "/placeholder.svg"}
-          alt={title}
+          alt={name}
           fill
           className="object-cover transition-transform duration-500 group-hover:scale-110"
           sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 400px"
@@ -148,10 +148,10 @@ function PortfolioItem({
         />
       </div>
       <div className="absolute inset-0 bg-gradient-to-t from-[#161616] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 md:p-6">
-        <span className="text-[#FF5001] text-xs md:text-sm font-medium">{category}</span>
-        <h3 className="text-lg md:text-xl font-bold mt-1 md:mt-2 text-white">{title}</h3>
+        <span className="text-[#FF5001] text-xs md:text-sm font-medium">{type}</span>
+        <h3 className="text-lg md:text-xl font-bold mt-1 md:mt-2 text-white">{name}</h3>
         <Link
-          href={`/portfolio/${slug}`}
+          href={`/portfolio/${id}`}
           className="mt-3 md:mt-4 inline-flex items-center text-[#E9E7E2] hover:text-[#FF5001] transition-colors text-sm md:text-base group/link"
         >
           View Project
