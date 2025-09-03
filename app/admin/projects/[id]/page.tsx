@@ -119,9 +119,9 @@ export default function ViewProjectPage() {
               </Button>
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-[#E9E7E2]">{project.title}</h1>
+              <h1 className="text-2xl font-bold text-[#E9E7E2]">{project.name}</h1>
               <div className="flex items-center gap-4 mt-1">
-                <p className="text-[#E9E7E2]/60">{project.category}</p>
+                <p className="text-[#E9E7E2]/60">{project.type}</p>
                 <div className="flex items-center gap-2">
                   <Badge variant={project.published ? 'default' : 'secondary'}>
                     {project.published ? 'Published' : 'Draft'}
@@ -167,7 +167,7 @@ export default function ViewProjectPage() {
           <div className="relative w-full h-64 md:h-96 rounded-lg overflow-hidden bg-[#1A1A1A]">
             <Image
               src={project.heroImageUrl}
-              alt={project.title}
+              alt={project.name}
               fill
               className="object-cover"
               onError={(e) => {
@@ -250,7 +250,7 @@ export default function ViewProjectPage() {
                 <div className="relative w-full h-32 rounded-lg overflow-hidden bg-[#333333]">
                   <Image
                     src={project.imageUrl}
-                    alt={project.title}
+                    alt={project.name}
                     fill
                     className="object-cover"
                     onError={(e) => {

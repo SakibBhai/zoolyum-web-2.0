@@ -37,9 +37,9 @@ export default function ProjectsManagementPage() {
   // Filter projects based on search query
   const filteredProjects = projects.filter(
     (project: any) =>
-      project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.slug.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.category?.toLowerCase().includes(searchQuery.toLowerCase())
+      project.type?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const formatDate = (dateString: string) => {
@@ -168,12 +168,12 @@ export default function ProjectsManagementPage() {
                     <tr key={project.id}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium">
-                          {project.title}
+                          {project.name}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-[#E9E7E2]/70">
-                          {project.category || "—"}
+                          {project.type || "—"}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

@@ -4,7 +4,7 @@ import type React from "react";
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { fetchProjectBySlug, updateProject } from "@/lib/project-operations";
+import { fetchProjectBySlug, updateProject, generateSlug } from "@/lib/project-operations";
 import { PageTransition } from "@/components/page-transition";
 import { ImageUploader } from "@/components/admin/image-uploader";
 import { Save, X, Loader2 } from "lucide-react";
@@ -70,9 +70,9 @@ export default function EditProjectPage() {
         // Map Project interface to formData structure
         const mappedFormData = {
           id: formattedProject.id || "",
-          title: formattedProject.title || "",
-          slug: formattedProject.slug || "",
-          category: (formattedProject as any).category || "",
+          title: formattedProject.name || "", // Use 'name' from database
+          slug: formattedProject.name ? generateSlug(formattedProject.name) : "", // Generate slug from name
+          category: formattedProject.type || "", // Use 'type' from database
           description: formattedProject.description || "",
           image_url: (formattedProject as any).imageUrl || "",
           image_path: (formattedProject as any).image_path || "",
@@ -163,26 +163,14 @@ export default function EditProjectPage() {
         (processedData as any).services = [];
       }
       
-      // Map form data to API format
+      // Map form data to database schema format
       const updateData = {
-        title: processedData.title,
-        slug: processedData.slug,
+        name: processedData.title, // Map title to name field in database
         description: processedData.description,
-        category: processedData.category,
-        imageUrl: processedData.image_url,
-        heroImageUrl: processedData.hero_image_url,
-        year: processedData.year,
-        client: processedData.client,
-        duration: processedData.duration,
-        services: (processedData as any).services,
-        overview: processedData.overview,
-        challenge: processedData.challenge,
-        solution: processedData.solution,
-        process: (processedData as any).process,
-        gallery: (processedData as any).gallery,
-        results: (processedData as any).results,
-        testimonial: (processedData as any).testimonial,
-        published: processedData.status === "published"
+        type: processedData.category, // Map category to type field in database
+        status: processedData.status,
+        // Note: Other fields like imageUrl, heroImageUrl, etc. are not part of the current database schema
+        // They would need to be added to the Project model if required
       };
       
       await updateProject(formData.id, updateData);

@@ -37,6 +37,17 @@ const nextConfig = {
   },
   poweredByHeader: false,
   compress: true,
+  webpack: (config, { dev, isServer }) => {
+    // Optimize webpack cache serialization to reduce warnings
+    if (dev) {
+      config.cache = {
+        ...config.cache,
+        compression: 'gzip',
+        maxMemoryGenerations: 1,
+      };
+    }
+    return config;
+  },
 
 };
 

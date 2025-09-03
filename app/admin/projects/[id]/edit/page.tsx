@@ -142,11 +142,11 @@ export default function EditProjectPage() {
         
         // Reset form with project data
         form.reset({
-          title: project.title || '',
+          title: project.name || '', // Map name from database to title in form
           slug: project.slug || '',
           description: project.overview || '',
           content: project.content || '',
-          category: project.category || '',
+          category: project.type || '', // Map type from database to category in form
           imageUrl: project.imageUrl || '',
           heroImageUrl: project.heroImageUrl || '',
           gallery: project.gallery || [],
