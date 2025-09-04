@@ -29,7 +29,8 @@ export function CategoryFilter({ categories, currentCategory = "all" }: Category
       const queryString = params.toString()
       const url = queryString ? `/portfolio?${queryString}` : "/portfolio"
       
-      router.push(url)
+      // Use replace instead of push to avoid RSC conflicts
+      router.replace(url, { scroll: false })
     })
   }
 

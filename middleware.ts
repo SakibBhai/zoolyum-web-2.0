@@ -6,11 +6,15 @@ export async function middleware(request: NextRequest) {
   if (
     request.nextUrl.pathname.startsWith('/_next') ||
     request.nextUrl.pathname.startsWith('/_vercel') ||
-    request.nextUrl.pathname.includes('_rsc=') ||
-    request.nextUrl.search.includes('_rsc=') ||
     request.nextUrl.pathname.includes('.hot-update.') ||
     request.nextUrl.pathname.startsWith('/api') ||
-    request.nextUrl.pathname.match(/\.(ico|png|jpg|jpeg|gif|svg|webp|css|js|woff|woff2|ttf|eot)$/)
+    request.nextUrl.pathname.match(/\.(ico|png|jpg|jpeg|gif|svg|webp|css|js|woff|woff2|ttf|eot)$/) ||
+    // Skip for React Server Component requests - Enhanced RSC detection
+    request.headers.get('RSC') === '1' ||
+    request.headers.get('Next-Router-Prefetch') === '1' ||
+    request.nextUrl.searchParams.has('_rsc') ||
+    // Skip for navigation requests with RSC parameters
+    (request.nextUrl.searchParams.has('_rsc') && request.method === 'GET')
   ) {
     return NextResponse.next()
   }
@@ -65,19 +69,19 @@ export async function middleware(request: NextRequest) {
     'camera=(), microphone=(), geolocation=(), payment=()'
   )
   
-  // Content Security Policy (CSP)
+  // Content Security Policy (CSP) - Updated for Next.js 15 compatibility
   const csp = [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://va.vercel-scripts.com",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https: blob:",
-    "connect-src 'self' https://vitals.vercel-insights.com https://vercel.live",
-    "frame-src 'none'",
+    "connect-src 'self' https://vitals.vercel-insights.com https://vercel.live ws: wss:",
+    "frame-src 'self'",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
-    "frame-ancestors 'none'"
+    "frame-ancestors 'self'"
   ].join('; ')
   
   response.headers.set('Content-Security-Policy', csp)
@@ -94,7 +98,9 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    // Admin routes
     '/admin/:path*',
-    '/((?!api|_next|favicon.ico|.*\\.).*)',
+    // Public routes - more specific matcher to avoid RSC conflicts
+    '/((?!api|_next|_vercel|favicon.ico|.*\\.|.*\\.hot-update\\.).*)',
   ],
 }
