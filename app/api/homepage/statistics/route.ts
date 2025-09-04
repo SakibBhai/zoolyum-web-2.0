@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/stack-auth';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { createId } from '@paralleldrive/cuid2';
-
-const prisma = new PrismaClient();
 
 // GET /api/homepage/statistics - Get all statistics
 export async function GET() {
