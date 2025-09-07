@@ -9,19 +9,21 @@ const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME
 const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL
 
 if (!R2_ENDPOINT || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY || !R2_BUCKET_NAME) {
-  console.warn('R2 configuration is incomplete. Upload functionality will be limited.')
+  console.warn('R2 storage not configured. File uploads will not work. Please set R2_ENDPOINT, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, and R2_BUCKET_NAME environment variables.')
 }
 
-// Create S3 client configured for Cloudflare R2
-export const r2Client = new S3Client({
-  region: 'auto', // Cloudflare R2 uses 'auto' as region
-  endpoint: R2_ENDPOINT,
-  credentials: {
-    accessKeyId: R2_ACCESS_KEY_ID || '',
-    secretAccessKey: R2_SECRET_ACCESS_KEY || '',
-  },
-  forcePathStyle: true, // Required for R2
-})
+// Only initialize R2 client if properly configured
+export const r2Client = (R2_ENDPOINT && R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY && R2_BUCKET_NAME) 
+  ? new S3Client({
+      region: 'auto', // Cloudflare R2 uses 'auto' as region
+      endpoint: R2_ENDPOINT,
+      credentials: {
+        accessKeyId: R2_ACCESS_KEY_ID,
+        secretAccessKey: R2_SECRET_ACCESS_KEY,
+      },
+      forcePathStyle: true, // Required for R2
+    })
+  : null
 
 export interface UploadParams {
   file: File
@@ -62,9 +64,9 @@ function generateUniqueFilename(originalName: string, folder?: string): string {
 export async function uploadToR2({ file, folder = 'uploads', filename }: UploadParams): Promise<UploadResult> {
   try {
     // Check if R2 is properly configured
-    if (!R2_ENDPOINT || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY || !R2_BUCKET_NAME) {
+    if (!r2Client || !R2_ENDPOINT || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY || !R2_BUCKET_NAME) {
       return {
-        error: 'R2 storage not configured. Please set up environment variables.',
+        error: 'R2 storage not configured. Please set up R2_ENDPOINT, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, and R2_BUCKET_NAME environment variables.',
         bucketMissing: true
       }
     }
@@ -109,7 +111,7 @@ export async function uploadToR2({ file, folder = 'uploads', filename }: UploadP
 export async function deleteFromR2(key: string): Promise<DeleteResult> {
   try {
     // Check if R2 is properly configured
-    if (!R2_ENDPOINT || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY || !R2_BUCKET_NAME) {
+    if (!r2Client || !R2_ENDPOINT || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY || !R2_BUCKET_NAME) {
       return {
         error: 'R2 storage not configured'
       }

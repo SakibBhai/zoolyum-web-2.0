@@ -255,11 +255,11 @@ export function ImageUploader({
       {bucketError && (
         <Alert variant="default" className="mb-4">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Storage Not Available</AlertTitle>
+          <AlertTitle>Cloud Storage Not Configured</AlertTitle>
           <AlertDescription>
             <p className="mb-2">
-              The storage bucket "media" doesn't exist. Please use the "External
-              URL" tab to add images from external sources.
+              Cloudflare R2 storage is not configured. Please use the "External
+              URL" tab to add images from external sources, or configure R2 environment variables.
             </p>
             <p className="text-sm">You can use image hosting services like:</p>
             <ul className="list-disc ml-5 mt-1 text-sm">

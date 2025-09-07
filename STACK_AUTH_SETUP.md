@@ -25,8 +25,8 @@ Update your `.env` file with the actual values:
 
 ```env
 # Stack Auth Configuration
-STACK_PROJECT_ID="your-actual-project-id-here"
-STACK_PUBLISHABLE_CLIENT_KEY="your-actual-publishable-key-here"
+NEXT_PUBLIC_STACK_PROJECT_ID="your-actual-project-id-here"
+NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY="your-actual-publishable-key-here"
 STACK_SECRET_SERVER_KEY="your-actual-secret-key-here"
 STACK_INTERFACE_TYPE="admin-interface"
 ```

@@ -1,0 +1,103 @@
+[build]
+  publish = ".next"
+  command = "npm run build"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "18"
+  NPM_VERSION = "9"
+  NEXT_TELEMETRY_DISABLED = "1"
+  SKIP_ENV_VALIDATION = "1"
+
+# Build settings for different contexts
+[context.production]
+  command = "prisma generate && npm run build"
+  
+[context.deploy-preview]
+  command = "prisma generate && npm run build"
+  
+[context.branch-deploy]
+  command = "prisma generate && npm run build"
+
+# Headers for security and performance
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.stripe.com https://www.google-analytics.com;"
+
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization, X-Requested-With"
+    Access-Control-Max-Age = "86400"
+
+# Static file caching
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"
+
+# Redirects
+[[redirects]]
+  from = "/home"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/dashboard/home"
+  to = "/dashboard"
+  status = 301
+  force = true
+
+# API rewrites
+[[redirects]]
+  from = "/health"
+  to = "/api/health"
+  status = 200
+
+[[redirects]]
+  from = "/status"
+  to = "/api/status"
+  status = 200
+
+# Catch-all for Next.js routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Environment variables (these will be set in Netlify dashboard)
+# NEXTAUTH_URL will be automatically set to the deploy URL
+# NEXT_PUBLIC_APP_URL will be automatically set to the deploy URL
+# NEXT_PUBLIC_API_URL will be automatically set to the deploy URL + /api
+
+# Plugin configuration
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Edge functions (if needed)
+[[edge_functions]]
+  function = "auth-middleware"
+  path = "/dashboard/*"
+
+# Form handling (if using Netlify forms)
+[forms]
+  settings = { error_page = "/error", success_page = "/success" }
+
+# Large Media (for large file handling)
+[large_media]
+  git_lfs = true

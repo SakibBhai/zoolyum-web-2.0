@@ -4,8 +4,8 @@ import { StackServerApp } from "@stackframe/stack";
 
 // Validate required environment variables
 const requiredEnvVars = {
-  STACK_PROJECT_ID: process.env.STACK_PROJECT_ID,
-  STACK_PUBLISHABLE_CLIENT_KEY: process.env.STACK_PUBLISHABLE_CLIENT_KEY,
+  NEXT_PUBLIC_STACK_PROJECT_ID: process.env.NEXT_PUBLIC_STACK_PROJECT_ID,
+  NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY: process.env.NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY,
   STACK_SECRET_SERVER_KEY: process.env.STACK_SECRET_SERVER_KEY,
 };
 
@@ -32,7 +32,7 @@ if (missingVars.length > 0) {
 
 export const stackServerApp = new StackServerApp({
   tokenStore: "nextjs-cookie",
-  projectId: process.env.STACK_PROJECT_ID,
-  publishableClientKey: process.env.STACK_PUBLISHABLE_CLIENT_KEY,
+  projectId: process.env.NEXT_PUBLIC_STACK_PROJECT_ID,
+  publishableClientKey: process.env.NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY,
   secretServerKey: process.env.STACK_SECRET_SERVER_KEY,
 });

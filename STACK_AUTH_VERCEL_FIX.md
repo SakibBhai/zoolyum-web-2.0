@@ -41,8 +41,8 @@ The Stack Auth environment variables are not configured in your Vercel deploymen
    - Add these three variables:
 
    ```bash
-   STACK_PROJECT_ID=your-actual-project-id
-   STACK_PUBLISHABLE_CLIENT_KEY=your-actual-publishable-key
+   NEXT_PUBLIC_STACK_PROJECT_ID=your-actual-project-id
+   NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY=your-actual-publishable-key
    STACK_SECRET_SERVER_KEY=your-actual-secret-key
    ```
 

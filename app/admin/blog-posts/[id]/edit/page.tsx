@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { RichTextEditor } from '@/components/admin/rich-text-editor'
+import { ImageUploader } from '@/components/admin/image-uploader'
 import { useToast } from '@/hooks/use-toast'
 import { ArrowLeft, Save, Eye } from 'lucide-react'
 import Link from 'next/link'
@@ -206,7 +207,7 @@ export default function EditBlogPostPage() {
       <div className="space-y-6">
         <div className="flex items-center space-x-4">
           <Link href="/admin/blog-posts">
-            <Button variant="ghost" size="icon">
+            <Button className="hover:bg-[#252525]">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
@@ -225,7 +226,7 @@ export default function EditBlogPostPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Link href="/admin/blog-posts">
-            <Button variant="ghost" size="icon">
+            <Button className="hover:bg-[#252525]">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
@@ -237,7 +238,7 @@ export default function EditBlogPostPage() {
         <div className="flex items-center space-x-2">
           <Button
             type="button"
-            variant="outline"
+            className="border border-[#333] hover:bg-[#252525]"
             onClick={handlePreview}
             disabled={!formData.title || !formData.content}
           >
@@ -246,7 +247,7 @@ export default function EditBlogPostPage() {
           </Button>
           <Button
             type="button"
-            variant="outline"
+            className="border border-[#333] hover:bg-[#252525]"
             onClick={(e) => handleSubmit(e, true)}
             disabled={isSubmitting}
           >
@@ -367,30 +368,18 @@ export default function EditBlogPostPage() {
             <Card className="bg-[#1A1A1A] border-[#333]">
               <CardHeader>
                 <CardTitle className="text-[#E9E7E2]">Featured Image</CardTitle>
+                <CardDescription className="text-[#E9E7E2]/60">
+                  Upload or add a cover photo for your blog post
+                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="imageUrl" className="text-[#E9E7E2]">Image URL</Label>
-                  <Input
-                    id="imageUrl"
-                    value={formData.imageUrl}
-                    onChange={(e) => setFormData(prev => ({ ...prev, imageUrl: e.target.value }))}
-                    placeholder="https://example.com/image.jpg"
-                    className="bg-[#252525] border-[#333] text-[#E9E7E2]"
-                  />
-                </div>
-                {formData.imageUrl && (
-                  <div className="aspect-video bg-[#252525] rounded-lg overflow-hidden">
-                    <img
-                      src={formData.imageUrl}
-                      alt="Featured image preview"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none'
-                      }}
-                    />
-                  </div>
-                )}
+              <CardContent>
+                <ImageUploader
+                  label="Cover Photo"
+                  initialImageUrl={formData.imageUrl}
+                  onImageChangeAction={(url) => setFormData(prev => ({ ...prev, imageUrl: url || '' }))}
+                  helpText="Upload a cover image for your blog post (16:9 ratio recommended)"
+                  folder="blog"
+                />
               </CardContent>
             </Card>
 

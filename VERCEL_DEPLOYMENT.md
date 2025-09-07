@@ -18,8 +18,8 @@ NEXTAUTH_SECRET=<generate-with-openssl-rand-base64-32>
 NEXTAUTH_URL=https://your-domain.vercel.app
 
 # Stack Auth (Required for Admin Authentication)
-STACK_PROJECT_ID=your-stack-project-id
-STACK_PUBLISHABLE_CLIENT_KEY=your-stack-publishable-key
+NEXT_PUBLIC_STACK_PROJECT_ID=your-stack-project-id
+NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY=your-stack-publishable-key
 STACK_SECRET_SERVER_KEY=your-stack-secret-key
 
 # Database (Required)
