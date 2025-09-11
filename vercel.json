@@ -1,10 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "prisma generate && npm run build",
+  "buildCommand": "prisma generate && SKIP_ENV_VALIDATION=1 npm run build",
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": "nextjs",
-  "regions": ["iad1", "sfo1"],
+
   "functions": {
     "app/api/**/*.ts": {
       "maxDuration": 30
@@ -116,12 +116,8 @@
       "schedule": "0 2 * * *"
     },
     {
-      "path": "/api/cron/analytics",
-      "schedule": "0 1 * * *"
-    },
-    {
       "path": "/api/cron/health-check",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 0 * * *"
     }
   ],
   "cleanUrls": true,

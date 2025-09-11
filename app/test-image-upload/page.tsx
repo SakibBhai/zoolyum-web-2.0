@@ -21,9 +21,9 @@ export default function TestImageUploadPage() {
     externalUrl: 'pending'
   })
 
-  const handleImageChange = async (url: string) => {
+  const handleImageChange = async (url: string | null) => {
     console.log('Image changed:', url)
-    setImageUrl(url)
+    setImageUrl(url || '')
     
     // Test preview functionality
     if (url) {
