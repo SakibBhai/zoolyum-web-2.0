@@ -11,9 +11,6 @@
     },
     "app/api/webhooks/**/*.ts": {
       "maxDuration": 60
-    },
-    "app/api/cron/**/*.ts": {
-      "maxDuration": 300
     }
   },
   "headers": [
@@ -110,16 +107,6 @@
       "SKIP_ENV_VALIDATION": "1"
     }
   },
-  "crons": [
-    {
-      "path": "/api/cron/cleanup",
-      "schedule": "0 2 * * *"
-    },
-    {
-      "path": "/api/cron/health-check",
-      "schedule": "0 0 * * *"
-    }
-  ],
   "cleanUrls": true,
   "trailingSlash": false
 }
