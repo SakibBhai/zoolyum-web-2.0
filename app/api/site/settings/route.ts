@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/stack-auth';
 import { prisma } from '@/lib/prisma';
 import { createId } from '@paralleldrive/cuid2';
+import { createCorsResponse, createCorsErrorResponse, handleCorsOptions } from '@/lib/cors';
+
+// OPTIONS handler for CORS preflight requests
+export async function OPTIONS() {
+  return handleCorsOptions();
+}
 
 // GET /api/site/settings - Get site settings
 export async function GET() {
@@ -10,7 +16,7 @@ export async function GET() {
 
     if (!settings) {
       // Return default settings if none exist
-      return NextResponse.json({
+      return createCorsResponse({
         siteName: "Zoolyum",
         siteDescription: "Brand Strategy & Digital Innovation Agency",
         logoUrl: "/logo.png",
@@ -31,13 +37,10 @@ export async function GET() {
       });
     }
 
-    return NextResponse.json(settings);
+    return createCorsResponse(settings);
   } catch (error) {
     console.error('Error fetching site settings:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch site settings' },
-      { status: 500 }
-    );
+    return createCorsErrorResponse('Failed to fetch site settings', 500);
   }
 }
 

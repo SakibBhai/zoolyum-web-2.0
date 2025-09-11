@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/stack-auth';
 import { prisma } from '@/lib/prisma';
+import { createCorsResponse, createCorsErrorResponse, handleCorsOptions } from '@/lib/cors';
+
+// OPTIONS handler for CORS preflight requests
+export async function OPTIONS() {
+  return handleCorsOptions();
+}
 
 // GET /api/homepage/hero - Get hero section content
 export async function GET() {
@@ -12,22 +18,19 @@ export async function GET() {
 
     if (!hero) {
       // Return default hero content if none exists
-      return NextResponse.json({
-        title: "Z o o l y u m",
-        subtitle: "Brand Strategy & Digital Innovation",
-        description: "We transform brands through strategic thinking and creative excellence, crafting digital experiences that resonate and inspire action.",
-        primaryCta: { text: "Start Your Project", url: "/contact" },
-        secondaryCta: { text: "View Our Work", url: "/portfolio" }
-      });
+      return createCorsResponse({
+      title: "Z o o l y u m",
+      subtitle: "Brand Strategy & Digital Innovation",
+      description: "We transform brands through strategic thinking and creative excellence, crafting digital experiences that resonate and inspire action.",
+      primaryCta: { text: "Start Your Project", url: "/contact" },
+      secondaryCta: { text: "View Our Work", url: "/portfolio" }
+    });
     }
 
-    return NextResponse.json(hero);
+    return createCorsResponse(hero);
   } catch (error) {
     console.error('Error fetching hero content:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch hero content' },
-      { status: 500 }
-    );
+    return createCorsErrorResponse('Failed to fetch hero content', 500);
   }
 }
 
@@ -36,10 +39,7 @@ export async function PUT(request: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return createCorsErrorResponse('Unauthorized', 401);
     }
 
     const body = await request.json();
@@ -67,13 +67,10 @@ export async function PUT(request: NextRequest) {
       }
     });
 
-    return NextResponse.json(hero);
+    return createCorsResponse(hero);
   } catch (error) {
     console.error('Error updating hero content:', error);
-    return NextResponse.json(
-      { error: 'Failed to update hero content' },
-      { status: 500 }
-    );
+    return createCorsErrorResponse('Failed to update hero content', 500);
   }
 }
 
@@ -82,10 +79,7 @@ export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return createCorsErrorResponse('Unauthorized', 401);
     }
 
     const body = await request.json();
@@ -106,12 +100,9 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    return NextResponse.json(hero, { status: 201 });
+    return createCorsResponse(hero, { status: 201 });
   } catch (error) {
     console.error('Error creating hero content:', error);
-    return NextResponse.json(
-      { error: 'Failed to create hero content' },
-      { status: 500 }
-    );
+    return createCorsErrorResponse('Failed to create hero content', 500);
   }
 }

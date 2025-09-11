@@ -1,13 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getStackServerApp } from './lib/stack-server'
+import { corsHeaders } from './lib/cors'
 
 export async function middleware(request: NextRequest) {
+  // Handle CORS for API routes
+  if (request.nextUrl.pathname.startsWith('/api')) {
+    // Handle preflight requests
+    if (request.method === 'OPTIONS') {
+      return new NextResponse(null, {
+        status: 200,
+        headers: corsHeaders,
+      })
+    }
+    
+    // For other API requests, add CORS headers to the response
+    const response = NextResponse.next()
+    Object.entries(corsHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value)
+    })
+    return response
+  }
+  
   // Skip middleware for Next.js internal requests and static assets
   if (
     request.nextUrl.pathname.startsWith('/_next') ||
     request.nextUrl.pathname.startsWith('/_vercel') ||
     request.nextUrl.pathname.includes('.hot-update.') ||
-    request.nextUrl.pathname.startsWith('/api') ||
     request.nextUrl.pathname.match(/\.(ico|png|jpg|jpeg|gif|svg|webp|css|js|woff|woff2|ttf|eot)$/) ||
     // Skip for React Server Component requests - Enhanced RSC detection
     request.headers.get('RSC') === '1' ||
@@ -98,9 +116,11 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    // Match API routes for CORS handling
+    '/api/:path*',
     // Admin routes
     '/admin/:path*',
     // Public routes - more specific matcher to avoid RSC conflicts
-    '/((?!api|_next|_vercel|favicon.ico|.*\\.|.*\\.hot-update\\.).*)',
+    '/((?!_next|_vercel|favicon.ico|.*\\.|.*\\.hot-update\\.).*)',
   ],
 }
