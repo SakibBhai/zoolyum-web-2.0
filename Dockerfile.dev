@@ -1,0 +1,86 @@
+# Development Dockerfile for Next.js application
+# Optimized for hot reloading and development tools
+
+# Base stage with Node.js
+FROM node:18-alpine AS base
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+# Development stage
+FROM base AS development
+
+# Install development dependencies
+COPY package.json package-lock.json* ./
+RUN npm ci
+
+# Copy source code
+COPY . .
+
+# Generate Prisma client
+RUN npx prisma generate
+
+# Expose port for development server
+EXPOSE 3000
+
+# Set development environment
+ENV NODE_ENV=development
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV WATCHPACK_POLLING=true
+
+# Start development server
+CMD ["npm", "run", "dev"]
+
+# Prisma Studio stage
+FROM base AS prisma-studio
+
+# Install only Prisma CLI
+RUN npm install -g prisma
+
+# Copy Prisma schema
+COPY prisma ./prisma/
+COPY package.json ./
+
+# Generate Prisma client
+RUN npx prisma generate
+
+# Expose Prisma Studio port
+EXPOSE 5555
+
+# Start Prisma Studio
+CMD ["npx", "prisma", "studio", "--hostname", "0.0.0.0"]
+
+# Testing stage
+FROM development AS testing
+
+# Install testing dependencies
+RUN npm ci --include=dev
+
+# Copy test files
+COPY __tests__ ./__tests__/
+COPY jest.config.js ./
+COPY cypress.config.ts ./
+COPY cypress ./cypress/
+
+# Run tests
+CMD ["npm", "run", "test"]
+
+# Build stage for development builds
+FROM development AS dev-builder
+
+# Build the application
+RUN npm run build
+
+# Development runner
+FROM base AS dev-runner
+
+# Copy built application
+COPY --from=dev-builder /app/.next ./.next
+COPY --from=dev-builder /app/public ./public
+COPY --from=dev-builder /app/package.json ./package.json
+COPY --from=dev-builder /app/node_modules ./node_modules
+
+# Expose port
+EXPOSE 3000
+
+# Start application
+CMD ["npm", "start"]

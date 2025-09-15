@@ -3,55 +3,30 @@ node_modules
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
 
-# Testing
-.nyc_output
-coverage
-*.lcov
-
-# Next.js
+# Next.js build output
 .next/
 out/
-build
-dist
 
-# Production
-build
+# Production build
+build/
+dist/
 
-# Misc
-.DS_Store
-*.pem
-
-# Debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# Local env files
+# Environment files
 .env
-.env*.local
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# Vercel
-.vercel
-
-# TypeScript
-*.tsbuildinfo
-next-env.d.ts
-
-# IDE
-.vscode
-.idea
+# IDE and editor files
+.vscode/
+.idea/
 *.swp
 *.swo
 *~
 
-# OS
+# OS generated files
 .DS_Store
 .DS_Store?
 ._*
@@ -60,22 +35,45 @@ next-env.d.ts
 ehthumbs.db
 Thumbs.db
 
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+*.md
+docs/
+
+# Testing
+__tests__/
+coverage/
+.nyc_output/
+jest.config.js
+cypress/
+cypress.config.ts
+
+# Linting and formatting
+.eslintrc.json
+.prettierrc
+.prettierignore
+
+# TypeScript
+tsconfig.json
+tsconfig.*.json
+
 # Logs
-logs
+logs/
 *.log
 
 # Runtime data
-pids
+pids/
 *.pid
 *.seed
 *.pid.lock
 
 # Coverage directory used by tools like istanbul
-coverage
-*.lcov
-
-# nyc test coverage
-.nyc_output
+coverage/
 
 # Dependency directories
 jspm_packages/
@@ -105,16 +103,27 @@ jspm_packages/
 .cache
 .parcel-cache
 
-# Next.js build output
-.next
+# Docker files
+Dockerfile*
+docker-compose*.yml
+.dockerignore
 
-# Nuxt.js build / generate output
-.nuxt
-dist
+# Deployment files
+vercel.json
+netlify.toml
+railway.json
 
-# Storybook build outputs
-.out
-.storybook-out
+# Backup files
+*.backup
+*.bak
+*.tmp
+
+# Local development
+.local
+
+# Storybook
+.storybook/
+storybook-static/
 
 # Temporary folders
 tmp/
@@ -122,6 +131,7 @@ temp/
 
 # Editor directories and files
 .vscode/
+!.vscode/extensions.json
 .idea
 *.suo
 *.ntvs*
@@ -129,71 +139,51 @@ temp/
 *.sln
 *.sw?
 
-# Documentation
-README.md
-CHANGELOG.md
-LICENSE
-*.md
+# Uploads (if storing locally)
+uploads/
+public/uploads/
 
-# Git
-.git
-.gitignore
-.gitattributes
+# Cache directories
+.cache/
+.turbo/
 
-# CI/CD
-.github/
-.gitlab-ci.yml
-.travis.yml
-circle.yml
+# Sentry
+.sentryclirc
 
-# Docker
-Dockerfile*
-docker-compose*
-.dockerignore
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
 
-# Platform specific
-vercel.json
-netlify.toml
-railway.json
+# Kubernetes
+*.yaml
+*.yml
+k8s/
 
-# Database
-*.db
-*.sqlite
-*.sqlite3
+# Monitoring
+prometheus/
+grafana/
 
-# Backup files
-*.bak
-*.backup
-*.old
+# Certificates
+*.pem
+*.key
+*.crt
+*.csr
+ssl/
+certs/
 
-# Archive files
-*.zip
-*.tar.gz
-*.rar
+# Secrets
+secrets/
+*.secret
 
-# Large media files
-*.mp4
-*.avi
-*.mov
-*.wmv
-*.flv
-*.webm
-*.mkv
+# Backups
+backups/
+*.sql
+*.dump
 
-# Audio files
-*.mp3
-*.wav
-*.flac
-*.aac
+# Vercel
+.vercel
 
-# Image originals (keep optimized versions)
-*.psd
-*.ai
-*.sketch
-
-# Fonts (if not needed)
-*.ttf
-*.otf
-*.woff
-*.woff2
-*.eot
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
