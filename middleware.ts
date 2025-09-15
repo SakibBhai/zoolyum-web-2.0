@@ -72,9 +72,19 @@ export async function middleware(request: NextRequest) {
       console.error('Stack Auth error in middleware:', error)
       return NextResponse.redirect(new URL('/admin/login', request.url))
     }
+    
+    // If we reach here, user is authenticated for admin routes
+    const response = NextResponse.next()
+    
+    // Cache control for admin routes
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+    response.headers.set('Pragma', 'no-cache')
+    response.headers.set('Expires', '0')
+    
+    return response
   }
   
-  // Set comprehensive security headers
+  // For public routes, set comprehensive security headers
   const response = NextResponse.next()
   
   // Security headers
@@ -104,13 +114,6 @@ export async function middleware(request: NextRequest) {
   
   response.headers.set('Content-Security-Policy', csp)
   
-  // Cache control for admin routes
-  if (request.nextUrl.pathname.startsWith('/admin')) {
-    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
-    response.headers.set('Pragma', 'no-cache')
-    response.headers.set('Expires', '0')
-  }
-  
   return response
 }
 
@@ -118,9 +121,7 @@ export const config = {
   matcher: [
     // Match API routes for CORS handling
     '/api/:path*',
-    // Admin routes
+    // Admin routes only
     '/admin/:path*',
-    // Public routes - more specific matcher to avoid RSC conflicts
-    '/((?!_next|_vercel|favicon.ico|.*\\.|.*\\.hot-update\\.).*)',
   ],
 }
