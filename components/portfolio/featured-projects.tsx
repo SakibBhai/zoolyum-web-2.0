@@ -37,14 +37,30 @@ export function FeaturedProjects({ limit = 3 }: FeaturedProjectsProps) {
           stack: err instanceof Error ? err.stack : undefined,
           timestamp: new Date().toISOString(),
           component: 'FeaturedProjects',
-          params: { status: 'active', limit }
+          params: { status: 'active', limit },
+          userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'Server'
         };
         
         console.error('Error fetching featured projects:', errorDetails);
         
-        // Set user-friendly error message
-        const userMessage = err instanceof Error ? err.message : 'Failed to load projects';
-        setError(userMessage);
+        // Check if it's a database connection error
+        const isConnectionError = err instanceof Error && (
+          err.message.includes('connection') ||
+          err.message.includes('timeout') ||
+          err.message.includes('ECONNREFUSED') ||
+          err.message.includes('PostgreSQL')
+        );
+        
+        // Set user-friendly error message based on error type
+        if (isConnectionError) {
+          setError('Unable to connect to database. Please try again later.');
+        } else {
+          const userMessage = err instanceof Error ? err.message : 'Failed to load projects';
+          setError(userMessage);
+        }
+        
+        // Fallback: Set empty array to prevent rendering issues
+        setProjects([]);
       } finally {
         setLoading(false);
       }

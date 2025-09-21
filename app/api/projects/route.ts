@@ -31,11 +31,62 @@ export async function GET(request: NextRequest) {
       queryOptions.take = limit;
     }
 
-    const projects = await prisma.project.findMany(queryOptions);
+    // Add retry logic for database operations
+    let retryCount = 0;
+    const maxRetries = 3;
+    
+    while (retryCount <= maxRetries) {
+      try {
+        const projects = await prisma.project.findMany(queryOptions);
+        return NextResponse.json(projects);
+      } catch (dbError: any) {
+        retryCount++;
+        
+        // Check if it's a connection error
+        const isConnectionError = dbError.message?.includes('connection') ||
+                                 dbError.message?.includes('timeout') ||
+                                 dbError.message?.includes('Closed') ||
+                                 dbError.code === 'P1001' || // Connection error
+                                 dbError.code === 'P1008' || // Timeout
+                                 dbError.code === 'P1017';   // Server closed connection
+        
+        if (isConnectionError && retryCount <= maxRetries) {
+          console.warn(`Database connection error (attempt ${retryCount}/${maxRetries + 1}):`, dbError.message);
+          
+          // Exponential backoff: wait 1s, 2s, 4s
+          const delay = Math.pow(2, retryCount - 1) * 1000;
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+        
+        // If not a connection error or max retries exceeded, throw the error
+        throw dbError;
+      }
+    }
 
-    return NextResponse.json(projects);
-  } catch (error) {
-    console.error('Error fetching projects:', error);
+  } catch (error: any) {
+    console.error('Error fetching projects:', {
+      message: error.message,
+      code: error.code,
+      stack: error.stack,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Return appropriate error based on error type
+    const isConnectionError = error.message?.includes('connection') ||
+                             error.message?.includes('timeout') ||
+                             error.message?.includes('Closed') ||
+                             error.code === 'P1001' ||
+                             error.code === 'P1008' ||
+                             error.code === 'P1017';
+    
+    if (isConnectionError) {
+      return NextResponse.json(
+        { error: 'Database connection temporarily unavailable. Please try again.' },
+        { status: 503 } // Service Unavailable
+      );
+    }
+    
     return NextResponse.json(
       { error: 'Failed to fetch projects' },
       { status: 500 }
