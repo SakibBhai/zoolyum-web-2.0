@@ -1,6 +1,6 @@
 'use client'
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { Mail, MapPin, Phone, Clock, Calendar } from "lucide-react"
@@ -12,10 +12,40 @@ import { TextReveal } from "@/components/scroll-animations/text-reveal"
 import { ContactForm } from "@/components/contact-form"
 import { ConsultationBookingModal } from "@/components/consultation-booking-modal"
 
+interface ContactSettings {
+  email?: string
+  phone?: string
+  address?: string
+  workingHours?: string
+  twitterUrl?: string
+  linkedinUrl?: string
+  instagramUrl?: string
+  behanceUrl?: string
+  enablePhoneField: boolean
+  requirePhoneField: boolean
+}
+
 export default function ContactPage() {
-  const contactSettings = null
+  const [contactSettings, setContactSettings] = useState<ContactSettings | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [consultationType, setConsultationType] = useState<'brand_strategy' | 'digital_strategy' | 'creative_direction'>('brand_strategy')
+
+  // Fetch contact settings on component mount
+  useEffect(() => {
+    const fetchContactSettings = async () => {
+      try {
+        const response = await fetch('/api/contacts/settings')
+        if (response.ok) {
+          const data = await response.json()
+          setContactSettings(data)
+        }
+      } catch (error) {
+        console.error('Failed to fetch contact settings:', error)
+      }
+    }
+
+    fetchContactSettings()
+  }, [])
 
   return (
     <div className="min-h-screen bg-[#161616] text-[#E9E7E2]">
