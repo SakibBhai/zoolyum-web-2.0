@@ -1,61 +1,53 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client'
 
-declare global {
-  var prisma: PrismaClient | undefined;
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined
 }
 
-// Edge runtime compatible Prisma client initialization
-function createPrismaClient() {
-  if (!process.env.DATABASE_URL) {
-    console.warn('DATABASE_URL environment variable is not set');
-    // Return a mock client for development or testing without database
-    return new PrismaClient();
-  }
+// Enhanced Prisma client with better error handling and connection management
+export const prisma = globalForPrisma.prisma ?? new PrismaClient({
+  log: ['error', 'warn'],
+  // Enhanced error formatting for better debugging
+  errorFormat: 'pretty',
+  // Transaction options for better reliability
+  transactionOptions: {
+    maxWait: 5000, // 5 seconds
+    timeout: 10000, // 10 seconds
+  },
+})
 
-  return new PrismaClient({
-    log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
-    datasources: {
-      db: {
-        url: process.env.DATABASE_URL
+// Connection health check with retry logic
+export async function checkDatabaseConnection(retries = 3): Promise<boolean> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      await prisma.$queryRaw`SELECT 1`
+      return true
+    } catch (error: any) {
+      console.warn(`Database connection attempt ${i + 1}/${retries} failed:`, error.message)
+      if (i === retries - 1) {
+        console.error('All database connection attempts failed')
+        return false
       }
-    },
-    // Connection pool configuration for better stability
-    connectionLimit: 10,
-    // Retry configuration for connection issues
-    errorFormat: 'pretty',
-    // Transaction options
-    transactionOptions: {
-      maxWait: 5000, // 5 seconds
-      timeout: 10000, // 10 seconds
+      // Wait before retry (exponential backoff)
+      await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000))
     }
-  });
-}
-
-// Create a singleton instance with connection management
-let prismaInstance: PrismaClient | undefined;
-
-function getPrismaClient() {
-  if (!prismaInstance) {
-    prismaInstance = createPrismaClient();
-    
-    // Handle connection errors gracefully
-    prismaInstance.$on('error' as any, (e) => {
-      console.error('Prisma connection error:', e);
-    });
   }
-  
-  return prismaInstance;
+  return false
 }
 
-export const prisma = global.prisma || getPrismaClient();
-
-if (process.env.NODE_ENV !== 'production') {
-  global.prisma = prisma;
-}
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
 // Graceful shutdown
 process.on('beforeExit', async () => {
-  if (prismaInstance) {
-    await prismaInstance.$disconnect();
-  }
-});
+  await prisma.$disconnect()
+})
+
+process.on('SIGINT', async () => {
+  await prisma.$disconnect()
+  process.exit(0)
+})
+
+process.on('SIGTERM', async () => {
+  await prisma.$disconnect()
+  process.exit(0)
+})
