@@ -164,6 +164,8 @@ model CampaignSubmission {
 
 model Project {
   description        String?
+  image_url          String?              @map("image_url")
+  hero_image_url     String?              @map("hero_image_url")
   createdAt          DateTime?            @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt          DateTime?            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   actual_budget      Decimal?             @default(0) @db.Decimal(12, 2)
@@ -181,8 +183,6 @@ model Project {
   tasks_completed    Int?                 @default(0)
   tasks_total        Int?                 @default(0)
   type               String?              @default("General") @db.VarChar(100)
-  image_url          String?              @map("image_url")
-  hero_image_url     String?              @map("hero_image_url")
   id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   content_calendar   content_calendar[]
   invoices           invoices[]

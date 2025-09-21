@@ -46,9 +46,15 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    console.log('Received project data:', body);
+    
+    // Handle both admin form structure and direct API calls
     const {
+      title,
       name,
+      slug,
       description,
+      category,
       client_id,
       status,
       priority,
@@ -65,22 +71,47 @@ export async function POST(request: NextRequest) {
       tasks_completed
     } = body;
 
+    // Use title if provided (from admin form), otherwise use name
+    const projectName = title || name;
+    const projectType = category || type || 'General';
+
     // Validate required fields
-    if (!name) {
+    if (!projectName) {
       return NextResponse.json(
-        { error: 'Missing required field: name' },
+        { error: 'Missing required field: title/name' },
+        { status: 400 }
+      );
+    }
+
+    // UUID validation helper
+    const isValidUUID = (uuid: string) => {
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      return uuidRegex.test(uuid);
+    };
+
+    // Validate UUID fields
+    if (client_id && !isValidUUID(client_id)) {
+      return NextResponse.json(
+        { error: 'Invalid client_id: must be a valid UUID' },
+        { status: 400 }
+      );
+    }
+
+    if (created_by && !isValidUUID(created_by)) {
+      return NextResponse.json(
+        { error: 'Invalid created_by: must be a valid UUID' },
         { status: 400 }
       );
     }
 
     const project = await prisma.project.create({
       data: {
-        name,
+        name: projectName,
         description,
-        client_id,
+        client_id: client_id || null,
         status: status || 'planning',
         priority: priority || 'medium',
-        type: type || 'General',
+        type: projectType,
         start_date: start_date ? new Date(start_date) : null,
         end_date: end_date ? new Date(end_date) : null,
         budget: budget || 0,
@@ -88,11 +119,13 @@ export async function POST(request: NextRequest) {
         actual_budget: actual_budget || 0,
         progress: progress || 0,
         manager,
-        created_by,
+        created_by: created_by || null,
         tasks_total: tasks_total || 0,
         tasks_completed: tasks_completed || 0,
       },
     });
+
+    console.log('Project created successfully:', project);
 
     return NextResponse.json(project, { status: 201 });
   } catch (error) {

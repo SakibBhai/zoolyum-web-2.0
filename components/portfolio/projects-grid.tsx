@@ -60,7 +60,7 @@ export async function ProjectsGrid({ category, limit }: ProjectsGridProps) {
           key={project.id}
           className="group h-full"
         >
-          <Link href={`/portfolio/${project.id}`} className="block h-full">
+          <Link href={`/portfolio/${project.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}`} className="block h-full">
             <Card className="h-full bg-[#1A1A1A] border-[#333333] overflow-hidden transform-gpu transition-all duration-300 hover:scale-105 flex flex-col">
               <div className="overflow-hidden">
                 <div className="transform-gpu transition-transform duration-700 group-hover:scale-110">
