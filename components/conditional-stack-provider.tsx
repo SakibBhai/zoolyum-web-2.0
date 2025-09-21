@@ -7,6 +7,11 @@ interface ConditionalStackProviderProps {
   children: ReactNode;
 }
 
+// Check if we're in development mode using environment variables
+const isDevelopmentMode = process.env.NODE_ENV === 'development' || 
+                         process.env.NEXT_PUBLIC_BASE_URL?.includes('localhost') ||
+                         process.env.VERCEL_ENV === 'development';
+
 // Dynamically import StackProvider components
 const StackProviderWrapper = dynamic(
   () => import('@stackframe/stack').then((mod) => {
@@ -34,17 +39,12 @@ const StackProviderWrapper = dynamic(
 export default function ConditionalStackProvider({ 
   children
 }: ConditionalStackProviderProps) {
-  const [isDevelopment, setIsDevelopment] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
-    const hostname = window.location.hostname;
-    const port = window.location.port;
-    const isDev = hostname === 'localhost' || hostname === '127.0.0.1' || port === '3000' || port === '3001' || port === '3002';
-    setIsDevelopment(isDev);
     
-    if (isDev) {
+    if (isDevelopmentMode) {
       console.log('ConditionalStackProvider: Development mode detected, StackProvider disabled');
     }
   }, []);
@@ -55,7 +55,7 @@ export default function ConditionalStackProvider({
   }
 
   // In development, just return children without StackProvider
-  if (isDevelopment) {
+  if (isDevelopmentMode) {
     return <>{children}</>;
   }
 
