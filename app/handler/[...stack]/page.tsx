@@ -20,6 +20,7 @@ export default function StackAuthHandler({ params }: StackHandlerProps) {
   const router = useRouter();
   const [stackParams, setStackParams] = useState<string[]>([]);
   const [isDevelopment, setIsDevelopment] = useState(false);
+  const [stackApp, setStackApp] = useState<any>(null);
 
   useEffect(() => {
     const initializeParams = async () => {
@@ -36,6 +37,14 @@ export default function StackAuthHandler({ params }: StackHandlerProps) {
       if (isDev) {
         console.log('Development mode: Redirecting to admin dashboard');
         router.push('/admin/dashboard');
+      } else {
+        // In production, load the stack server app
+        try {
+          const { stackServerApp } = await import('../../../stack');
+          setStackApp(stackServerApp);
+        } catch (error) {
+          console.error('Failed to load Stack Auth server app:', error);
+        }
       }
     };
     
@@ -51,16 +60,20 @@ export default function StackAuthHandler({ params }: StackHandlerProps) {
     );
   }
 
+  // In production, show loading state until stack app is loaded
+  if (!stackApp) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+        <div className="text-[#E9E7E2]">Loading authentication...</div>
+      </div>
+    );
+  }
+
   // In production, use the actual Stack Auth handler
   return (
     <StackHandler
       fullPage
-      afterSignIn={() => {
-        router.push('/admin/dashboard');
-      }}
-      afterSignUp={() => {
-        router.push('/admin/dashboard');
-      }}
+      app={stackApp}
     />
   );
 }
