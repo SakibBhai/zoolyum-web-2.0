@@ -1,5 +1,3 @@
-import "server-only";
-
 import { StackServerApp } from "@stackframe/stack";
 
 // Validate required environment variables
