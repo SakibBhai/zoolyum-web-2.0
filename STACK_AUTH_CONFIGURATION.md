@@ -1,100 +1,102 @@
-# Stack Auth Configuration Summary
+# Stack Auth Configuration Guide
 
 ## Overview
-This document summarizes the Stack Auth environment variables configuration for the Zoolyum Web 2.0 project.
 
-## Environment Variables Configured
+This project uses a dual authentication system:
+- **Local Development**: Mock authentication for easy development
+- **Production**: Stack Auth with real authentication
 
-The following Stack Auth credentials have been properly configured in `.env.local`:
+## Local Development Setup
+
+The `.env.local` file contains development Stack Auth keys that enable local testing:
 
 ```env
-# Stack Auth Configuration
-NEXT_PUBLIC_STACK_PROJECT_ID=8e1b2d94-6841-419a-bbc4-4c6714a3c131
-NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY=pck_wcndqtfmy26fb1gc96vmahzwbty3rktg1pdgyr71k9rzr
-STACK_SECRET_SERVER_KEY=ssk_b0qma9yga0sv861d36pphswj4mdcs5agm4yh8kqmy3g58
+NEXT_PUBLIC_STACK_PROJECT_ID="8e1b2d94-6841-419a-bbc4-4c6714a3c131"
+NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY="pck_wcndqtfmy26fb1gc96vmahzwbty3rktg1pdgyr71k9rzr"
+STACK_SECRET_SERVER_KEY="ssk_b0qma9yga0sv861d36pphswj4mdcs5agm4yh8kqmy3g58"
 ```
 
-## Files Updated
+## Production Deployment (Vercel)
 
-### 1. Environment Configuration
-- **`.env.local`**: Added Stack Auth environment variables
+### Step 1: Configure Environment Variables in Vercel
 
-### 2. Server Configuration
-- **`stack.tsx`**: Updated to use correct environment variable names:
-  - `STACK_PROJECT_ID` → `NEXT_PUBLIC_STACK_PROJECT_ID`
-  - `STACK_PUBLISHABLE_CLIENT_KEY` → `NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY`
-  - `STACK_SECRET_SERVER_KEY` (unchanged)
+1. Go to your Vercel project dashboard
+2. Navigate to **Settings** → **Environment Variables**
+3. Add the following variables with **Production** scope:
 
-### 3. Client Configuration
-- **`components/conditional-stack-provider.tsx`**: Already using correct variable names
-
-### 4. Documentation Updates
-- **`STACK_AUTH_SETUP.md`**: Updated environment variable names
-- **`VERCEL_DEPLOYMENT.md`**: Updated environment variable names
-- **`STACK_AUTH_VERCEL_FIX.md`**: Updated environment variable names
-
-## Key Changes Made
-
-### Environment Variable Naming Convention
-- **Client-side variables**: Must use `NEXT_PUBLIC_` prefix to be accessible in browser
-- **Server-side variables**: No prefix required (e.g., `STACK_SECRET_SERVER_KEY`)
-
-### Configuration Pattern
-```typescript
-// Server-side (stack.tsx)
-const stackServerApp = new StackServerApp({
-  tokenStore: "nextjs-cookie",
-  projectId: process.env.NEXT_PUBLIC_STACK_PROJECT_ID,
-  publishableClientKey: process.env.NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY,
-  secretServerKey: process.env.STACK_SECRET_SERVER_KEY,
-});
-
-// Client-side (conditional-stack-provider.tsx)
-const stackClientApp = new StackClientApp({
-  tokenStore: 'nextjs-cookie',
-  projectId: process.env.NEXT_PUBLIC_STACK_PROJECT_ID!,
-  publishableClientKey: process.env.NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY!
-});
+```env
+NEXT_PUBLIC_STACK_PROJECT_ID=58b90d93-9071-4155-9262-5351fcbed848
+NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY=pck_gpwev442v0rmkyevxm17py8n3patf73w2nfvremf0r6hr
+STACK_SECRET_SERVER_KEY=ssk_47x6c3w8cmrkvpx8e0adaf16fyhj2fc1edv5jrxvsstvg
 ```
 
-## Development vs Production
+### Step 2: Configure Stack Auth Dashboard
+
+1. Log into your Stack Auth dashboard
+2. Navigate to your production project: `58b90d93-9071-4155-9262-5351fcbed848`
+3. Configure the following settings:
+
+**Allowed Domains:**
+- `https://www.zoolyum.com`
+- `https://zoolyum.com`
+- `https://zoolyum-web-2-0.vercel.app` (if using Vercel default domain)
+
+**Redirect URLs:**
+- `https://www.zoolyum.com/handler/sign-in`
+- `https://www.zoolyum.com/handler/sign-out`
+- `https://www.zoolyum.com/handler/sign-up`
+
+### Step 3: Set Up Admin User
+
+1. In Stack Auth dashboard, create an admin user account
+2. Use the email you want for admin access
+3. Verify the email address
+
+### Step 4: Deploy and Test
+
+1. Deploy your application to Vercel
+2. Visit `https://www.zoolyum.com/admin`
+3. You should be redirected to Stack Auth sign-in
+4. Sign in with your admin credentials
+5. You should be redirected back to the admin dashboard
+
+## Authentication Flow
 
 ### Development Mode
-- Stack Auth is bypassed when running on localhost
-- Mock authentication is used for development
-- No Stack Auth setup required for local development
+- Uses mock authentication (`useConditionalUser` returns `DEV_USER`)
+- No Stack Auth provider is loaded
+- Admin access works immediately
 
 ### Production Mode
-- All Stack Auth environment variables are required
-- Real authentication through Stack Auth service
-- Must be configured in deployment platform (Vercel)
+- Uses Stack Auth with real authentication
+- `ConditionalStackProvider` loads Stack Auth components
+- `useConditionalUser` integrates with Stack Auth's `useUser` hook
+- Users must sign in through Stack Auth
 
-## Verification Steps
+## Troubleshooting
 
-1. **Environment Variables**: ✅ Added to `.env.local`
-2. **Server Configuration**: ✅ Updated `stack.tsx`
-3. **Client Configuration**: ✅ Already correct in `conditional-stack-provider.tsx`
-4. **Documentation**: ✅ Updated all relevant docs
-5. **Development Server**: ✅ Started successfully on port 3002
+### Admin Access Issues
 
-## Next Steps for Production
+1. **Check Environment Variables**: Ensure all Stack Auth variables are set in Vercel
+2. **Verify Domain Configuration**: Make sure your domain is allowed in Stack Auth dashboard
+3. **Check Redirect URLs**: Ensure redirect URLs match your domain
+4. **Admin User Setup**: Verify admin user exists and email is verified
 
-When deploying to production:
+### Development Issues
 
-1. **Vercel Environment Variables**: Add the same three variables to Vercel dashboard
-2. **Stack Auth Dashboard**: Configure domain and redirect URLs
-3. **Testing**: Verify authentication works in production environment
+1. **Mock Auth Not Working**: Check that you're running on localhost with development environment
+2. **Stack Auth Loading in Dev**: Verify `NODE_ENV=development` is set
+
+## Environment Detection
+
+The system detects environment based on:
+- `NODE_ENV` environment variable
+- Hostname detection (localhost, 127.0.0.1)
+- Port detection (3000, 3001, 3002)
 
 ## Security Notes
 
-- ✅ Secret server key is server-side only (no `NEXT_PUBLIC_` prefix)
-- ✅ Client keys are properly prefixed for browser access
-- ✅ All credentials are excluded from version control
-- ✅ Development mode uses secure mock authentication
-
-## Status
-
-**Configuration Status**: ✅ Complete  
-**Development Ready**: ✅ Yes  
-**Production Ready**: ✅ Yes (pending Vercel env vars)  
-**Documentation**: ✅ Updated
+- Production keys are never committed to version control
+- Development keys are safe to commit as they're for local development only
+- Stack Auth handles all authentication security in production
+- Admin access is controlled through Stack Auth user management

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 
 // Mock user for development
 const DEV_USER = {
@@ -21,6 +22,12 @@ const DEV_USER = {
   selectedTeamId: null
 };
 
+// Dynamically import Stack Auth hook for production
+const useStackUser = dynamic(
+  () => import('@stackframe/stack').then((mod) => mod.useUser),
+  { ssr: false }
+);
+
 export function useConditionalUser() {
   const [isClient, setIsClient] = useState(false);
   const [user, setUser] = useState<any>(undefined);
@@ -36,10 +43,6 @@ export function useConditionalUser() {
     if (isDev) {
       console.log('useConditionalUser: Development mode detected, using mock user');
       setUser(DEV_USER);
-    } else {
-      // In production, we would need to handle Stack Auth properly
-      // For now, just return null to indicate no user in production without StackProvider
-      setUser(null);
     }
   }, []);
 
@@ -48,5 +51,19 @@ export function useConditionalUser() {
     return undefined;
   }
 
-  return user;
+  // In development, return mock user
+  if (isDevelopment) {
+    return user;
+  }
+
+  // In production, use Stack Auth
+  // This will be handled by the ConditionalStackProvider
+  // If Stack Auth is not available, this will return null
+  try {
+    const stackUser = useStackUser();
+    return stackUser;
+  } catch (error) {
+    console.warn('Stack Auth not available, user will be null');
+    return null;
+  }
 }
