@@ -2,16 +2,8 @@ import { ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import Image from "next/image"
+import { Project } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
-
-interface Project {
-  id: string
-  name: string
-  description: string | null
-  type: string | null
-  createdAt: Date | null
-  updatedAt: Date | null
-}
 
 interface ProjectsGridProps {
   category?: string
@@ -19,21 +11,26 @@ interface ProjectsGridProps {
 }
 
 async function getProjects({ category, limit }: ProjectsGridProps = {}): Promise<Project[]> {
-  const whereClause: any = {}
-  
-  if (category && category !== 'all') {
-    whereClause.type = category
+  try {
+    const where: any = {}
+    
+    if (category && category !== 'all') {
+      where.type = category
+    }
+
+    const projects = await prisma.project.findMany({
+      where,
+      take: limit,
+      orderBy: {
+        createdAt: 'desc'
+      }
+    })
+    
+    return projects || []
+  } catch (error) {
+    console.error('Error fetching projects from database:', error)
+    return []
   }
-
-  const projects = await prisma.project.findMany({
-    where: whereClause,
-    orderBy: [
-      { createdAt: 'desc' }
-    ],
-    take: limit,
-  })
-
-  return projects
 }
 
 export async function ProjectsGrid({ category, limit }: ProjectsGridProps) {
