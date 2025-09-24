@@ -21,6 +21,7 @@ export default function StackAuthHandler({ params }: StackHandlerProps) {
   const [stackParams, setStackParams] = useState<string[]>([]);
   const [isDevelopment, setIsDevelopment] = useState(false);
   const [stackApp, setStackApp] = useState<any>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     const initializeParams = async () => {
@@ -36,20 +37,37 @@ export default function StackAuthHandler({ params }: StackHandlerProps) {
       // In development, redirect to admin dashboard (mock auth)
       if (isDev) {
         console.log('Development mode: Redirecting to admin dashboard');
-        router.push('/admin/dashboard');
+        setTimeout(() => {
+          router.push('/admin/dashboard');
+        }, 1000); // Add small delay to show loading message
       } else {
-        // In production, load the stack server app
+        // In production, create a client-side Stack app
         try {
-          const { stackServerApp } = await import('../../../stack');
-          setStackApp(stackServerApp);
+          const { StackApp } = await import('@stackframe/stack');
+          const clientApp = new StackApp({
+            projectId: process.env.NEXT_PUBLIC_STACK_PROJECT_ID!,
+            publishableClientKey: process.env.NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY!,
+          });
+          setStackApp(clientApp);
         } catch (error) {
-          console.error('Failed to load Stack Auth server app:', error);
+          console.error('Failed to load Stack Auth client app:', error);
         }
       }
+      
+      setIsInitialized(true);
     };
     
     initializeParams();
   }, [params, router]);
+
+  // Show loading state until initialized
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+        <div className="text-[#E9E7E2]">Loading authentication...</div>
+      </div>
+    );
+  }
 
   // In development, show loading state while redirecting
   if (isDevelopment) {
@@ -64,7 +82,7 @@ export default function StackAuthHandler({ params }: StackHandlerProps) {
   if (!stackApp) {
     return (
       <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
-        <div className="text-[#E9E7E2]">Loading authentication...</div>
+        <div className="text-[#E9E7E2]">Failed to load authentication. Please check your configuration.</div>
       </div>
     );
   }
