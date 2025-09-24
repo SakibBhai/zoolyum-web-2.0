@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import dynamic from 'next/dynamic';
 
 // Mock user for development
 const DEV_USER = {
@@ -22,11 +21,16 @@ const DEV_USER = {
   selectedTeamId: null
 };
 
-// Dynamically import Stack Auth hook for production
-const useStackUser = dynamic(
-  () => import('@stackframe/stack').then((mod) => mod.useUser),
-  { ssr: false }
-);
+// Conditionally import Stack Auth hook for production
+let useStackUser: any = null;
+if (typeof window !== 'undefined') {
+  try {
+    const stackModule = require('@stackframe/stack');
+    useStackUser = stackModule.useUser;
+  } catch (error) {
+    console.warn('Stack Auth not available:', error);
+  }
+}
 
 export function useConditionalUser() {
   const [isClient, setIsClient] = useState(false);
@@ -56,14 +60,18 @@ export function useConditionalUser() {
     return user;
   }
 
-  // In production, use Stack Auth
-  // This will be handled by the ConditionalStackProvider
-  // If Stack Auth is not available, this will return null
-  try {
-    const stackUser = useStackUser();
-    return stackUser;
-  } catch (error) {
-    console.warn('Stack Auth not available, user will be null');
-    return null;
+  // In production, use Stack Auth if available
+  if (useStackUser) {
+    try {
+      const stackUser = useStackUser();
+      return stackUser;
+    } catch (error) {
+      console.warn('Stack Auth error:', error);
+      return null;
+    }
   }
+
+  // Fallback if Stack Auth is not available
+  console.warn('Stack Auth not available, user will be null');
+  return null;
 }
