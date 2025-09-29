@@ -12,28 +12,51 @@ const isDevelopmentMode = process.env.NODE_ENV === 'development' ||
                          process.env.NEXT_PUBLIC_BASE_URL?.includes('localhost') ||
                          process.env.VERCEL_ENV === 'development';
 
-// Dynamically import StackProvider components
+// Dynamically import StackProvider components with better error handling
 const StackProviderWrapper = dynamic(
   () => import('@stackframe/stack').then((mod) => {
     const { StackProvider, StackTheme, StackClientApp } = mod;
     
     return function StackWrapper({ children }: { children: ReactNode }) {
-      const stackClientApp = new StackClientApp({
-        tokenStore: 'nextjs-cookie',
-        projectId: process.env.NEXT_PUBLIC_STACK_PROJECT_ID!,
-        publishableClientKey: process.env.NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY!
-      });
+      // Only create StackClientApp if environment variables are available
+      const projectId = process.env.NEXT_PUBLIC_STACK_PROJECT_ID;
+      const publishableClientKey = process.env.NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY;
       
-      return (
-        <StackProvider app={stackClientApp}>
-          <StackTheme>
-            {children}
-          </StackTheme>
-        </StackProvider>
-      );
+      if (!projectId || !publishableClientKey) {
+        console.warn('Stack Auth environment variables not found, skipping provider');
+        return <>{children}</>;
+      }
+      
+      try {
+        const stackClientApp = new StackClientApp({
+          tokenStore: 'nextjs-cookie',
+          projectId,
+          publishableClientKey
+        });
+        
+        return (
+          <StackProvider app={stackClientApp}>
+            <StackTheme>
+              {children}
+            </StackTheme>
+          </StackProvider>
+        );
+      } catch (error) {
+        console.error('Failed to initialize Stack Auth:', error);
+        return <>{children}</>;
+      }
+    };
+  }).catch((error) => {
+    console.error('Failed to load Stack Auth module:', error);
+    // Return a fallback component
+    return function FallbackWrapper({ children }: { children: ReactNode }) {
+      return <>{children}</>;
     };
   }),
-  { ssr: false }
+  { 
+    ssr: false,
+    loading: () => null
+  }
 );
 
 export default function ConditionalStackProvider({ 
