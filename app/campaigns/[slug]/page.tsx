@@ -95,11 +95,11 @@ function CampaignData({ campaign }: { campaign: Campaign }) {
       </div>
 
       {/* Media Section */}
-      {(campaign.imageUrls.length > 0 || campaign.videoUrls.length > 0) && (
+      {((campaign.imageUrls && campaign.imageUrls.length > 0) || (campaign.videoUrls && campaign.videoUrls.length > 0)) && (
         <div className="py-16">
           <div className="container mx-auto px-4">
             {/* Videos */}
-            {campaign.videoUrls.length > 0 && (
+            {campaign.videoUrls && campaign.videoUrls.length > 0 && (
               <div className="mb-12">
                 <h2 className="text-3xl font-bold text-center mb-8">Featured Videos</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -127,7 +127,7 @@ function CampaignData({ campaign }: { campaign: Campaign }) {
             )}
 
             {/* Images */}
-            {campaign.imageUrls.length > 0 && (
+            {campaign.imageUrls && campaign.imageUrls.length > 0 && (
               <div className="mb-12">
                 <h2 className="text-3xl font-bold text-center mb-8">Gallery</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -162,7 +162,7 @@ function CampaignData({ campaign }: { campaign: Campaign }) {
       )}
 
       {/* Contact Form Section */}
-      {campaign.enableForm && campaign.formFields.length > 0 && (
+      {campaign.enableForm && campaign.formFields && campaign.formFields.length > 0 && (
         <div className="py-16">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">

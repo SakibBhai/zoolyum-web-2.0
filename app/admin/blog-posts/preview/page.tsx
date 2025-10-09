@@ -131,7 +131,7 @@ export default function BlogPostPreviewPage() {
                 {previewData.excerpt}
               </p>
               
-              {previewData.tags.length > 0 && (
+              {previewData.tags && previewData.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {previewData.tags.map((tag, index) => (
                     <span

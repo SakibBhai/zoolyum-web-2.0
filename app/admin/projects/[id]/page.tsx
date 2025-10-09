@@ -213,7 +213,7 @@ export default function ViewProjectPage() {
             )}
 
             {/* Technologies */}
-            {project.technologies.length > 0 && (
+            {project.technologies && project.technologies.length > 0 && (
               <div className="bg-[#1A1A1A] rounded-lg p-6">
                 <h2 className="text-lg font-semibold text-[#E9E7E2] mb-3">Technologies</h2>
                 <div className="flex flex-wrap gap-2">
@@ -227,7 +227,7 @@ export default function ViewProjectPage() {
             )}
 
             {/* Services */}
-            {project.services.length > 0 && (
+            {project.services && project.services.length > 0 && (
               <div className="bg-[#1A1A1A] rounded-lg p-6">
                 <h2 className="text-lg font-semibold text-[#E9E7E2] mb-3">Services</h2>
                 <div className="flex flex-wrap gap-2">

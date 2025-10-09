@@ -526,7 +526,7 @@ export default function NewJobPage() {
                   </Button>
                 </div>
                 
-                {formData.skills.length > 0 && (
+                {(formData.skills || []).length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {formData.skills.map((skill, index) => (
                       <Badge key={index} variant="secondary" className="flex items-center gap-1">

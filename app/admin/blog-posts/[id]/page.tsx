@@ -321,7 +321,7 @@ export default function BlogPostViewPage() {
           </Card>
 
           {/* Tags */}
-          {blogPost.tags.length > 0 && (
+          {blogPost.tags && blogPost.tags.length > 0 && (
             <Card className="bg-[#1A1A1A] border-[#333]">
               <CardHeader>
                 <CardTitle className="text-[#E9E7E2] flex items-center">

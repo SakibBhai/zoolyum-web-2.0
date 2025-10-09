@@ -115,9 +115,9 @@ export default function EditBlogPostPage() {
   }
 
   const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
+    const value = e.target.value || ''
     setTagsInput(value)
-    const tags = value.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
+    const tags = value.split(',').map(tag => tag.trim()).filter(tag => tag && tag.length > 0)
     setFormData(prev => ({ ...prev, tags }))
   }
 
@@ -316,7 +316,7 @@ export default function EditBlogPostPage() {
                     required
                   />
                   <p className="text-sm text-[#E9E7E2]/60">
-                    {formData.excerpt.length}/300 characters
+                    {(formData.excerpt || '').length}/300 characters
                   </p>
                 </div>
               </CardContent>
@@ -399,7 +399,7 @@ export default function EditBlogPostPage() {
                     className="bg-[#252525] border-[#333] text-[#E9E7E2]"
                   />
                 </div>
-                {formData.tags.length > 0 && (
+                {(formData.tags || []).length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {formData.tags.map((tag, index) => (
                       <span

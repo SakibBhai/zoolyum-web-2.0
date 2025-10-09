@@ -181,7 +181,7 @@ export default function JobApplicationsPage() {
               </SelectTrigger>
               <SelectContent className="bg-[#252525] border-[#333333]">
                 <SelectItem value="all">All Jobs</SelectItem>
-                {jobs.map((job) => (
+                {(jobs || []).map((job) => (
                   <SelectItem key={job.id} value={job.id}>
                     {job.title}
                   </SelectItem>
@@ -195,16 +195,16 @@ export default function JobApplicationsPage() {
       {/* Applications List */}
       <Card className="bg-[#1A1A1A] border-[#333333]">
         <CardHeader>
-          <CardTitle className="text-[#E9E7E2]">Applications ({filteredApplications.length})</CardTitle>
+          <CardTitle className="text-[#E9E7E2]">Applications ({(filteredApplications || []).length})</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {filteredApplications.length === 0 ? (
+            {(filteredApplications || []).length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-[#E9E7E2]/70">No applications found</p>
               </div>
             ) : (
-              filteredApplications.map((application) => (
+              (filteredApplications || []).map((application) => (
                 <div
                   key={application.id}
                   className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border border-[#333333] rounded-lg hover:bg-[#252525] transition-colors"

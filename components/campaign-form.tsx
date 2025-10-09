@@ -44,7 +44,7 @@ export function CampaignForm({ campaignId, fields, successMessage, redirectUrl }
 
     try {
       // Validate required fields
-      const missingFields = fields
+      const missingFields = (fields || [])
         .filter(field => field.required && !formData[field.name])
         .map(field => field.label);
 
@@ -253,7 +253,7 @@ export function CampaignForm({ campaignId, fields, successMessage, redirectUrl }
       </CardHeader>
       <CardContent className="p-4 sm:p-6">
         <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
-          {fields.map(renderField)}
+          {(fields || []).map(renderField)}
           
           <Button 
             type="submit" 

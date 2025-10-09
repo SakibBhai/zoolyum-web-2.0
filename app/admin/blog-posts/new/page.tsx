@@ -70,7 +70,7 @@ export default function NewBlogPostPage() {
   const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setTagsInput(value)
-    const tags = value.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
+    const tags = value.split(',').map(tag => tag.trim()).filter(tag => tag && tag.length > 0)
     setFormData(prev => ({ ...prev, tags }))
   }
 
@@ -78,31 +78,31 @@ export default function NewBlogPostPage() {
   const validateForm = () => {
     const errors: Record<string, string> = {}
     
-    if (!formData.title.trim()) {
+    if (!formData.title?.trim()) {
       errors.title = 'Title is required'
-    } else if (formData.title.length < 3) {
+    } else if ((formData.title || '').length < 3) {
       errors.title = 'Title must be at least 3 characters long'
-    } else if (formData.title.length > 200) {
+    } else if ((formData.title || '').length > 200) {
       errors.title = 'Title must be less than 200 characters'
     }
     
-    if (!formData.slug.trim()) {
+    if (!formData.slug?.trim()) {
       errors.slug = 'Slug is required'
-    } else if (!/^[a-z0-9-]+$/.test(formData.slug)) {
+    } else if (!/^[a-z0-9-]+$/.test(formData.slug || '')) {
       errors.slug = 'Slug can only contain lowercase letters, numbers, and hyphens'
     }
     
-    if (!formData.excerpt.trim()) {
+    if (!formData.excerpt?.trim()) {
       errors.excerpt = 'Excerpt is required'
-    } else if (formData.excerpt.length < 10) {
+    } else if ((formData.excerpt || '').length < 10) {
       errors.excerpt = 'Excerpt must be at least 10 characters long'
-    } else if (formData.excerpt.length > 500) {
+    } else if ((formData.excerpt || '').length > 500) {
       errors.excerpt = 'Excerpt must be less than 500 characters'
     }
     
-    if (!formData.content.trim()) {
+    if (!formData.content?.trim()) {
       errors.content = 'Content is required'
-    } else if (formData.content.length < 50) {
+    } else if ((formData.content || '').length < 50) {
       errors.content = 'Content must be at least 50 characters long'
     }
     
@@ -241,7 +241,7 @@ export default function NewBlogPostPage() {
                     <p className="text-red-500 text-sm">{fieldErrors.title}</p>
                   )}
                   <p className="text-[#E9E7E2]/60 text-sm">
-                    {formData.title.length}/200 characters
+                    {(formData.title || '').length}/200 characters
                   </p>
                 </div>
                 
@@ -291,7 +291,7 @@ export default function NewBlogPostPage() {
                     <p className="text-red-500 text-sm">{fieldErrors.excerpt}</p>
                   )}
                   <p className="text-sm text-[#E9E7E2]/60">
-                    {formData.excerpt.length}/500 characters
+                    {(formData.excerpt || '').length}/500 characters
                   </p>
                 </div>
               </CardContent>
@@ -322,7 +322,7 @@ export default function NewBlogPostPage() {
                   <p className="text-red-500 text-sm">{fieldErrors.content}</p>
                 )}
                 <p className="text-[#E9E7E2]/60 text-sm">
-                  {formData.content.replace(/<[^>]*>/g, '').length} characters
+                  {(formData.content || '').replace(/<[^>]*>/g, '').length} characters
                 </p>
               </CardContent>
             </Card>
@@ -385,7 +385,7 @@ export default function NewBlogPostPage() {
                     Separate multiple tags with commas. Tags help readers find your content.
                   </p>
                 </div>
-                {formData.tags.length > 0 && (
+                {formData.tags && formData.tags.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {formData.tags.map((tag, index) => (
                       <span
@@ -397,7 +397,7 @@ export default function NewBlogPostPage() {
                     ))}
                   </div>
                 )}
-                {formData.tags.length > 10 && (
+                {formData.tags && formData.tags.length > 10 && (
                   <p className="text-yellow-500 text-sm">
                     Consider using fewer tags (10 or less) for better organization.
                   </p>

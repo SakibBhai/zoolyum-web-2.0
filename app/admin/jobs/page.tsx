@@ -206,9 +206,9 @@ export default function AdminJobsPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{jobs.length}</div>
+            <div className="text-2xl font-bold">{(jobs || []).length}</div>
             <p className="text-xs text-muted-foreground">
-              {jobs.filter(job => job.published).length} published
+              {(jobs || []).filter(job => job.published).length} published
             </p>
           </CardContent>
         </Card>
@@ -219,7 +219,7 @@ export default function AdminJobsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {jobs.reduce((sum, job) => sum + job._count.applications, 0)}
+              {(jobs || []).reduce((sum, job) => sum + job._count.applications, 0)}
             </div>
             <p className="text-xs text-muted-foreground">
               Total applications received
@@ -232,7 +232,7 @@ export default function AdminJobsPage() {
             <MapPin className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{departments.length}</div>
+            <div className="text-2xl font-bold">{(departments || []).length}</div>
             <p className="text-xs text-muted-foreground">
               Active departments
             </p>
@@ -245,7 +245,7 @@ export default function AdminJobsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {jobs.filter(job => job.featured).length}
+              {(jobs || []).filter(job => job.featured).length}
             </div>
             <p className="text-xs text-muted-foreground">
               Currently featured
@@ -279,7 +279,7 @@ export default function AdminJobsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Departments</SelectItem>
-                {departments.map((dept) => (
+                {(departments || []).map((dept) => (
                   <SelectItem key={dept} value={dept}>{dept}</SelectItem>
                 ))}
               </SelectContent>
@@ -314,7 +314,7 @@ export default function AdminJobsPage() {
         <CardHeader>
           <CardTitle>Job Listings</CardTitle>
           <CardDescription>
-            {loading ? 'Loading...' : `${jobs.length} job${jobs.length !== 1 ? 's' : ''} found`}
+            {loading ? 'Loading...' : `${(jobs || []).length} job${(jobs || []).length !== 1 ? 's' : ''} found`}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -326,7 +326,7 @@ export default function AdminJobsPage() {
                 </div>
               ))}
             </div>
-          ) : jobs.length === 0 ? (
+          ) : (jobs || []).length === 0 ? (
             <div className="text-center py-12">
               <Users className="mx-auto h-12 w-12 text-gray-400 mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No jobs found</h3>
@@ -355,7 +355,7 @@ export default function AdminJobsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {jobs.map((job, index) => (
+                  {(jobs || []).map((job, index) => (
                     <motion.tr
                       key={job.id}
                       initial={{ opacity: 0, y: 20 }}

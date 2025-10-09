@@ -169,7 +169,7 @@ export default function BlogPostPage() {
     )
   }
 
-  const estimatedReadTime = Math.ceil(post.content.split(' ').length / 200); // Assuming 200 words per minute
+  const estimatedReadTime = Math.ceil((post.content || '').split(' ').length / 200); // Assuming 200 words per minute
 
   return (
     <PageTransition>

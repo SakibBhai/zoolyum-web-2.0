@@ -38,19 +38,23 @@ export default function AdminDashboard() {
       try {
         // Fetch contacts
         const contactsRes = await fetch('/api/contacts');
-        const contacts = contactsRes.ok ? await contactsRes.json() : [];
+        const contactsData = contactsRes.ok ? await contactsRes.json() : [];
+        const contacts = Array.isArray(contactsData) ? contactsData : [];
         
         // Fetch testimonials
         const testimonialsRes = await fetch('/api/testimonials');
-        const testimonials = testimonialsRes.ok ? await testimonialsRes.json() : [];
+        const testimonialsData = testimonialsRes.ok ? await testimonialsRes.json() : [];
+        const testimonials = Array.isArray(testimonialsData) ? testimonialsData : [];
         
         // Fetch blog posts
         const blogPostsRes = await fetch('/api/blog-posts');
-        const blogPosts = blogPostsRes.ok ? await blogPostsRes.json() : [];
+        const blogPostsData = blogPostsRes.ok ? await blogPostsRes.json() : [];
+        const blogPosts = Array.isArray(blogPostsData) ? blogPostsData : [];
 
         // Fetch projects
         const projectsRes = await fetch('/api/projects');
-        const projects = projectsRes.ok ? await projectsRes.json() : [];
+        const projectsData = projectsRes.ok ? await projectsRes.json() : [];
+        const projects = Array.isArray(projectsData) ? projectsData : [];
         
         // Create recent activity from available data
         const recentActivity = [

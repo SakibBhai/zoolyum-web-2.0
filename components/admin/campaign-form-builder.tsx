@@ -93,7 +93,7 @@ export function CampaignFormBuilder({
     (type: FormField["type"]) => {
       const newField: FormField = {
         id: `field_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        name: `field_${fields.length + 1}`,
+        name: `field_${(fields || []).length + 1}`,
         label: `New ${type} Field`,
         type,
         required: false,
@@ -145,7 +145,7 @@ export function CampaignFormBuilder({
     (fieldId: string) => {
       const field = fields.find((f) => f.id === fieldId);
       if (field && field.options) {
-        const newOptions = [...field.options, `Option ${field.options.length + 1}`];
+        const newOptions = [...(field.options || []), `Option ${(field.options || []).length + 1}`];
         updateField(fieldId, { options: newOptions });
       }
     },
@@ -167,7 +167,7 @@ export function CampaignFormBuilder({
   const removeOption = useCallback(
     (fieldId: string, optionIndex: number) => {
       const field = fields.find((f) => f.id === fieldId);
-      if (field && field.options && field.options.length > 1) {
+      if (field && field.options && (field.options || []).length > 1) {
         const newOptions = field.options.filter((_, index) => index !== optionIndex);
         updateField(fieldId, { options: newOptions });
       }
@@ -322,7 +322,7 @@ export function CampaignFormBuilder({
                     {renderFieldPreview(field)}
                   </div>
                 ))}
-                {fields.length === 0 && (
+                {(fields || []).length === 0 && (
                   <p className="text-[#E9E7E2]/60 text-center py-8">
                     No fields added yet. Switch to edit mode to add fields.
                   </p>
@@ -383,7 +383,7 @@ export function CampaignFormBuilder({
                         </Draggable>
                       ))}
                       {provided.placeholder}
-                      {fields.length === 0 && (
+                      {(fields || []).length === 0 && (
                         <p className="text-[#E9E7E2]/60 text-center py-8">
                           No fields added yet. Click on field types to add them.
                         </p>
@@ -466,7 +466,7 @@ export function CampaignFormBuilder({
                           variant="outline"
                           size="sm"
                           onClick={() => removeOption(selectedField!, index)}
-                          disabled={selectedFieldData.options!.length <= 1}
+                          disabled={(selectedFieldData.options || []).length <= 1}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

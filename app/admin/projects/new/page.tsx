@@ -685,9 +685,9 @@ export default function NewProjectPage() {
                   </Button>
                 </div>
               </div>
-              {form.watch('process').length > 0 && (
+              {(form.watch('process') || []).length > 0 && (
                 <div className="space-y-3">
-                  {form.watch('process').map((step, index) => (
+                  {(form.watch('process') || []).map((step, index) => (
                     <div key={index} className="flex items-start gap-3 p-3 border rounded-lg">
                       <div className="flex-1">
                         <h4 className="font-medium">{step.title}</h4>
@@ -728,9 +728,9 @@ export default function NewProjectPage() {
                   </Button>
                 </div>
               </div>
-              {form.watch('results')?.metrics && form.watch('results')!.metrics.length > 0 && (
+              {form.watch('results')?.metrics && (form.watch('results')?.metrics || []).length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {form.watch('results')!.metrics.map((metric, index) => (
+                  {(form.watch('results')?.metrics || []).map((metric, index) => (
                     <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                       <div>
                         <span className="font-medium">{metric.label}:</span>
@@ -853,9 +853,9 @@ export default function NewProjectPage() {
                   Add
                 </Button>
               </div>
-              {form.watch('services').length > 0 && (
+              {(form.watch('services') || []).length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {form.watch('services').map((service, index) => (
+                  {(form.watch('services') || []).map((service, index) => (
                     <div key={index} className="flex items-center gap-1 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
                       {service}
                       <button
@@ -887,9 +887,9 @@ export default function NewProjectPage() {
                   Add
                 </Button>
               </div>
-              {form.watch('technologies').length > 0 && (
+              {(form.watch('technologies') || []).length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {form.watch('technologies').map((tech, index) => (
+                  {(form.watch('technologies') || []).map((tech, index) => (
                     <div key={index} className="flex items-center gap-1 bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
                       {tech}
                       <button

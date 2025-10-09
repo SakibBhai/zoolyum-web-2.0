@@ -41,21 +41,21 @@ model BlogPost {
 model Contact {
   id              String   @id @default(cuid())
   name            String
-  email           String?
+  email           String
   phone           String?
-  countryCode     String?  @map("country_code")
   company         String?
-  businessName    String?  @map("business_name")
-  businessWebsite String?  @map("business_website")
-  services        String[] @default([])
-  subject         String?
   message         String
   status          String   @default("NEW")
-  ipAddress       String?  @map("ip_address")
-  userAgent       String?  @map("user_agent")
-  chartNumber     String   @unique @map("chart_number")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
+  ipAddress       String?  @map("ip_address")
+  subject         String?
+  userAgent       String?  @map("user_agent")
+  chartNumber     String   @unique @map("chart_number")
+  countryCode     String?  @map("country_code")
+  businessName    String?  @map("business_name")
+  businessWebsite String?  @map("business_website")
+  services        Json?    @default("[]")
 
   @@index([createdAt(sort: Desc)], map: "idx_contacts_created_at")
   @@index([email], map: "idx_contacts_email")
