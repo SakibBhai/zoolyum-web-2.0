@@ -104,7 +104,7 @@ export function validateContactData(data: any) {
 
 // Contact CRUD operations
 export async function createContact(
-  data: Omit<Contact, "id" | "createdAt" | "updatedAt">
+  data: Omit<Contact, "id" | "createdAt" | "updatedAt" | "chartNumber">
 ): Promise<Contact> {
   try {
     // Generate a CUID for the ID to match Prisma's default
