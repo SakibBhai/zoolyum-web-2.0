@@ -29,9 +29,9 @@ const nextConfig = {
     ],
     formats: ['image/webp', 'image/avif'],
   },
-  experimental: {
-    optimizePackageImports: ['@prisma/client', 'lucide-react'],
-  },
+  // experimental: {
+  //   optimizePackageImports: ['@prisma/client', 'lucide-react'],
+  // },
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
