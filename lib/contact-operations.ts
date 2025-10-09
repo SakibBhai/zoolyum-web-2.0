@@ -19,6 +19,7 @@ export interface Contact {
   userAgent?: string;
   createdAt: Date;
   updatedAt: Date;
+  chartNumber: string;
 }
 
 export interface ContactSettings {
@@ -110,9 +111,12 @@ export async function createContact(
     const { createId } = await import('@paralleldrive/cuid2');
     const id = createId();
     
+    // Generate a unique chart number using timestamp and random suffix
+    const chartNumber = `CT-${Date.now()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
+    
     const result = await query(
-      `INSERT INTO contacts (id, name, email, phone, country_code, company, business_name, business_website, services, subject, message, status, ip_address, user_agent, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
+      `INSERT INTO contacts (id, name, email, phone, country_code, company, business_name, business_website, services, subject, message, status, ip_address, user_agent, chart_number, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW(), NOW())
        RETURNING *`,
       [
         id,
@@ -129,6 +133,7 @@ export async function createContact(
         data.status || "NEW",
         data.ipAddress || null,
         data.userAgent || null,
+        chartNumber,
       ]
     );
 
@@ -408,6 +413,7 @@ function mapContactFromDb(row: any): Contact {
     userAgent: row.user_agent,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    chartNumber: row.chart_number,
   };
 }
 
