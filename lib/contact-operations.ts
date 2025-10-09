@@ -5,7 +5,7 @@ import { DatabaseError } from "pg";
 export interface Contact {
   id: string;
   name: string;
-  email: string;
+  email?: string;
   phone?: string;
   countryCode?: string;
   company?: string;
@@ -59,46 +59,38 @@ export function validateContactData(data: any) {
     errors.push("Name must be at least 2 characters long");
   }
 
-  if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-    errors.push("Valid email address is required");
+  // Email is optional now
+  if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+    errors.push("Please enter a valid email address");
   }
 
-  if (!data.message || data.message.trim().length < 10) {
-    errors.push("Message must be at least 10 characters long");
-  }
-
-  // Enhanced phone validation for Bangladesh numbers
-  if (data.phone) {
-    const countryCode = data.countryCode || "+880";
-    if (countryCode === "+880") {
-      // Bangladesh phone number validation (11 digits)
-      const phoneDigits = data.phone.replace(/\D/g, '');
-      if (!/^01[3-9]\d{8}$/.test(phoneDigits)) {
-        errors.push("Bangladesh phone number must be 11 digits starting with 013-019");
-      }
-    } else {
-      // General international phone validation
-      if (!/^[\+]?[1-9][\d\s\-\(\)]{7,}$/.test(data.phone)) {
-        errors.push("Invalid phone number format");
-      }
+  // Phone is required
+  if (!data.phone || data.phone.trim().length === 0) {
+    errors.push("Phone number is required");
+  } else {
+    // Validate phone number format (7-15 digits)
+    const phoneDigits = data.phone.replace(/\D/g, '');
+    if (phoneDigits.length < 7 || phoneDigits.length > 15) {
+      errors.push("Please enter a valid phone number (7-15 digits)");
     }
   }
 
-  // Business website validation
+  // Business website validation (optional)
   if (data.businessWebsite) {
     try {
-      new URL(data.businessWebsite);
+      const url = data.businessWebsite.startsWith('http') ? data.businessWebsite : `https://${data.businessWebsite}`;
+      new URL(url);
     } catch {
-      errors.push("Business website must be a valid URL");
+      errors.push("Please enter a valid website URL or social media link");
     }
   }
 
-  // Business name validation
+  // Business name validation (optional)
   if (data.businessName && data.businessName.trim().length < 2) {
     errors.push("Business name must be at least 2 characters long");
   }
 
-  // Services validation
+  // Services validation (optional)
   if (data.services && !Array.isArray(data.services)) {
     errors.push("Services must be an array");
   }
@@ -113,33 +105,42 @@ export function validateContactData(data: any) {
 export async function createContact(
   data: Omit<Contact, "id" | "createdAt" | "updatedAt">
 ): Promise<Contact> {
-  // Generate a CUID for the ID to match Prisma's default
-  const { createId } = await import('@paralleldrive/cuid2');
-  const id = createId();
-  
-  const result = await query(
-    `INSERT INTO contacts (id, name, email, phone, country_code, company, business_name, business_website, services, subject, message, status, ip_address, user_agent, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
-     RETURNING *`,
-    [
-      id,
-      data.name,
-      data.email,
-      data.phone,
-      data.countryCode || "+880",
-      data.company,
-      data.businessName,
-      data.businessWebsite,
-      data.services || [],
-      data.subject,
-      data.message,
-      data.status || "NEW",
-      data.ipAddress,
-      data.userAgent,
-    ]
-  );
+  try {
+    // Generate a CUID for the ID to match Prisma's default
+    const { createId } = await import('@paralleldrive/cuid2');
+    const id = createId();
+    
+    const result = await query(
+      `INSERT INTO contacts (id, name, email, phone, country_code, company, business_name, business_website, services, subject, message, status, ip_address, user_agent, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
+       RETURNING *`,
+      [
+        id,
+        data.name,
+        data.email || null,
+        data.phone || null,
+        data.countryCode || "+880",
+        data.company || null,
+        data.businessName || null,
+        data.businessWebsite || null,
+        JSON.stringify(data.services || []),
+        data.subject || null,
+        data.message,
+        data.status || "NEW",
+        data.ipAddress || null,
+        data.userAgent || null,
+      ]
+    );
 
-  return mapContactFromDb(result.rows[0]);
+    return mapContactFromDb(result.rows[0]);
+  } catch (error) {
+    console.error('Error creating contact:', error);
+    throw new ContactOperationError(
+      'Failed to create contact',
+      'CREATE_FAILED',
+      error instanceof Error ? error : new Error(String(error))
+    );
+  }
 }
 
 export async function fetchContacts(
@@ -399,7 +400,7 @@ function mapContactFromDb(row: any): Contact {
     company: row.company,
     businessName: row.business_name,
     businessWebsite: row.business_website,
-    services: row.services || [],
+    services: typeof row.services === 'string' ? JSON.parse(row.services) : (row.services || []),
     subject: row.subject,
     message: row.message,
     status: row.status,

@@ -17,10 +17,13 @@ import { ConsultationBookingModal } from "@/components/consultation-booking-moda
 // Form validation schema with enhanced phone validation
 const contactFormSchema = z.object({
   name: z.string().min(1, "Name is required").min(2, "Name must be at least 2 characters"),
-  email: z.string().min(1, "Email is required").email("Invalid email address"),
+  email: z.string().optional().refine((email) => {
+    if (!email) return true;
+    return z.string().email().safeParse(email).success;
+  }, "Please enter a valid email address"),
   countryCode: z.string().default("+880"),
-  phone: z.string().optional().refine((phone) => {
-    if (!phone) return true;
+  phone: z.string().min(1, "Phone number is required").refine((phone) => {
+    if (!phone) return false;
     // Bangladesh phone number validation (11 digits starting with 01)
     const phoneDigits = phone.replace(/\D/g, '');
     const bdPhoneRegex = /^01[3-9]\d{8}$/;
@@ -29,16 +32,15 @@ const contactFormSchema = z.object({
   businessName: z.string().optional(),
   businessWebsite: z.string().optional().refine((url) => {
     if (!url) return true;
+    // Allow social media links and website URLs
     try {
       new URL(url.startsWith('http') ? url : `https://${url}`);
       return true;
     } catch {
       return false;
     }
-  }, "Please enter a valid website URL"),
-  services: z.array(z.string()).optional(),
-  subject: z.string().optional(),
-  message: z.string().min(1, "Message is required").min(10, "Message must be at least 10 characters")
+  }, "Please enter a valid website URL or social media link"),
+  services: z.array(z.string()).optional()
 })
 
 type ContactFormData = z.infer<typeof contactFormSchema>
@@ -168,14 +170,13 @@ export function ContactForm() {
               </div>
               <div>
                 <Label htmlFor="email" className="block text-sm font-medium mb-3 text-[#E9E7E2]">
-                  Email *
+                  Email
                 </Label>
                 <Input
-                  {...register('email', { required: "Email is required" })}
+                  {...register('email')}
                   type="email"
                   id="email"
                   name="email"
-                  required
                   className="w-full px-4 py-4 sm:py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2] text-base min-h-[48px] touch-manipulation"
                   placeholder="your.email@example.com"
                 />
@@ -189,7 +190,7 @@ export function ContactForm() {
             {(!contactSettings || contactSettings.enablePhoneField) && (
               <div className="md:col-span-2">
                 <Label htmlFor="phone" className="block text-sm font-medium mb-3 text-[#E9E7E2]">
-                  Phone Number {contactSettings?.requirePhoneField ? '*' : ''}
+                  Phone Number *
                 </Label>
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-2">
                   <select
@@ -244,7 +245,7 @@ export function ContactForm() {
               </div>
               <div>
                 <Label htmlFor="businessWebsite" className="block text-sm font-medium mb-3 text-[#E9E7E2]">
-                  Business Website
+                  Website or Social Media Link
                 </Label>
                 <Input
                   {...register('businessWebsite')}
@@ -252,10 +253,10 @@ export function ContactForm() {
                   id="businessWebsite"
                   name="businessWebsite"
                   className="w-full px-4 py-4 sm:py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2] text-base min-h-[48px] touch-manipulation"
-                  placeholder="https://yourwebsite.com"
+                  placeholder="https://yourwebsite.com or social media link"
                 />
                 {errors.businessWebsite && (
-                  <p className="text-red-400 text-sm mt-1">{errors.businessWebsite.message}</p>
+                  <p className="text-red-400 text-sm mt-2">{errors.businessWebsite.message}</p>
                 )}
               </div>
             </div>
@@ -298,46 +299,6 @@ export function ContactForm() {
              )}
            </div>
           
-          {/* Message Section */}
-           <div className="bg-[#1F1F1F] rounded-lg p-4 sm:p-6 border border-[#333333]">
-             <h3 className="text-lg font-semibold mb-4 sm:mb-6 text-[#FF5001]">Project Details</h3>
-             <div className="space-y-4 sm:space-y-6">
-               <div>
-                 <Label htmlFor="subject" className="block text-sm font-medium mb-3 text-[#E9E7E2]">
-                   Subject
-                 </Label>
-                 <Input
-                  {...register('subject')}
-                  type="text"
-                  id="subject"
-                  name="subject"
-                  className="w-full px-4 py-4 sm:py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2] text-base min-h-[48px] touch-manipulation"
-                  placeholder="Brief description of your project"
-                />
-                 {errors.subject && (
-                   <p className="text-red-400 text-sm mt-1">{errors.subject.message}</p>
-                 )}
-               </div>
-               
-               <div>
-                 <Label htmlFor="message" className="block text-sm font-medium mb-3 text-[#E9E7E2]">
-                   Message *
-                 </Label>
-                 <Textarea
-                   {...register('message', { required: "Message is required" })}
-                   id="message"
-                   name="message"
-                   required
-                   rows={5}
-                   className="w-full px-4 py-4 sm:py-3 bg-[#252525] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5001]/50 text-[#E9E7E2] resize-none text-base min-h-[120px] touch-manipulation"
-                   placeholder="Tell us about your project, goals, timeline, and any specific requirements"
-                 />
-                 {errors.message && (
-                   <p className="text-red-400 text-sm mt-2">{errors.message.message}</p>
-                 )}
-               </div>
-             </div>
-           </div>
           
           <Button
             type="submit"

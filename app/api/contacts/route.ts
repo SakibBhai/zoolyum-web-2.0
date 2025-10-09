@@ -25,51 +25,128 @@ export async function GET() {
 // POST /api/contacts - Create new contact submission
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    // Parse request body with error handling
+    let body
+    try {
+      body = await request.json()
+    } catch (parseError) {
+      console.error('Error parsing request body:', parseError)
+      return NextResponse.json(
+        { error: 'Invalid JSON in request body' },
+        { status: 400 }
+      )
+    }
+
     const { name, email, phone, countryCode, businessName, businessWebsite, services, subject, message } = body
     
-    // Validate required fields
+    // Log incoming request for debugging
+    console.log('Contact form submission received:', {
+      name: name ? '[PROVIDED]' : '[MISSING]',
+      email: email ? '[PROVIDED]' : '[MISSING]',
+      phone: phone ? '[PROVIDED]' : '[MISSING]',
+      countryCode: countryCode || '[DEFAULT]',
+      businessName: businessName ? '[PROVIDED]' : '[MISSING]',
+      businessWebsite: businessWebsite ? '[PROVIDED]' : '[MISSING]',
+      services: Array.isArray(services) ? `[${services.length} items]` : '[INVALID]',
+      timestamp: new Date().toISOString()
+    })
+    
+    // Validate required fields before processing
+    if (!name?.trim()) {
+      return NextResponse.json(
+        { error: 'Name is required' },
+        { status: 400 }
+      )
+    }
+
+    if (!phone?.trim()) {
+      return NextResponse.json(
+        { error: 'Phone number is required' },
+        { status: 400 }
+      )
+    }
+    
+    // Prepare contact data with proper validation
     const contactData = {
-      name: name?.trim(),
-      email: email?.trim(),
-      phone: phone?.trim() || undefined,
+      name: name.trim(),
+      email: email?.trim() || undefined,
+      phone: phone.trim(),
       countryCode: countryCode?.trim() || '+880',
       company: undefined, // Legacy field, keeping for compatibility
       businessName: businessName?.trim() || undefined,
       businessWebsite: businessWebsite?.trim() || undefined,
-      services: Array.isArray(services) ? services : [],
+      services: Array.isArray(services) ? services.filter(s => s && s.trim()) : [],
       subject: subject?.trim() || undefined,
-      message: message?.trim(),
+      message: message?.trim() || 'Contact form submission',
       status: 'NEW' as const,
       ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || undefined,
       userAgent: request.headers.get('user-agent') || undefined
     }
     
-    // Validate the contact data
+    // Validate the contact data using the validation function
     const validation = validateContactData(contactData)
     if (!validation.isValid) {
+      console.error('Contact validation failed:', validation.errors)
       return NextResponse.json(
-        { error: 'Validation failed', details: validation.errors },
+        { 
+          error: 'Validation failed', 
+          details: validation.errors,
+          message: 'Please check your form data and try again'
+        },
         { status: 400 }
       )
     }
     
-    // Create the contact
-    const contact = await createContact(contactData)
+    // Attempt to create the contact with detailed error handling
+    let contact
+    try {
+      contact = await createContact(contactData)
+      console.log('Contact created successfully:', contact.id)
+    } catch (dbError) {
+      console.error('Database error creating contact:', dbError)
+      
+      // Check for specific database errors
+      if (dbError instanceof Error) {
+        if (dbError.message.includes('unique constraint')) {
+          return NextResponse.json(
+            { error: 'A contact with this information already exists' },
+            { status: 409 }
+          )
+        }
+        if (dbError.message.includes('connection')) {
+          return NextResponse.json(
+            { error: 'Database connection error. Please try again later.' },
+            { status: 503 }
+          )
+        }
+      }
+      
+      // Generic database error
+      return NextResponse.json(
+        { error: 'Failed to save contact information. Please try again.' },
+        { status: 500 }
+      )
+    }
     
     // Return success response (don't expose internal data)
     return NextResponse.json(
       { 
-        message: 'Contact form submitted successfully',
+        success: true,
+        message: 'Thank you for contacting us! We will get back to you soon.',
         id: contact.id,
         submittedAt: contact.createdAt
       },
       { status: 201 }
     )
   } catch (error) {
-    console.error('Error creating contact:', error)
+    // Catch-all error handler
+    console.error('Unexpected error in contact form submission:', error)
+    
     return NextResponse.json(
-      { error: 'Failed to submit contact form' },
+      { 
+        error: 'An unexpected error occurred. Please try again later.',
+        message: 'If the problem persists, please contact support.'
+      },
       { status: 500 }
     )
   }
