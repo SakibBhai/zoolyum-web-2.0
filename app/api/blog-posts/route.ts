@@ -52,8 +52,6 @@ export async function GET(request: NextRequest) {
       { error: 'Failed to fetch blog posts' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -135,7 +133,5 @@ export async function POST(request: NextRequest) {
       { error: 'Failed to create blog post' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }

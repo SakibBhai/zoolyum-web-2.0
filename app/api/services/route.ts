@@ -74,7 +74,5 @@ export async function POST(request: NextRequest) {
       { error: 'Failed to create service' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }

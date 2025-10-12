@@ -4,25 +4,47 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
+// Environment validation with fallback for build time
+import { getDatabaseConfig } from './env-validation'
+
+const getDatabaseUrl = (): string => {
+  try {
+    return getDatabaseConfig()
+  } catch (error) {
+    // During build time, provide a placeholder URL to prevent constructor errors
+    if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
+      console.warn('DATABASE_URL not found. Using placeholder for build.')
+      return 'postgresql://placeholder:placeholder@placeholder:5432/placeholder'
+    }
+    throw error
+  }
+}
+
 // Enhanced Prisma client with better error handling and connection management
-export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
-  // Enhanced error formatting for better debugging
-  errorFormat: 'pretty',
-  // Transaction options for better reliability
-  transactionOptions: {
-    maxWait: 5000, // 5 seconds
-    timeout: 10000, // 10 seconds
-  },
-  // Vercel-specific optimizations for serverless environment
-  ...(process.env.VERCEL && {
-    datasources: {
-      db: {
-        url: process.env.DATABASE_URL,
+const createPrismaClient = () => {
+  try {
+    return new PrismaClient({
+      log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+      // Enhanced error formatting for better debugging
+      errorFormat: 'pretty',
+      // Transaction options for better reliability
+      transactionOptions: {
+        maxWait: 5000, // 5 seconds
+        timeout: 10000, // 10 seconds
       },
-    },
-  }),
-})
+      datasources: {
+        db: {
+          url: getDatabaseUrl(),
+        },
+      },
+    })
+  } catch (error) {
+    console.error('Failed to create Prisma client:', error)
+    throw error
+  }
+}
+
+export const prisma = globalForPrisma.prisma ?? createPrismaClient()
 
 // Connection health check with retry logic
 export async function checkDatabaseConnection(retries = 3): Promise<boolean> {
