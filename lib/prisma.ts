@@ -6,7 +6,7 @@ const globalForPrisma = globalThis as unknown as {
 
 // Enhanced Prisma client with better error handling and connection management
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  log: ['error', 'warn'],
+  log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
   // Enhanced error formatting for better debugging
   errorFormat: 'pretty',
   // Transaction options for better reliability
@@ -14,6 +14,14 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient({
     maxWait: 5000, // 5 seconds
     timeout: 10000, // 10 seconds
   },
+  // Vercel-specific optimizations for serverless environment
+  ...(process.env.VERCEL && {
+    datasources: {
+      db: {
+        url: process.env.DATABASE_URL,
+      },
+    },
+  }),
 })
 
 // Connection health check with retry logic
