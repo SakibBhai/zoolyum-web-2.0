@@ -26,3 +26,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 /lib/generated/prisma
+
+# build logs
+build-*.log
+*.log
+
+# cache directories
+.cache/
+node_modules/.cache/

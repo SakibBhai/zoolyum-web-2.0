@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
       }
     });
     
-    const formattedPosts = blogPosts.map(post => ({
+    const formattedPosts = blogPosts.map((post: any) => ({
       id: post.id,
       title: post.title,
       slug: post.slug,
