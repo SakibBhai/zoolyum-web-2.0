@@ -102,7 +102,7 @@ export function AdminSidebar({ isMobileMenuOpen = false, setIsMobileMenuOpen }: 
                     href={item.href}
                     className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${isActive 
                       ? 'bg-[#FF5001]/10 text-[#FF5001]' 
-                      : 'text-[#E9E7E2]/70 hover:text-[#E9E7E2] hover:bg-[#252525]'}`}
+                      : 'text-[#E9E7E2] hover:text-[#FFFFFF] hover:bg-[#252525]'}`}
                   >
                     {item.icon}
                     <span>{item.name}</span>
@@ -116,7 +116,7 @@ export function AdminSidebar({ isMobileMenuOpen = false, setIsMobileMenuOpen }: 
         <div className="mt-auto pt-4 border-t border-[#333333]">
           <button
             onClick={() => window.location.href = "/handler/sign-out"}
-            className="flex items-center gap-3 px-3 py-2 w-full text-left rounded-md text-[#E9E7E2]/70 hover:text-[#E9E7E2] hover:bg-[#252525] transition-colors"
+            className="flex items-center gap-3 px-3 py-2 w-full text-left rounded-md text-[#E9E7E2] hover:text-[#FFFFFF] hover:bg-[#252525] transition-colors"
           >
             <LogOut className="h-5 w-5" />
             <span>Log Out</span>
@@ -145,7 +145,7 @@ export function AdminSidebar({ isMobileMenuOpen = false, setIsMobileMenuOpen }: 
                       onClick={handleLinkClick}
                       className={`flex items-center gap-3 px-3 py-3 rounded-md transition-colors touch-manipulation ${isActive 
                         ? 'bg-[#FF5001]/10 text-[#FF5001]' 
-                        : 'text-[#E9E7E2]/70 hover:text-[#E9E7E2] hover:bg-[#252525]'}`}
+                        : 'text-[#E9E7E2] hover:text-[#FFFFFF] hover:bg-[#252525]'}`}
                     >
                       {item.icon}
                       <span className="text-base">{item.name}</span>
@@ -162,7 +162,7 @@ export function AdminSidebar({ isMobileMenuOpen = false, setIsMobileMenuOpen }: 
                 window.location.href = "/handler/sign-out";
                 handleLinkClick();
               }}
-              className="flex items-center gap-3 px-3 py-3 w-full text-left rounded-md text-[#E9E7E2]/70 hover:text-[#E9E7E2] hover:bg-[#252525] transition-colors touch-manipulation"
+              className="flex items-center gap-3 px-3 py-3 w-full text-left rounded-md text-[#E9E7E2] hover:text-[#FFFFFF] hover:bg-[#252525] transition-colors touch-manipulation"
             >
               <LogOut className="h-5 w-5" />
               <span className="text-base">Log Out</span>

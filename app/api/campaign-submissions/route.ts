@@ -7,6 +7,57 @@ const submissionSchema = z.object({
   data: z.record(z.any()),
 });
 
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const campaignId = searchParams.get('campaignId');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const skip = (page - 1) * limit;
+
+    // Build where clause
+    const where = campaignId ? { campaignId } : {};
+
+    // Get submissions with campaign details
+    const submissions = await prisma.campaignSubmission.findMany({
+      where,
+      include: {
+        campaign: {
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+          }
+        }
+      },
+      orderBy: {
+        submittedAt: 'desc'
+      },
+      skip,
+      take: limit,
+    });
+
+    // Get total count for pagination
+    const total = await prisma.campaignSubmission.count({ where });
+
+    return NextResponse.json({
+      submissions,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching campaign submissions:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch campaign submissions' },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -77,7 +128,7 @@ export async function OPTIONS() {
     status: 200,
     headers: {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
     },
   });

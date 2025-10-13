@@ -6,6 +6,12 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  // Add experimental flag to help with Next.js 15.5.2 stability
+  experimental: {
+    optimizePackageImports: ['lucide-react'],
+  },
+  // Move serverComponentsExternalPackages to root level for Next.js 15.5.2
+  serverExternalPackages: ['@prisma/client'],
   images: {
     remotePatterns: [
       {
@@ -29,21 +35,25 @@ const nextConfig = {
     ],
     formats: ['image/webp', 'image/avif'],
   },
-  // experimental: {
-  //   optimizePackageImports: ['@prisma/client', 'lucide-react'],
-  // },
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
   poweredByHeader: false,
   compress: true,
   webpack: (config, { dev, isServer }) => {
-    // Optimize webpack cache serialization to reduce warnings
-    if (dev) {
-      config.cache = {
-        ...config.cache,
-        compression: 'gzip',
-        maxMemoryGenerations: 1,
+    // Fix for Next.js 15.5.2 clientReferenceManifest error
+    if (dev && !isServer) {
+      // Ensure client reference manifest is properly handled
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          ...config.optimization.splitChunks,
+          cacheGroups: {
+            ...config.optimization.splitChunks?.cacheGroups,
+            default: false,
+            vendors: false,
+          },
+        },
       };
     }
     return config;

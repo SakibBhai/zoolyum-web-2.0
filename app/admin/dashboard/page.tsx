@@ -156,7 +156,7 @@ export default function AdminDashboard() {
       case 'blog':
         return 'text-purple-600';
       default:
-        return 'text-gray-600';
+        return 'text-slate-700'; // Changed from text-gray-600 for better contrast
     }
   };
 
@@ -164,8 +164,8 @@ export default function AdminDashboard() {
     return (
       <div className="p-4 sm:p-6">
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-2">Welcome to your admin dashboard</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#E9E7E2]">Dashboard</h1>
+          <p className="text-[#E9E7E2]/80 mt-2">Welcome to your admin dashboard</p>
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
@@ -188,8 +188,8 @@ export default function AdminDashboard() {
     <div className="p-4 sm:p-6">
       {/* Header */}
       <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-2">Welcome to your admin dashboard</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#E9E7E2]">Dashboard</h1>
+        <p className="text-[#E9E7E2]/80 mt-2">Welcome to your admin dashboard</p>
       </div>
 
       {/* Stats Cards */}
@@ -206,7 +206,7 @@ export default function AdminDashboard() {
               <Link href={stat.href}>
                 <Card className="hover:shadow-lg transition-shadow cursor-pointer touch-manipulation">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-600">
+                    <CardTitle className="text-sm font-medium text-[#E9E7E2]/85">
                       {stat.title}
                     </CardTitle>
                     <div className={`p-2 rounded-lg ${stat.bgColor}`}>
@@ -214,7 +214,7 @@ export default function AdminDashboard() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-xl sm:text-2xl font-bold text-gray-900">{stat.value}</div>
+                    <div className="text-xl sm:text-2xl font-bold text-[#E9E7E2]">{stat.value}</div>
                   </CardContent>
                 </Card>
               </Link>
@@ -231,7 +231,7 @@ export default function AdminDashboard() {
               <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-[#FF5001]" />
               Recent Activity
             </CardTitle>
-            <CardDescription className="text-sm sm:text-base">
+            <CardDescription className="text-sm sm:text-base text-slate-600"> {/* Changed from default gray */}
               Latest updates across your platform
             </CardDescription>
           </CardHeader>
@@ -246,14 +246,14 @@ export default function AdminDashboard() {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className="flex items-center gap-3 p-3 sm:p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors touch-manipulation"
+                      className="flex items-center gap-3 p-3 sm:p-4 rounded-lg bg-[#1F1F1F] hover:bg-[#252525] transition-colors touch-manipulation"
                     >
                       <Icon className={`h-3 w-3 sm:h-4 sm:w-4 ${getActivityColor(activity.type)} flex-shrink-0`} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        <p className="text-sm font-medium text-[#E9E7E2] truncate">
                           {activity.title}
                         </p>
-                        <p className="text-xs text-gray-500 mt-0.5">{activity.date}</p>
+                        <p className="text-xs text-[#E9E7E2]/70 mt-0.5">{activity.date}</p>
                       </div>
                       <Badge className="text-xs flex-shrink-0 border">
                         {activity.type}
@@ -264,8 +264,8 @@ export default function AdminDashboard() {
               </div>
             ) : (
               <div className="text-center py-6 sm:py-8">
-                <Calendar className="h-10 w-10 sm:h-12 sm:w-12 text-gray-300 mx-auto mb-3 sm:mb-4" />
-                <p className="text-gray-500 text-sm sm:text-base">No recent activity</p>
+                <Calendar className="h-10 w-10 sm:h-12 sm:w-12 text-[#E9E7E2]/50 mx-auto mb-3 sm:mb-4" />
+                <p className="text-[#E9E7E2]/70 text-sm sm:text-base">No recent activity</p>
               </div>
             )}
           </CardContent>
@@ -275,7 +275,7 @@ export default function AdminDashboard() {
         <Card>
           <CardHeader className="pb-3 sm:pb-6">
             <CardTitle className="text-base sm:text-lg">Quick Actions</CardTitle>
-            <CardDescription className="text-sm sm:text-base">
+            <CardDescription className="text-sm sm:text-base text-[#E9E7E2]/75">
               Common tasks and shortcuts
             </CardDescription>
           </CardHeader>

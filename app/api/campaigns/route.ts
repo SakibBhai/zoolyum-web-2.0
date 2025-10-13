@@ -34,7 +34,22 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { title, slug, shortDescription, content, status, startDate, endDate } = body;
+    const { 
+      title, 
+      slug, 
+      shortDescription, 
+      content, 
+      status, 
+      startDate, 
+      endDate,
+      imageUrls,
+      videoUrls,
+      enableForm,
+      successMessage,
+      redirectUrl,
+      ctas,
+      formFields
+    } = body;
 
     const campaign = await prisma.campaign.create({
       data: {
@@ -45,6 +60,13 @@ export async function POST(request: NextRequest) {
         status: status || 'DRAFT',
         startDate: startDate ? new Date(startDate) : null,
         endDate: endDate ? new Date(endDate) : null,
+        imageUrls: imageUrls || [],
+        videoUrls: videoUrls || [],
+        enableForm: enableForm || false,
+        successMessage: successMessage || null,
+        redirectUrl: redirectUrl || null,
+        ctas: ctas || null,
+        formFields: formFields || null,
       },
     });
 

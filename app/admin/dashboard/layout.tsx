@@ -138,7 +138,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               </div>
               <div className="ml-3">
                 <p className="font-medium">{effectiveUser.displayName}</p>
-                <p className="text-xs text-[#E9E7E2]/50">{effectiveUser.primaryEmail}</p>
+                <p className="text-xs text-[#E9E7E2]/75">{effectiveUser.primaryEmail}</p> {/* Changed from /50 to /75 for better visibility */}
               </div>
             </div>
           </div>

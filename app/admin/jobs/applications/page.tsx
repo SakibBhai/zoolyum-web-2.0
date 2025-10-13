@@ -142,7 +142,7 @@ export default function JobApplicationsPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-[#E9E7E2]/70">Reviewed</p>
+                <p className="text-sm font-medium text-[#E9E7E2]/85">Reviewed</p> {/* Changed from /70 to /85 for better visibility */}
                 <p className="text-2xl font-bold text-blue-500">{stats.reviewed}</p>
               </div>
               <Eye className="h-8 w-8 text-blue-500" />
@@ -153,7 +153,7 @@ export default function JobApplicationsPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-[#E9E7E2]/70">Shortlisted</p>
+                <p className="text-sm font-medium text-[#E9E7E2]/85">Shortlisted</p> {/* Changed from /70 to /85 for better visibility */}
                 <p className="text-2xl font-bold text-green-500">{stats.shortlisted}</p>
               </div>
               <Mail className="h-8 w-8 text-green-500" />

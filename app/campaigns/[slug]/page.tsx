@@ -28,7 +28,6 @@ interface Campaign {
   title: string;
   slug: string;
   shortDescription: string;
-  description?: string;
   content?: string;
   status: string;
   imageUrls: string[];
@@ -42,7 +41,8 @@ interface Campaign {
 
 async function getCampaignBySlug(slug: string): Promise<Campaign | null> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/campaigns/slug/${slug}`, {
+    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    const response = await fetch(`${baseUrl}/api/campaigns/slug/${slug}`, {
       cache: 'no-store'
     });
     

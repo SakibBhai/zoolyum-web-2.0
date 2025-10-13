@@ -7,7 +7,7 @@ export function AdminLoading() {
         <Loader2 className="h-12 w-12 animate-spin text-[#FF5001] mx-auto" />
         <div className="space-y-2">
           <h2 className="text-xl font-semibold text-[#E9E7E2]">Loading Admin Panel</h2>
-          <p className="text-[#E9E7E2]/60">Please wait while we prepare your dashboard...</p>
+          <p className="text-[#E9E7E2]/75">Please wait while we prepare your dashboard...</p> {/* Changed from /60 to /75 for better visibility */}
         </div>
       </div>
     </div>
