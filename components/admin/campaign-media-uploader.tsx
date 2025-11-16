@@ -50,6 +50,8 @@ export function CampaignMediaUploader({
   const [newImageUrl, setNewImageUrl] = useState("");
   const [newVideoUrl, setNewVideoUrl] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
+  const [videoThumbnailErrors, setVideoThumbnailErrors] = useState<Set<number>>(new Set());
 
   // Ensure arrays are always defined
   const safeImages = images || [];
@@ -69,9 +71,15 @@ export function CampaignMediaUploader({
     return null;
   };
 
-  // Get YouTube thumbnail URL
+  // Get YouTube thumbnail URL with multiple fallback options
   const getYouTubeThumbnail = (videoId: string): string => {
+    // Try maxresdefault first, then fallback to hqdefault
     return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+  };
+
+  // Get fallback YouTube thumbnail
+  const getFallbackYouTubeThumbnail = (videoId: string): string => {
+    return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
   };
 
   // Validate YouTube URL
@@ -100,6 +108,12 @@ export function CampaignMediaUploader({
     (index: number) => {
       const updatedImages = safeImages.filter((_, i) => i !== index);
       onImagesChange(updatedImages);
+      // Clear error state for this image
+      setImageErrors(prev => {
+        const newErrors = new Set(prev);
+        newErrors.delete(index);
+        return newErrors;
+      });
     },
     [safeImages, onImagesChange]
   );
@@ -109,9 +123,25 @@ export function CampaignMediaUploader({
     (index: number) => {
       const updatedVideos = safeVideos.filter((_, i) => i !== index);
       onVideosChange(updatedVideos);
+      // Clear error state for this video
+      setVideoThumbnailErrors(prev => {
+        const newErrors = new Set(prev);
+        newErrors.delete(index);
+        return newErrors;
+      });
     },
     [safeVideos, onVideosChange]
   );
+
+  // Handle image error
+  const handleImageError = useCallback((index: number) => {
+    setImageErrors(prev => new Set(prev).add(index));
+  }, []);
+
+  // Handle video thumbnail error
+  const handleVideoThumbnailError = useCallback((index: number) => {
+    setVideoThumbnailErrors(prev => new Set(prev).add(index));
+  }, []);
 
   // Handle file upload
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -143,16 +173,19 @@ export function CampaignMediaUploader({
       });
 
       if (!response.ok) {
-        throw new Error("Upload failed");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Upload failed");
       }
 
       const data = await response.json();
       if (data.url) {
         onImagesChange([...safeImages, data.url]);
+      } else {
+        throw new Error("No URL returned from upload");
       }
     } catch (error) {
       console.error("Upload error:", error);
-      alert("Failed to upload image. Please try again.");
+      alert(`Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`);
     } finally {
       setUploadingImage(false);
       // Reset the input
@@ -236,16 +269,30 @@ export function CampaignMediaUploader({
                   className="relative group bg-[#252525] border border-[#333333] rounded-lg overflow-hidden"
                 >
                   <div className="aspect-video relative">
-                    <Image
-                      src={imageUrl}
-                      alt={`Campaign image ${index + 1}`}
-                      fill
-                      className="object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = "/placeholder-image.jpg";
-                      }}
-                    />
+                    {imageErrors.has(index) ? (
+                      <div className="w-full h-full bg-[#333333] flex items-center justify-center">
+                        <div className="text-center">
+                          <ImageIcon className="h-8 w-8 text-[#E9E7E2]/40 mx-auto mb-2" />
+                          <p className="text-xs text-[#E9E7E2]/40">Image failed to load</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <Image
+                        src={imageUrl}
+                        alt={`Campaign image ${index + 1}`}
+                        fill
+                        className="object-cover"
+                        onError={() => handleImageError(index)}
+                        onLoad={() => {
+                          // Remove from error set if it loads successfully
+                          setImageErrors(prev => {
+                            const newErrors = new Set(prev);
+                            newErrors.delete(index);
+                            return newErrors;
+                          });
+                        }}
+                      />
+                    )}
                   </div>
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                     <Button
@@ -329,6 +376,8 @@ export function CampaignMediaUploader({
               {safeVideos.map((videoUrl, index) => {
                 const videoId = extractYouTubeId(videoUrl);
                 const thumbnailUrl = videoId ? getYouTubeThumbnail(videoId) : null;
+                const fallbackThumbnailUrl = videoId ? getFallbackYouTubeThumbnail(videoId) : null;
+                const hasThumbnailError = videoThumbnailErrors.has(index);
 
                 return (
                   <div
@@ -336,17 +385,39 @@ export function CampaignMediaUploader({
                     className="relative group bg-[#252525] border border-[#333333] rounded-lg overflow-hidden"
                   >
                     <div className="aspect-video relative">
-                      {thumbnailUrl ? (
+                      {hasThumbnailError || !thumbnailUrl ? (
+                        <div className="w-full h-full bg-[#333333] flex items-center justify-center">
+                          <div className="text-center">
+                            <Video className="h-12 w-12 text-[#E9E7E2]/60 mx-auto mb-2" />
+                            <p className="text-xs text-[#E9E7E2]/60">YouTube Video</p>
+                          </div>
+                        </div>
+                      ) : (
                         <Image
                           src={thumbnailUrl}
                           alt={`YouTube video ${index + 1}`}
                           fill
                           className="object-cover"
+                          onError={() => {
+                            // Try fallback thumbnail first
+                            if (fallbackThumbnailUrl && thumbnailUrl !== fallbackThumbnailUrl) {
+                              const img = document.querySelector(`img[alt="YouTube video ${index + 1}"]`) as HTMLImageElement;
+                              if (img) {
+                                img.src = fallbackThumbnailUrl;
+                                return;
+                              }
+                            }
+                            handleVideoThumbnailError(index);
+                          }}
+                          onLoad={() => {
+                            // Remove from error set if it loads successfully
+                            setVideoThumbnailErrors(prev => {
+                              const newErrors = new Set(prev);
+                              newErrors.delete(index);
+                              return newErrors;
+                            });
+                          }}
                         />
-                      ) : (
-                        <div className="w-full h-full bg-[#333333] flex items-center justify-center">
-                          <Video className="h-12 w-12 text-[#E9E7E2]/60" />
-                        </div>
                       )}
                       <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                         <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center">

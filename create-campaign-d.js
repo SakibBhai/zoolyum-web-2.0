@@ -1,26 +1,26 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-async function createTestCampaign() {
+async function createCampaignD() {
   try {
     // Check if campaign already exists
     const existing = await prisma.campaign.findUnique({
-      where: { slug: 'zoolyum-digital-marketing-2024' }
+      where: { slug: 'd' }
     });
     
     if (existing) {
-      console.log('Campaign already exists:', existing.title);
+      console.log('Campaign with slug "d" already exists:', existing.title);
       return;
     }
     
-    // Create the campaign
+    // Create the campaign with slug 'd'
     const campaign = await prisma.campaign.create({
       data: {
-        title: 'Zoolyum Digital Marketing 2024',
-        slug: 'zoolyum-digital-marketing-2024',
-        shortDescription: 'Transform your business with our comprehensive digital marketing solutions for 2024.',
-        description: 'Join our exclusive digital marketing campaign designed to boost your online presence and drive results.',
-        content: 'Our 2024 digital marketing campaign offers cutting-edge strategies, personalized solutions, and measurable results to help your business thrive in the digital landscape.',
+        title: 'Demo Campaign',
+        slug: 'd',
+        shortDescription: 'A simple demo campaign for testing purposes.',
+        description: 'This is a test campaign created to demonstrate the campaign functionality.',
+        content: '<h2>Welcome to our Demo Campaign</h2><p>This is a sample campaign page that showcases our campaign features. You can customize this content to match your needs.</p><p>Features include:</p><ul><li>Responsive design</li><li>Contact forms</li><li>Media galleries</li><li>Call-to-action buttons</li></ul>',
         status: 'PUBLISHED',
         startDate: new Date('2024-01-01'),
         endDate: new Date('2024-12-31'),
@@ -45,30 +45,31 @@ async function createTestCampaign() {
             placeholder: 'Enter your email address'
           },
           {
-            id: 'company',
-            name: 'company',
-            label: 'Company Name',
-            type: 'text',
+            id: 'message',
+            name: 'message',
+            label: 'Message',
+            type: 'textarea',
             required: false,
-            placeholder: 'Enter your company name'
+            placeholder: 'Tell us about your interest'
           }
         ],
         ctas: [
           {
-            label: 'Get Started Today',
+            label: 'Get Started',
             url: '/contact'
           },
           {
             label: 'Learn More',
-            url: '/services'
+            url: '/about'
           }
         ],
-        successMessage: 'Thank you for your interest! We will contact you soon.',
+        successMessage: 'Thank you for your interest! We will get back to you soon.',
         redirectUrl: null
       }
     });
     
-    console.log('Campaign created successfully:', campaign.title);
+    console.log('Campaign with slug "d" created successfully:', campaign.title);
+    console.log('You can now access it at: http://localhost:3000/campaigns/d');
   } catch (error) {
     console.error('Error creating campaign:', error);
   } finally {
@@ -76,4 +77,4 @@ async function createTestCampaign() {
   }
 }
 
-createTestCampaign();
+createCampaignD();

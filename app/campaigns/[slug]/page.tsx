@@ -3,6 +3,8 @@ import { Suspense } from 'react'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import { CampaignForm } from '@/components/campaign-form'
+import { PageHeadline } from '@/components/page-headline'
+import { FeaturedProject } from '@/components/portfolio/featured-project'
 
 // Force dynamic rendering to avoid build-time database calls
 export const dynamic = 'force-dynamic';
@@ -178,6 +180,42 @@ function CampaignData({ campaign }: { campaign: Campaign }) {
           </div>
         </div>
       )}
+
+      {/* Featured Work Section */}
+      <section className="py-12 sm:py-16 md:py-20 lg:py-24 xl:py-28 bg-[#1A1A1A]">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-6xl mx-auto text-[#E9E7E2]">
+            <PageHeadline
+              eyebrow="Featured Project"
+              title="Featured Work"
+              description="Highlighting our most impactful work that showcases our expertise and creativity."
+              size="medium"
+            />
+
+            <div className="mt-8 sm:mt-10 md:mt-12">
+              <Suspense fallback={
+                <div className="relative overflow-hidden rounded-2xl bg-[#1A1A1A] border border-[#333333]">
+                  <div className="grid lg:grid-cols-2 gap-0">
+                    <div className="animate-pulse bg-[#333333] aspect-[4/3] lg:aspect-auto lg:h-96" />
+                    <div className="p-6 sm:p-8 lg:p-12 animate-pulse">
+                      <div className="h-6 bg-[#333333] rounded w-32 mb-4" />
+                      <div className="h-4 bg-[#333333] rounded w-20 mb-2" />
+                      <div className="h-8 bg-[#333333] rounded w-3/4 mb-4" />
+                      <div className="space-y-2 mb-6">
+                        <div className="h-4 bg-[#333333] rounded w-full" />
+                        <div className="h-4 bg-[#333333] rounded w-2/3" />
+                      </div>
+                      <div className="h-4 bg-[#333333] rounded w-32" />
+                    </div>
+                  </div>
+                </div>
+              }>
+                <FeaturedProject />
+              </Suspense>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   )
 }

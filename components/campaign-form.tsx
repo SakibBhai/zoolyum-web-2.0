@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -253,7 +253,11 @@ export function CampaignForm({ campaignId, fields, successMessage, redirectUrl }
       </CardHeader>
       <CardContent className="p-4 sm:p-6">
         <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
-          {(fields || []).map((field) => renderField(field))}
+          {(fields || []).map((field) => (
+            <React.Fragment key={field.id}>
+              {renderField(field)}
+            </React.Fragment>
+          ))}
           
           <Button 
             type="submit" 
