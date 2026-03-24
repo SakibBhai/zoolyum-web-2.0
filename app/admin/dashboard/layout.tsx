@@ -3,7 +3,7 @@
 import { type ReactNode, useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { LayoutDashboard, FileText, Briefcase, MessageSquare, Settings, LogOut, Menu, X, User, Mail, Megaphone, UserCheck } from "lucide-react"
+import { LayoutDashboard, FileText, Briefcase, MessageSquare, Settings, LogOut, Menu, X, User, Mail, Megaphone, UserCheck, TrendingUp } from "lucide-react"
 import { useSession, signOut } from "next-auth/react"
 import { AdminLoading } from "@/components/admin/admin-loading"
 
@@ -67,6 +67,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       name: "Dashboard",
       href: "/admin/dashboard",
       icon: LayoutDashboard
+    },
+    {
+      name: "Statistics",
+      href: "/admin/statistics",
+      icon: TrendingUp
     },
     {
       name: "Blog Posts",

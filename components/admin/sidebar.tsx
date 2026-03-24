@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { signOut } from "next-auth/react"
 import {
   LayoutDashboard,
   FileText,
@@ -15,7 +16,6 @@ import {
   UserCheck,
   TrendingUp
 } from "lucide-react"
-import { useConditionalUser } from "@/hooks/use-conditional-user"
 
 interface AdminSidebarProps {
   isMobileMenuOpen?: boolean;
@@ -121,7 +121,7 @@ export function AdminSidebar({ isMobileMenuOpen = false, setIsMobileMenuOpen }: 
         
         <div className="mt-auto pt-4 border-t border-[#333333]">
           <button
-            onClick={() => window.location.href = "/handler/sign-out"}
+            onClick={() => signOut({ callbackUrl: '/admin/login' })}
             className="flex items-center gap-3 px-3 py-2 w-full text-left rounded-md text-[#E9E7E2] hover:text-[#FFFFFF] hover:bg-[#252525] transition-colors"
           >
             <LogOut className="h-5 w-5" />
@@ -165,7 +165,7 @@ export function AdminSidebar({ isMobileMenuOpen = false, setIsMobileMenuOpen }: 
           <div className="mt-auto pt-4 border-t border-[#333333]">
             <button
               onClick={() => {
-                window.location.href = "/handler/sign-out";
+                signOut({ callbackUrl: '/admin/login' });
                 handleLinkClick();
               }}
               className="flex items-center gap-3 px-3 py-3 w-full text-left rounded-md text-[#E9E7E2] hover:text-[#FFFFFF] hover:bg-[#252525] transition-colors touch-manipulation"
