@@ -27,6 +27,19 @@ const ADMIN_EMAILS = [
   // Add more admin emails here
 ]
 
+// Validate required environment variables
+if (!process.env.NEXTAUTH_SECRET) {
+  console.error('❌ NEXTAUTH_SECRET is not set. Authentication will fail.')
+  console.error('   Generate one with: openssl rand -base64 32')
+  console.error('   Add it to Vercel: Settings → Environment Variables → NEXTAUTH_SECRET')
+}
+
+if (!process.env.NEXTAUTH_URL && process.env.NODE_ENV === 'production') {
+  console.error('❌ NEXTAUTH_URL is not set in production.')
+  console.error('   Add it to Vercel: Settings → Environment Variables → NEXTAUTH_URL')
+  console.error('   Value should be: https://your-domain.vercel.app')
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     // Credentials provider for email/password login
