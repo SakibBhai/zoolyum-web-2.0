@@ -65,26 +65,26 @@ export async function middleware(request: NextRequest) {
     }
 
     // Production: Get the session from NextAuth
-    try {
-      const session = await auth()
+    const session = await auth()
 
-      // Redirect to login if not authenticated
-      if (!session?.user) {
-        const loginUrl = new URL('/admin/login', request.url)
-        loginUrl.searchParams.set('callbackUrl', request.nextUrl.pathname)
-        return NextResponse.redirect(loginUrl)
-      }
+    // If session exists and user is admin, allow access
+    if (session?.user && session.user.isAdmin) {
+      const response = NextResponse.next()
+      response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+      response.headers.set('Pragma', 'no-cache')
+      response.headers.set('Expires', '0')
+      return response
+    }
 
-      // Check if user is admin
-      if (!session.user.isAdmin) {
-        return NextResponse.redirect(new URL('/admin/login?error=AccessDenied', request.url))
-      }
-    } catch (error) {
-      // If auth fails, log it but allow access to prevent blocking
-      console.error('Auth error in middleware:', error)
-      // For now, allow access to prevent complete blockage
-      // TODO: Implement proper error handling
-      return NextResponse.next()
+    // Redirect to login if not authenticated or not admin
+    if (!session?.user) {
+      const loginUrl = new URL('/admin/login', request.url)
+      loginUrl.searchParams.set('callbackUrl', request.nextUrl.pathname)
+      return NextResponse.redirect(loginUrl)
+    }
+
+    if (!session.user.isAdmin) {
+      return NextResponse.redirect(new URL('/admin/login?error=AccessDenied', request.url))
     }
 
     // If we reach here, user is authenticated for admin routes
