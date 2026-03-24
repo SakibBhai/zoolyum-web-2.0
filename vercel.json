@@ -98,10 +98,10 @@
     }
   ],
   "env": {
-    "NEXTAUTH_URL": "https://zoolyum-web-2-0.vercel.app",
-    "NEXT_PUBLIC_APP_URL": "https://zoolyum-web-2-0.vercel.app",
-    "NEXT_PUBLIC_API_URL": "https://zoolyum-web-2-0.vercel.app/api",
-    "NEXT_PUBLIC_BASE_URL": "https://zoolyum-web-2-0.vercel.app"
+    "NEXTAUTH_URL": "https://zoolyum-web-20.vercel.app",
+    "NEXT_PUBLIC_APP_URL": "https://zoolyum-web-20.vercel.app",
+    "NEXT_PUBLIC_API_URL": "https://zoolyum-web-20.vercel.app/api",
+    "NEXT_PUBLIC_BASE_URL": "https://zoolyum-web-20.vercel.app"
   },
   "build": {
     "env": {
