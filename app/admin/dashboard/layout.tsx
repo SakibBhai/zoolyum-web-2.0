@@ -4,7 +4,7 @@ import { type ReactNode, useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { LayoutDashboard, FileText, Briefcase, MessageSquare, Settings, LogOut, Menu, X, User, Mail, Megaphone, UserCheck } from "lucide-react"
-import { useConditionalUser } from "@/hooks/use-conditional-user"
+import { useSession, signOut } from "next-auth/react"
 import { AdminLoading } from "@/components/admin/admin-loading"
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
@@ -12,11 +12,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [isDevelopment, setIsDevelopment] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
-  const user = useConditionalUser()
+  const { data: session, status } = useSession()
 
   useEffect(() => {
     // Check if we're in development mode
-    const isDevMode = window.location.hostname === 'localhost' || 
+    const isDevMode = window.location.hostname === 'localhost' ||
                      window.location.hostname === '127.0.0.1' ||
                      window.location.hostname.includes('192.168') ||
                      window.location.port === '3000' ||
@@ -28,31 +28,38 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Skip authentication check in development
     if (isDevelopment) {
-      console.log('Development mode: Bypassing Stack Auth in dashboard layout')
+      console.log('Development mode: Bypassing authentication in dashboard layout')
       return
     }
-    
-    if (user === null) {
-      router.push("/handler/sign-in")
-    }
-  }, [user, router, isDevelopment])
 
-  // In development, create a mock user
+    // Still loading session
+    if (status === 'loading') return
+
+    // Not authenticated - redirect to NextAuth login
+    if (status === 'unauthenticated') {
+      router.push("/admin/login")
+    }
+  }, [status, router, isDevelopment])
+
+  // In development or authenticated, show dashboard
   const effectiveUser = isDevelopment ? {
     displayName: 'Development Admin',
     primaryEmail: 'admin@zoolyum.com'
-  } : user
+  } : {
+    displayName: session?.user?.email?.split('@')[0] || 'Admin',
+    primaryEmail: session?.user?.email || 'admin@zoolyum.com'
+  }
 
-  if (!isDevelopment && user === undefined) {
+  if (!isDevelopment && status === 'loading') {
     return <AdminLoading />
   }
 
-  if (!isDevelopment && !user) {
-    return null // Or a loading spinner, or redirect
+  if (!isDevelopment && status === 'unauthenticated') {
+    return null
   }
 
   const handleSignOut = async () => {
-    window.location.href = "/handler/sign-out"
+    await signOut({ callbackUrl: '/admin/login' })
   }
 
   const navItems = [
