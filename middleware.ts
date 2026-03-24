@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getStackServerApp } from './lib/stack-server'
+import { auth } from './lib/next-auth'
 import { corsHeaders } from './lib/cors'
 
 export async function middleware(request: NextRequest) {
@@ -52,35 +52,41 @@ export async function middleware(request: NextRequest) {
     if (request.nextUrl.pathname === '/admin/login') {
       return NextResponse.next()
     }
-    
+
     // In development, bypass authentication for admin routes
     if (isDevelopment) {
-      console.log('Development mode: Bypassing Stack Auth for admin routes')
+      console.log('Development mode: Bypassing authentication for admin routes')
       return NextResponse.next()
     }
-    
-    // Production: Get the user from Stack Auth
+
+    // Production: Get the session from NextAuth
     try {
-      const stackServerApp = await getStackServerApp()
-      const user = await stackServerApp.getUser()
-      
+      const session = await auth()
+
       // Redirect to login if not authenticated
-      if (!user) {
-        return NextResponse.redirect(new URL('/admin/login', request.url))
+      if (!session?.user) {
+        const loginUrl = new URL('/admin/login', request.url)
+        loginUrl.searchParams.set('callbackUrl', request.nextUrl.pathname)
+        return NextResponse.redirect(loginUrl)
+      }
+
+      // Check if user is admin
+      if (!session.user.isAdmin) {
+        return NextResponse.redirect(new URL('/admin/login?error=AccessDenied', request.url))
       }
     } catch (error) {
-      console.error('Stack Auth error in middleware:', error)
-      return NextResponse.redirect(new URL('/admin/login', request.url))
+      console.error('NextAuth error in middleware:', error)
+      return NextResponse.redirect(new URL('/admin/login?error=Configuration', request.url))
     }
-    
+
     // If we reach here, user is authenticated for admin routes
     const response = NextResponse.next()
-    
+
     // Cache control for admin routes
     response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
     response.headers.set('Pragma', 'no-cache')
     response.headers.set('Expires', '0')
-    
+
     return response
   }
   

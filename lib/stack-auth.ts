@@ -67,24 +67,44 @@ export async function getCurrentUser() {
 
 /**
  * Check if user has admin privileges
- * For now, any authenticated user is considered admin
- * In a real app, you'd check user roles/permissions
+ *
+ * This function now uses the enhanced admin utilities that check
+ * against an admin email whitelist. Any authenticated user is no longer
+ * automatically admin - they must be on the whitelist.
+ *
  * @returns Promise<boolean>
+ *
+ * @deprecated Use the isAdmin function from admin-utils.ts instead
+ * This function is kept for backward compatibility
  */
 export async function isAdmin() {
-  // Development bypass
+  // Import and use the enhanced admin check
+  const { isAdmin: checkAdmin } = await import('./admin-utils');
+  return checkAdmin();
+}
+
+/**
+ * Quick admin check for simple cases
+ *
+ * This is a lightweight version that just checks authentication.
+ * For production use, use the isAdmin function from admin-utils.ts
+ * which checks the admin email whitelist.
+ *
+ * @returns Promise<boolean>
+ */
+export async function isAuthenticated() {
   const isDevelopment = process.env.NODE_ENV === 'development';
-  
+
   if (isDevelopment) {
-    return true; // Always admin in development
+    return true;
   }
-  
+
   try {
     const stackServerApp = await getStackServerApp();
     const user = await stackServerApp.getUser();
-    return !!user; // For now, any authenticated user is admin
+    return !!user;
   } catch (error) {
-    console.error('Error checking admin status:', error);
+    console.error('Error checking authentication status:', error);
     return false;
   }
 }

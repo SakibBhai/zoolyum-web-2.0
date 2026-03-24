@@ -1,0 +1,634 @@
+# Authentication Architecture - Visual Guide
+
+Complete visual representation of the Zoolyum Web authentication system.
+
+---
+
+## 🏗️ System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                         ZOOLYUM WEB APP                             │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  ┌──────────────┐         ┌──────────────┐        ┌─────────────┐ │
+│  │   Public     │         │    Admin     │        │    API      │ │
+│  │    Routes    │         │   Portal     │        │   Routes    │ │
+│  │              │         │              │        │             │ │
+│  │  /, /about,  │         │  /admin/*    │        │  /api/*     │ │
+│  │  /services,  │         │              │        │             │ │
+│  │  /portfolio  │         │              │        │             │ │
+│  └──────┬───────┘         └──────┬───────┘        └──────┬──────┘ │
+│         │                        │                        │        │
+│         │                        │                        │        │
+│         ▼                        ▼                        ▼        │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │                    NEXT.JS MIDDLEWARE                       │   │
+│  │                      middleware.ts                          │   │
+│  └───────────────────────────┬─────────────────────────────────┘   │
+│                              │                                      │
+│         ┌────────────────────┼────────────────────┐                │
+│         │                    │                    │                │
+│         ▼                    ▼                    ▼                │
+│  ┌─────────────┐     ┌──────────────┐    ┌──────────────┐        │
+│  │ Development │     │  Production   │    │    Public    │        │
+│  │    Mode     │     │     Mode     │    │    Routes    │        │
+│  └──────┬──────┘     └──────┬───────┘    └──────────────┘        │
+│         │                   │                                      │
+│         │                   │                                      │
+│         ▼                   ▼                                      │
+│  ┌─────────────┐     ┌──────────────┐                              │
+│  │   Bypass    │     │  Stack Auth  │                              │
+│  │   Auth      │     │   Required   │                              │
+│  │             │     │              │                              │
+│  │  Mock User  │     │  Real User   │                              │
+│  └─────────────┘     └──────┬───────┘                              │
+│                              │                                      │
+│                              │                                      │
+│                              ▼                                      │
+│                    ┌──────────────────┐                             │
+│                    │  Stack Auth      │                             │
+│                    │  Verification    │                             │
+│                    └─────────┬────────┘                             │
+│                              │                                      │
+│                              ▼                                      │
+│                    ┌──────────────────┐                             │
+│                    │  Admin Utils     │                             │
+│                    │  lib/admin-utils │                             │
+│                    │                  │                             │
+│                    │  • Email Whitelist                             │
+│                    │  • Role Checking                              │
+│                    │  • User Management                            │
+│                    └──────────────────┘                             │
+│                                                                      │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🔐 Authentication Flow
+
+### Development Mode Flow
+
+```
+┌─────────────────┐
+│ User visits     │
+│ /admin/dashboard│
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Middleware      │
+│ Checks hostname │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Detected:       │
+│ localhost       │
+│ (Development)   │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ BYPASS AUTH     │
+│ ✅ Grant Access │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Return Mock     │
+│ Admin User:     │
+│ admin@zoolyum   │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Access Granted  │
+│ to All Routes   │
+└─────────────────┘
+```
+
+### Production Mode Flow (Authenticated)
+
+```
+┌─────────────────┐
+│ User visits     │
+│ /admin/dashboard│
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Middleware      │
+│ Checks hostname │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Detected:       │
+│ Production      │
+│ Domain          │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Check Stack     │
+│ Auth Session    │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Session Found   │
+│ ✅ Valid User   │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Admin Utils     │
+│ Check Email     │
+│ Whitelist       │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Email Found     │
+│ ✅ Is Admin     │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Access Granted  │
+│ to All Routes   │
+└─────────────────┘
+```
+
+### Production Mode Flow (Not Authenticated)
+
+```
+┌─────────────────┐
+│ User visits     │
+│ /admin/dashboard│
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Middleware      │
+│ Checks hostname │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Detected:       │
+│ Production      │
+│ Domain          │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Check Stack     │
+│ Auth Session    │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ No Session      │
+│ ❌ Not Logged In│
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Redirect to     │
+│ /admin/login    │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Show Login Page │
+│ ────────────── │
+│ • Sign In Btn   │
+│ • Countdown     │
+│ • Env Badge     │
+└────────┬────────┘
+         │
+         │ User clicks
+│         ▼
+┌─────────────────┐
+│ Redirect to     │
+│ /handler/sign-in│
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Stack Auth      │
+│ Login Page      │
+│ ────────────── │
+│ • Email/Pass    │
+│ • OAuth         │
+│ • Magic Link    │
+└────────┬────────┘
+         │
+         │ User completes
+│         ▼
+┌─────────────────┐
+│ Auth Success    │
+│ Set Session     │
+│ Cookie          │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Redirect Back   │
+│ /admin/dashboard│
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Middleware      │
+│ Validates       │
+│ Session         │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Session Valid   │
+│ ✅ Grant Access │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Access Granted  │
+│ to All Routes   │
+└─────────────────┘
+```
+
+---
+
+## 🗂️ File Structure
+
+```
+zoolyum-web-2.0/
+├── app/
+│   ├── admin/
+│   │   ├── login/
+│   │   │   └── page.tsx                 ← Enhanced login page
+│   │   └── layout.tsx                   ← Admin layout
+│   └── api/
+│       └── [various routes]
+│           └── route.ts                 ← Use verifyAdminAccess()
+│
+├── components/
+│   ├── ui/
+│   │   └── button.tsx                   ← UI components
+│   ├── conditional-stack-provider.tsx   ← Stack Auth provider
+│   └── icons.tsx                        ← Icon components
+│
+├── lib/
+│   ├── stack-auth.ts                   ← Stack Auth utilities
+│   ├── stack-server.ts                 ← Stack Server App
+│   ├── admin-utils.ts                  ← Admin utilities (NEW)
+│   ├── cors.ts                         ← CORS configuration
+│   └── prisma.ts                       ← Database client
+│
+├── hooks/
+│   └── use-conditional-user.tsx        ← User hook
+│
+├── middleware.ts                        ← Route protection
+│
+└── docs/
+    ├── AUTHENTICATION.md                ← Main authentication guide
+    ├── STACK-AUTH-SETUP.md             ← Stack Auth setup
+    ├── AUTHENTICATION-SUMMARY.md       ← Setup summary
+    └── AUTHENTICATION-ARCHITECTURE.md  ← This file
+```
+
+---
+
+## 🔑 Component Interactions
+
+### Server-Side Authentication
+
+```
+┌──────────────────┐
+│   API Route      │
+│  /api/admin/...  │
+└────────┬─────────┘
+         │
+         │ Imports
+         ▼
+┌──────────────────┐
+│  lib/admin-utils │
+│                  │
+│  verifyAdminAccess()
+└────────┬─────────┘
+         │
+         │ Calls
+         ▼
+┌──────────────────┐
+│  isAdmin()       │
+│                  │
+│  1. Check env    │
+│  2. Get user     │
+│  3. Check email  │
+└────────┬─────────┘
+         │
+         │ Returns
+         ▼
+┌──────────────────┐
+│  boolean         │
+│  true/false      │
+└──────────────────┘
+```
+
+### Client-Side Authentication
+
+```
+┌──────────────────┐
+│  Admin Page      │
+│  Component       │
+└────────┬─────────┘
+         │
+         │ Uses Hook
+         ▼
+┌──────────────────┐
+│  useConditionalUser()
+│  (Client Hook)   │
+└────────┬─────────┘
+         │
+         │ Returns
+         ▼
+┌──────────────────┐
+│  user | null     │
+│                  │
+│  Development:    │
+│    Mock user     │
+│  Production:     │
+│    Real user     │
+└──────────────────┘
+```
+
+### Middleware Protection
+
+```
+┌──────────────────┐
+│  Incoming        │
+│  Request         │
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐
+│  middleware.ts   │
+│                  │
+│  1. Check route  │
+│  2. Check env    │
+│  3. Verify user  │
+└────────┬─────────┘
+         │
+         │ Returns
+         ▼
+┌──────────────────┐
+│  NextResponse    │
+│                  │
+│  • next()        │
+│  • redirect()    │
+│  • headers       │
+└──────────────────┘
+```
+
+---
+
+## 🛡️ Security Layers
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    SECURITY LAYERS                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  LAYER 1: Environment Detection                             │
+│  ─────────────────────────                                   │
+│  • Middleware checks NODE_ENV                               │
+│  • Development bypass only for local IPs                    │
+│  • Production enforces auth                                 │
+│                                                              │
+│  LAYER 2: Route Protection                                  │
+│  ────────────────────                                      │
+│  • All /admin/* routes protected                           │
+│  • Automatic redirect to login                             │
+│  • API routes require verification                          │
+│                                                              │
+│  LAYER 3: Stack Auth                                        │
+│  ─────────────────                                          │
+│  • Secure authentication                                    │
+│  • Cookie-based sessions                                    │
+│  • OAuth provider support                                  │
+│                                                              │
+│  LAYER 4: Admin Verification                                │
+│  ───────────────────────                                   │
+│  • Email whitelist validation                              │
+│  • Database admin check (optional)                         │
+│  • Role-based access (optional)                            │
+│                                                              │
+│  LAYER 5: Security Headers                                  │
+│  ───────────────────────                                   │
+│  • X-Frame-Options: DENY                                   │
+│  • X-Content-Type-Options: nosniff                         │
+│  • CSP headers configured                                  │
+│  • Cache-control for admin routes                          │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🔄 Data Flow Diagram
+
+```
+┌─────────────┐
+│   Browser   │
+└──────┬──────┘
+       │
+       │ 1. Request /admin
+       ▼
+┌─────────────────┐
+│ Next.js App     │
+│                 │
+│ middleware.ts   │
+└────┬────────────┘
+     │
+     │ 2. Check Environment
+     ▼
+┌─────────────────┐
+│ Development?    │────Yes──→ ┌──────────────┐
+└────────┬────────┘           │ Bypass Auth  │
+         │No                  └──────────────┘
+         ▼
+┌─────────────────┐
+│ Production?     │
+└────────┬────────┘
+         │
+         │ 3. Check Stack Auth
+         ▼
+┌─────────────────┐
+│ Has Session?    │────No───→ ┌──────────────┐
+└────────┬────────┘           │ Redirect to  │
+         │Yes                  │ /admin/login │
+         ▼                     └──────────────┘
+┌─────────────────┐
+│ Get User from   │
+│ Stack Auth      │
+└────────┬────────┘
+         │
+         │ 4. Verify Admin
+         ▼
+┌─────────────────┐
+│ Admin Utils     │
+│                 │
+│ isAdmin()       │
+└────────┬────────┘
+         │
+         │ 5. Check Email
+         ▼
+┌─────────────────┐
+│ Email in        │────No───→ ┌──────────────┐
+│ ADMIN_EMAILS?   │                 │ Return 403  │
+└────────┬────────┘           └──────────────┘
+         │Yes
+         ▼
+┌─────────────────┐
+│ Grant Access    │
+│ Render Page     │
+└─────────────────┘
+```
+
+---
+
+## 📊 State Management
+
+### User State
+
+```
+┌─────────────────────────────────────────┐
+│          User State                     │
+├─────────────────────────────────────────┤
+│                                         │
+│  Development:                           │
+│  ────────────                          │
+│  user = {                               │
+│    id: 'dev-user',                      │
+│    email: 'admin@zoolyum.com',          │
+│    displayName: 'Development Admin'     │
+│  }                                      │
+│                                         │
+│  Production:                            │
+│  ───────────                            │
+│  user = Stack Auth User Object {        │
+│    id: 'user_xxx',                      │
+│    primaryEmail: 'user@example.com',    │
+│    displayName: 'User Name',            │
+│    account: { ... },                    │
+│    roles: [ ... ]                       │
+│  }                                      │
+│                                         │
+└─────────────────────────────────────────┘
+```
+
+### Admin State
+
+```
+┌─────────────────────────────────────────┐
+│          Admin State                    │
+├─────────────────────────────────────────┤
+│                                         │
+│  ADMIN_EMAILS = [                       │
+│    'admin@zoolyum.com',                 │
+│    'sakib@zoolyum.com',                 │
+│    ...                                  │
+│  ]                                      │
+│                                         │
+│  isAdmin() =                            │
+│    user && ADMIN_EMAILS.includes(user) │
+│                                         │
+└─────────────────────────────────────────┘
+```
+
+---
+
+## 🚀 Deployment Flow
+
+### Development Deployment
+
+```
+1. git clone repository
+   ↓
+2. npm install
+   ↓
+3. cp .env.example .env.local
+   ↓
+4. npm run dev
+   ↓
+5. Open http://localhost:3000/admin
+   ↓
+6. ✅ Access Granted (No auth required)
+```
+
+### Production Deployment
+
+```
+1. Set up Stack Auth account
+   ↓
+2. Configure project & get API keys
+   ↓
+3. Add environment variables to Vercel:
+   - NEXT_PUBLIC_STACK_PROJECT_ID
+   - NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY
+   - STACK_SECRET_SERVER_KEY
+   ↓
+4. Add admin emails to lib/admin-utils.ts
+   ↓
+5. Deploy to Vercel
+   ↓
+6. Open https://your-domain.com/admin
+   ↓
+7. ✅ Redirect to Stack Auth login
+   ↓
+8. Complete authentication
+   ↓
+9. ✅ Access Granted
+```
+
+---
+
+## 📝 Quick Reference
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `middleware.ts` | Route protection |
+| `lib/admin-utils.ts` | Admin verification |
+| `lib/stack-auth.ts` | Stack Auth utilities |
+| `app/admin/login/page.tsx` | Login page |
+| `hooks/use-conditional-user.tsx` | User hook |
+
+### Key Functions
+
+| Function | Location | Purpose |
+|----------|----------|---------|
+| `isAdmin()` | `lib/admin-utils.ts` | Check admin access |
+| `requireAdmin()` | `lib/admin-utils.ts` | Throw if not admin |
+| `verifyAdminAccess()` | `lib/admin-utils.ts` | API route verification |
+| `getCurrentUser()` | `lib/stack-auth.ts` | Get authenticated user |
+| `verifyStackAuth()` | `lib/stack-auth.ts` | Verify authentication |
+
+### Environment Variables
+
+```env
+NODE_ENV=development|production
+NEXT_PUBLIC_STACK_PROJECT_ID=project_xxx
+NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY=pk_xxx
+STACK_SECRET_SERVER_KEY=sk_xxx
+NEXT_PUBLIC_STACK_URL=/handler
+```
+
+---
+
+**Last Updated:** March 24, 2026

@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PageTransition } from "@/components/page-transition";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -21,10 +21,38 @@ import { FeaturedProjects } from "@/components/portfolio/featured-projects";
 import { MobileCTAMenu, MobileCTATrigger } from "@/components/mobile-cta-menu";
 import { TestimonialsSection } from "@/components/testimonials-section";
 
+interface Statistic {
+  label: string;
+  value: string;
+  suffix: string;
+  order: number;
+}
+
 export default function Home() {
   const isMobile = useMediaQuery("(max-width: 768px)");
   const isTablet = useMediaQuery("(max-width: 1024px)");
   const [isMobileCTAMenuOpen, setIsMobileCTAMenuOpen] = useState(false);
+  const [statistics, setStatistics] = useState<Statistic[]>([
+    { label: "Years Experience", value: "50", suffix: "+", order: 1 },
+    { label: "Projects Completed", value: "30", suffix: "+", order: 2 },
+    { label: "Happy Clients", value: "5", suffix: "+", order: 3 },
+    { label: "Industry Awards", value: "5", suffix: "", order: 4 }
+  ]);
+
+  // Fetch statistics from API
+  useEffect(() => {
+    fetch('/api/homepage/statistics')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setStatistics(data);
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching statistics:', error);
+        // Keep default values on error
+      });
+  }, []);
 
   const handleOpenMobileCTAMenu = () => {
     setIsMobileCTAMenuOpen(true);
@@ -215,41 +243,17 @@ export default function Home() {
                   </p>
 
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mt-8">
-                    <div className="text-center p-3 sm:p-4 bg-[#1A1A1A] rounded-lg hover:bg-[#1A1A1A]/80 transition-colors duration-300 touch-manipulation">
-                      <CounterAnimation
-                        end={10}
-                        suffix="+"
-                        className="text-xl sm:text-2xl md:text-3xl font-bold text-[#FF5001]"
-                        duration={2}
-                      />
-                      <p className="text-xs sm:text-sm mt-1 sm:mt-2">Years Experience</p>
-                    </div>
-                    <div className="text-center p-3 sm:p-4 bg-[#1A1A1A] rounded-lg hover:bg-[#1A1A1A]/80 transition-colors duration-300 touch-manipulation">
-                      <CounterAnimation
-                        end={50}
-                        suffix="+"
-                        className="text-xl sm:text-2xl md:text-3xl font-bold text-[#FF5001]"
-                        duration={2}
-                      />
-                      <p className="text-xs sm:text-sm mt-1 sm:mt-2">Projects Completed</p>
-                    </div>
-                    <div className="text-center p-3 sm:p-4 bg-[#1A1A1A] rounded-lg hover:bg-[#1A1A1A]/80 transition-colors duration-300 touch-manipulation">
-                      <CounterAnimation
-                        end={30}
-                        suffix="+"
-                        className="text-xl sm:text-2xl md:text-3xl font-bold text-[#FF5001]"
-                        duration={2}
-                      />
-                      <p className="text-xs sm:text-sm mt-1 sm:mt-2">Happy Clients</p>
-                    </div>
-                    <div className="text-center p-3 sm:p-4 bg-[#1A1A1A] rounded-lg hover:bg-[#1A1A1A]/80 transition-colors duration-300 touch-manipulation">
-                      <CounterAnimation
-                        end={5}
-                        className="text-xl sm:text-2xl md:text-3xl font-bold text-[#FF5001]"
-                        duration={2}
-                      />
-                      <p className="text-xs sm:text-sm mt-1 sm:mt-2">Industry Awards</p>
-                    </div>
+                    {statistics.map((stat) => (
+                      <div key={stat.order} className="text-center p-3 sm:p-4 bg-[#1A1A1A] rounded-lg hover:bg-[#1A1A1A]/80 transition-colors duration-300 touch-manipulation">
+                        <CounterAnimation
+                          end={parseInt(stat.value) || 0}
+                          suffix={stat.suffix}
+                          className="text-xl sm:text-2xl md:text-3xl font-bold text-[#FF5001]"
+                          duration={2}
+                        />
+                        <p className="text-xs sm:text-sm mt-1 sm:mt-2">{stat.label}</p>
+                      </div>
+                    ))}
                   </div>
 
                   <div className="mt-8">

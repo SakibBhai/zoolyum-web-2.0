@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCurrentUser } from '@/lib/stack-auth';
+import { auth } from '@/lib/next-auth';
 import { prisma } from '@/lib/prisma';
 import { createId } from '@paralleldrive/cuid2';
 
@@ -14,9 +14,9 @@ export async function GET() {
     if (statistics.length === 0) {
       // Return default statistics if none exist
       return NextResponse.json([
-        { label: "Years Experience", value: "10", suffix: "+", order: 1 },
-        { label: "Projects Completed", value: "50", suffix: "+", order: 2 },
-        { label: "Happy Clients", value: "30", suffix: "+", order: 3 },
+        { label: "Years Experience", value: "50", suffix: "+", order: 1 },
+        { label: "Projects Completed", value: "30", suffix: "+", order: 2 },
+        { label: "Happy Clients", value: "5", suffix: "+", order: 3 },
         { label: "Industry Awards", value: "5", suffix: "", order: 4 }
       ]);
     }
@@ -34,8 +34,9 @@ export async function GET() {
 // POST /api/homepage/statistics - Create new statistic (Admin only)
 export async function POST(request: NextRequest) {
   try {
-    const user = await getCurrentUser();
-    if (!user) {
+    const session = await auth();
+
+    if (!session?.user?.isAdmin) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -70,8 +71,9 @@ export async function POST(request: NextRequest) {
 // PUT /api/homepage/statistics - Bulk update statistics (Admin only)
 export async function PUT(request: NextRequest) {
   try {
-    const user = await getCurrentUser();
-    if (!user) {
+    const session = await auth();
+
+    if (!session?.user?.isAdmin) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -117,6 +119,31 @@ export async function PUT(request: NextRequest) {
     console.error('Error updating statistics:', error);
     return NextResponse.json(
       { error: 'Failed to update statistics' },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE /api/homepage/statistics - Delete all statistics (Admin only)
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await auth();
+
+    if (!session?.user?.isAdmin) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    // Delete all statistics
+    await prisma.homepage_statistics.deleteMany({});
+
+    return NextResponse.json({ message: 'All statistics deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting statistics:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete statistics' },
       { status: 500 }
     );
   }

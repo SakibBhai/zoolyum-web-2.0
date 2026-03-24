@@ -12,8 +12,37 @@ import { ImageReveal } from "@/components/scroll-animations/image-reveal"
 import { PageHeadline } from "@/components/page-headline"
 import { CounterAnimation } from "@/components/scroll-animations/counter-animation"
 import { TeamMemberCard } from "@/components/team-member-card"
+import { useState, useEffect } from "react"
+
+interface Statistic {
+  label: string;
+  value: string;
+  suffix: string;
+  order: number;
+}
 
 export default function AboutPage() {
+  const [statistics, setStatistics] = useState<Statistic[]>([
+    { label: "Years Experience", value: "50", suffix: "+", order: 1 },
+    { label: "Projects Completed", value: "30", suffix: "+", order: 2 },
+    { label: "Happy Clients", value: "5", suffix: "+", order: 3 },
+    { label: "Industry Awards", value: "5", suffix: "", order: 4 }
+  ]);
+
+  // Fetch statistics from API
+  useEffect(() => {
+    fetch('/api/homepage/statistics')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setStatistics(data);
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching statistics:', error);
+        // Keep default values on error
+      });
+  }, []);
   return (
     <PageTransition>
       <div className="min-h-screen bg-[#161616] text-[#E9E7E2]">
@@ -169,48 +198,19 @@ export default function AboutPage() {
           <section className="py-16 md:py-24">
             <div className="container mx-auto px-4">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-                <StaggerReveal staggerDelay={0.1} mobileStaggerDelay={0.05}>
-                  <div className="text-center p-8 bg-[#1A1A1A] rounded-2xl">
-                    <CounterAnimation
-                      end={10}
-                      suffix="+"
-                      className="text-4xl md:text-5xl font-bold text-[#FF5001]"
-                      duration={2}
-                    />
-                    <p className="text-lg mt-3">Years Experience</p>
-                  </div>
-                </StaggerReveal>
-
-                <StaggerReveal staggerDelay={0.2} mobileStaggerDelay={0.1}>
-                  <div className="text-center p-8 bg-[#1A1A1A] rounded-2xl">
-                    <CounterAnimation
-                      end={50}
-                      suffix="+"
-                      className="text-4xl md:text-5xl font-bold text-[#FF5001]"
-                      duration={2}
-                    />
-                    <p className="text-lg mt-3">Projects Completed</p>
-                  </div>
-                </StaggerReveal>
-
-                <StaggerReveal staggerDelay={0.3} mobileStaggerDelay={0.15}>
-                  <div className="text-center p-8 bg-[#1A1A1A] rounded-2xl">
-                    <CounterAnimation
-                      end={30}
-                      suffix="+"
-                      className="text-4xl md:text-5xl font-bold text-[#FF5001]"
-                      duration={2}
-                    />
-                    <p className="text-lg mt-3">Happy Clients</p>
-                  </div>
-                </StaggerReveal>
-
-                <StaggerReveal staggerDelay={0.4} mobileStaggerDelay={0.2}>
-                  <div className="text-center p-8 bg-[#1A1A1A] rounded-2xl">
-                    <CounterAnimation end={5} className="text-4xl md:text-5xl font-bold text-[#FF5001]" duration={2} />
-                    <p className="text-lg mt-3">Industry Awards</p>
-                  </div>
-                </StaggerReveal>
+                {statistics.map((stat, index) => (
+                  <StaggerReveal key={stat.order} staggerDelay={0.1 * (index + 1)} mobileStaggerDelay={0.05 * (index + 1)}>
+                    <div className="text-center p-8 bg-[#1A1A1A] rounded-2xl">
+                      <CounterAnimation
+                        end={parseInt(stat.value) || 0}
+                        suffix={stat.suffix}
+                        className="text-4xl md:text-5xl font-bold text-[#FF5001]"
+                        duration={2}
+                      />
+                      <p className="text-lg mt-3">{stat.label}</p>
+                    </div>
+                  </StaggerReveal>
+                ))}
               </div>
             </div>
           </section>

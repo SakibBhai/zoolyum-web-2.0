@@ -2,17 +2,18 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { 
-  LayoutDashboard, 
-  FileText, 
-  Briefcase, 
-  Users, 
+import {
+  LayoutDashboard,
+  FileText,
+  Briefcase,
+  Users,
   MessageSquare,
   Settings,
   LogOut,
   Megaphone,
   Mail,
-  UserCheck
+  UserCheck,
+  TrendingUp
 } from "lucide-react"
 import { useConditionalUser } from "@/hooks/use-conditional-user"
 
@@ -29,6 +30,11 @@ export function AdminSidebar({ isMobileMenuOpen = false, setIsMobileMenuOpen }: 
       name: "Dashboard",
       href: "/admin/dashboard",
       icon: <LayoutDashboard className="h-5 w-5" />
+    },
+    {
+      name: "Statistics",
+      href: "/admin/statistics",
+      icon: <TrendingUp className="h-5 w-5" />
     },
     {
       name: "Blog Posts",
