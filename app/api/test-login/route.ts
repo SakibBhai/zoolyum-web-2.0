@@ -6,7 +6,7 @@ export async function POST(request: Request) {
     const body = await request.json()
     const { email, password } = body
 
-    const diagnostics = {
+    const diagnostics: any = {
       timestamp: new Date().toISOString(),
       email,
       passwordProvided: !!password,
