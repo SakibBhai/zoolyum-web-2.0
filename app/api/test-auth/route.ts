@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/next-auth'
 
 export async function GET() {
-  const diagnostics = {
+  const diagnostics: any = {
     timestamp: new Date().toISOString(),
     environment: {
       NEXTAUTH_URL: process.env.NEXTAUTH_URL || 'MISSING',
