@@ -172,6 +172,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
   secret: process.env.NEXTAUTH_SECRET,
 
+  // Configure cookies for production
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: true,
+      },
+    },
+  },
+
   // Enable debug mode in development
   debug: process.env.NODE_ENV === "development"
 })

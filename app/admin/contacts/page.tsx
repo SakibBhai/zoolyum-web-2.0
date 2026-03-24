@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useConditionalUser } from "@/hooks/use-conditional-user";
+import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -110,7 +110,7 @@ interface ContactStats {
 }
 
 export default function ContactsAdminPage() {
-  const user = useConditionalUser();
+  const { data: session } = useSession();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [settings, setSettings] = useState<ContactSettings | null>(null);
   const [stats, setStats] = useState<ContactStats | null>(null);
@@ -168,13 +168,13 @@ export default function ContactsAdminPage() {
     fetchStats();
   }, []);
 
-  // Redirect if not authenticated (but wait for user to load)
-  if (user === null) {
-    redirect("/handler/sign-in");
+  // Redirect if not authenticated (but wait for session to load)
+  if (session === null) {
+    redirect("/admin/login");
   }
 
-  // Show loading state while user is being determined
-  if (user === undefined) {
+  // Show loading state while session is being determined
+  if (session === undefined) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-white">Loading...</div>
