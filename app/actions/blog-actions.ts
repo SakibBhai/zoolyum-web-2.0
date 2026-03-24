@@ -93,7 +93,7 @@ export async function createBlogPostAction(
     });
 
     // Revalidate the blog posts cache
-    revalidateTag('blog-posts');
+    revalidateTag('blog-posts', ['GET']);
     revalidatePath('/admin/dashboard/blog');
     
     return {
@@ -206,7 +206,7 @@ export async function updateBlogPostAction(
     });
 
     // Revalidate the blog posts cache
-    revalidateTag('blog-posts');
+    revalidateTag('blog-posts', ['GET']);
     revalidatePath('/admin/dashboard/blog');
     revalidatePath(`/admin/dashboard/blog/edit/${slug}`);
     
@@ -257,7 +257,7 @@ export async function deleteBlogPostAction(
     });
 
     // Revalidate the blog posts cache
-    revalidateTag('blog-posts');
+    revalidateTag('blog-posts', ['GET']);
     revalidatePath('/admin/dashboard/blog');
     
     return {
