@@ -47,10 +47,11 @@ async function getSubmissions(): Promise<CampaignSubmission[]> {
       },
     });
 
-    // Convert Date objects to strings for serialization
+    // Convert Date objects to strings for serialization and handle JsonValue
     return submissions.map(submission => ({
       ...submission,
       submittedAt: submission.submittedAt.toISOString(),
+      data: (submission.data as Record<string, any>) || {},
     }));
   } catch (error) {
     console.error('Error fetching submissions:', error);
