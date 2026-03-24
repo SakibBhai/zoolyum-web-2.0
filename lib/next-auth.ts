@@ -50,16 +50,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials, request) {
+        console.log('[NextAuth] Authorize attempt:', { email: credentials?.email })
+
         // Development mode: Allow any credentials
         const isDevelopment = process.env.NODE_ENV === "development"
 
         if (isDevelopment) {
           // In development, accept any email/password
-          return {
+          const user = {
             id: "dev-user",
             email: (credentials?.email as string) || "admin@zoolyum.com",
             name: "Development Admin"
           }
+          console.log('[NextAuth] Development mode: Returning user', user)
+          return user
         }
 
         // Production: Validate credentials
@@ -70,22 +74,27 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           email === ADMIN_CREDENTIALS.email &&
           password === ADMIN_CREDENTIALS.password
         ) {
-          return {
+          const user = {
             id: "admin-user",
             email: ADMIN_CREDENTIALS.email,
             name: "Admin User"
           }
+          console.log('[NextAuth] Credentials valid: Returning user', user)
+          return user
         }
 
         // Check if email is in admin whitelist (for OAuth)
         if (email && ADMIN_EMAILS.includes(email)) {
-          return {
+          const user = {
             id: `admin-${email}`,
             email: email,
             name: email.split("@")[0]
           }
+          console.log('[NextAuth] Email whitelisted: Returning user', user)
+          return user
         }
 
+        console.log('[NextAuth] Authorization failed: Invalid credentials')
         return null
       }
     }),
@@ -116,15 +125,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
      * JWT callback - called when token is created/updated
      */
     async jwt({ token, user, account }) {
+      console.log('[NextAuth] JWT callback:', { hasUser: !!user, hasToken: !!token })
+
       // Add user info to token
       if (user) {
         token.id = user.id
         token.email = user.email
+        console.log('[NextAuth] Added user to token:', { id: token.id, email: token.email })
       }
 
       // Check if user is admin
       if (token.email) {
         token.isAdmin = ADMIN_EMAILS.includes(token.email as string)
+        console.log('[NextAuth] Admin check:', { email: token.email, isAdmin: token.isAdmin })
       }
 
       return token
@@ -134,10 +147,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
      * Session callback - called when session is checked
      */
     async session({ session, token }) {
+      console.log('[NextAuth] Session callback:', { hasSession: !!session, hasToken: !!token })
+
       if (token) {
         session.user.id = token.id as string
         session.user.email = token.email as string
         session.user.isAdmin = token.isAdmin as boolean
+        console.log('[NextAuth] Session data:', {
+          id: session.user.id,
+          email: session.user.email,
+          isAdmin: session.user.isAdmin
+        })
       }
       return session
     },
@@ -146,16 +166,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
      * Sign-in callback - validate admin access
      */
     async signIn({ user, account }) {
+      console.log('[NextAuth] Sign-in callback:', { email: user?.email })
+
       // In development, allow any user
       if (process.env.NODE_ENV === "development") {
+        console.log('[NextAuth] Development mode: Allowing sign in')
         return true
       }
 
       // In production, check if email is in admin whitelist
       if (user.email) {
-        return ADMIN_EMAILS.includes(user.email)
+        const isAdmin = ADMIN_EMAILS.includes(user.email)
+        console.log('[NextAuth] Production admin check:', { email: user.email, isAdmin })
+        return isAdmin
       }
 
+      console.log('[NextAuth] Sign-in denied: No email')
       return false
     }
   },
@@ -185,8 +211,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
   },
 
-  // Enable debug mode in development
-  debug: process.env.NODE_ENV === "development"
+  // Enable debug mode temporarily for troubleshooting
+  debug: true
 })
 
 /**

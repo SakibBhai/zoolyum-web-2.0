@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { signIn, getSession } from "next-auth/react"
+import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -58,25 +58,20 @@ export default function AdminLogin() {
       const result = await signIn("credentials", {
         email,
         password,
-        redirect: false
+        redirect: true,
+        callbackUrl: "/admin/dashboard"
       })
 
+      // If we get here, redirect failed
       if (result?.error) {
         setError("Invalid email or password")
-      } else if (result?.ok) {
-        // Check if user is admin
-        const session = await getSession()
-        if (session?.user?.isAdmin) {
-          router.push("/admin/dashboard")
-        } else {
-          setError("You don't have admin access")
-        }
+        setIsLoading(false)
       }
     } catch (err) {
       setError("An error occurred during login")
-    } finally {
       setIsLoading(false)
     }
+    // Don't set isLoading(false) on success because we're redirecting
   }
 
   const handleDevLogin = () => {
