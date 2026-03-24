@@ -36,7 +36,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" }
       },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
         // Development mode: Allow any credentials
         const isDevelopment = process.env.NODE_ENV === "development"
 
@@ -44,15 +44,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           // In development, accept any email/password
           return {
             id: "dev-user",
-            email: credentials?.email || "admin@zoolyum.com",
+            email: (credentials?.email as string) || "admin@zoolyum.com",
             name: "Development Admin"
           }
         }
 
         // Production: Validate credentials
+        const email = credentials?.email as string | undefined
+        const password = credentials?.password as string | undefined
+
         if (
-          credentials?.email === ADMIN_CREDENTIALS.email &&
-          credentials?.password === ADMIN_CREDENTIALS.password
+          email === ADMIN_CREDENTIALS.email &&
+          password === ADMIN_CREDENTIALS.password
         ) {
           return {
             id: "admin-user",
@@ -62,11 +65,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
 
         // Check if email is in admin whitelist (for OAuth)
-        if (credentials?.email && ADMIN_EMAILS.includes(credentials.email)) {
+        if (email && ADMIN_EMAILS.includes(email)) {
           return {
-            id: `admin-${credentials.email}`,
-            email: credentials.email,
-            name: credentials.email.split("@")[0]
+            id: `admin-${email}`,
+            email: email,
+            name: email.split("@")[0]
           }
         }
 
