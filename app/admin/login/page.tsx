@@ -58,20 +58,20 @@ export default function AdminLogin() {
       const result = await signIn("credentials", {
         email,
         password,
-        redirect: true,
-        callbackUrl: "/admin/dashboard"
+        redirect: false
       })
 
-      // If we get here, redirect failed
       if (result?.error) {
         setError("Invalid email or password")
         setIsLoading(false)
+      } else if (result?.ok) {
+        // Success - redirect manually
+        router.push("/admin/dashboard")
       }
     } catch (err) {
       setError("An error occurred during login")
       setIsLoading(false)
     }
-    // Don't set isLoading(false) on success because we're redirecting
   }
 
   const handleDevLogin = () => {
