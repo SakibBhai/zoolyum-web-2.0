@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/stack-auth'
-import { deleteFromR2, extractKeyFromUrl } from '@/lib/r2-client'
+import { auth } from '@/lib/next-auth'
+import { deleteFromBlob } from '@/lib/blob-client'
 
 export async function DELETE(request: NextRequest) {
   try {
-    // Check authentication
-    const user = await getCurrentUser()
-    if (!user) {
+    // Check authentication using NextAuth
+    const session = await auth()
+    if (!session?.user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -23,20 +23,11 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // Extract key from URL if only URL is provided
-    let fileKey = key
-    if (!fileKey && url) {
-      fileKey = extractKeyFromUrl(url)
-      if (!fileKey) {
-        return NextResponse.json(
-          { error: 'Could not extract file key from URL' },
-          { status: 400 }
-        )
-      }
-    }
+    // Use URL if key is not provided
+    const fileUrl = url || `https://vercel.com/blob/${key}`
 
-    // Delete from R2
-    const result = await deleteFromR2(fileKey)
+    // Delete from Blob
+    const result = await deleteFromBlob(fileUrl)
 
     if (result.error) {
       return NextResponse.json(

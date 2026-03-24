@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/stack-auth'
-import { uploadToR2 } from '@/lib/r2-client'
+import { auth } from '@/lib/next-auth'
+import { uploadToBlob } from '@/lib/blob-client'
 
 // Maximum file size (5MB)
 const MAX_FILE_SIZE = 5 * 1024 * 1024
@@ -8,7 +8,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024
 // Allowed file types
 const ALLOWED_TYPES = [
   'image/jpeg',
-  'image/jpg', 
+  'image/jpg',
   'image/png',
   'image/webp',
   'image/gif'
@@ -16,9 +16,9 @@ const ALLOWED_TYPES = [
 
 export async function POST(request: NextRequest) {
   try {
-    // Check authentication
-    const user = await getCurrentUser()
-    if (!user) {
+    // Check authentication using NextAuth
+    const session = await auth()
+    if (!session?.user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -63,19 +63,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Upload to R2
-    const result = await uploadToR2({
+    // Upload to Vercel Blob
+    const result = await uploadToBlob({
       file,
       folder: sanitizedFolder
     })
 
     if (result.error) {
       return NextResponse.json(
-        { 
-          error: result.error,
-          bucketMissing: result.bucketMissing 
-        },
-        { status: result.bucketMissing ? 503 : 500 }
+        { error: result.error },
+        { status: 500 }
       )
     }
 
