@@ -58,7 +58,7 @@ function generateRecommendations(envChecks: Record<string, any>) {
     recommendations.push({
       critical: true,
       issue: 'NEXTAUTH_URL is missing',
-      solution: 'Add NEXTAUTH_URL to Vercel environment variables. Value should be: https://zoolyum-web-2-0.vercel.app'
+      solution: 'Add NEXTAUTH_URL to Vercel environment variables. Value should be: https://zoolyum-web-20.vercel.app'
     })
   }
 
