@@ -23,8 +23,8 @@ interface CampaignSubmission {
     [key: string]: any;
   };
   submittedAt: string;
-  ipAddress?: string;
-  userAgent?: string;
+  ipAddress: string | null;
+  userAgent: string | null;
   campaign: {
     id: string;
     title: string;
