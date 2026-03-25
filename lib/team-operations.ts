@@ -55,7 +55,7 @@ export async function getAllTeamMembers(): Promise<TeamMemberWithStatus[]> {
       email: member.email,
       linkedin: null, // Not available in current schema
       twitter: null, // Not available in current schema
-      status: member.is_active ? 'active' : 'inactive',
+      status: member.is_active ? 'ACTIVE' : 'INACTIVE',
       order: 0, // Default value since not in schema
       featured: false, // Default value since not in schema
       createdAt: member.createdAt || new Date(),
@@ -156,7 +156,7 @@ export async function updateTeamMember(id: string, data: Partial<TeamMemberData>
         ...(data.imageUrl !== undefined && { avatar: data.imageUrl }), // Map imageUrl to avatar
         ...(data.email !== undefined && { email: data.email }),
         // linkedin and twitter are not available in current schema
-        ...(data.status && { is_active: data.status === 'active' }) // Map status to is_active boolean
+        ...(data.status && { is_active: data.status === 'ACTIVE' }) // Map ACTIVE to is_active boolean
         // order and featured are not available in current schema
       }
     });
