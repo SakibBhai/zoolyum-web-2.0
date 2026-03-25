@@ -37,6 +37,8 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     const { id } = await context.params;
     const body = await request.json();
 
+    console.log('PUT /api/team/[id] - Received body:', JSON.stringify(body, null, 2));
+
     const teamMember = await updateTeamMember(id, {
       name: body.name,
       position: body.position,

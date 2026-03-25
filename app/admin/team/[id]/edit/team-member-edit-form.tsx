@@ -71,6 +71,8 @@ export function TeamMemberEditForm({ teamMember }: TeamMemberEditFormProps) {
 
     startTransition(async () => {
       try {
+        console.log('Submitting team member update:', formData);
+
         const response = await fetch(`/api/team/${teamMember.id}`, {
           method: "PUT",
           headers: {
