@@ -64,7 +64,7 @@ function ActionsCell({ teamMember }: { teamMember: TeamMember }) {
 
   return (
     <div className="flex items-center gap-2">
-      <Link href={`/admin/team/${teamMember.id}/view`}>
+      <Link href={`/admin/team/${teamMember.id}`}>
         <Button variant="ghost" size="sm" title="View">
           <Eye className="h-4 w-4" />
         </Button>
