@@ -71,11 +71,16 @@ export async function GET() {
 // POST /api/team - Create new team member
 export async function POST(request: NextRequest) {
   try {
-    const stackServerApp = await getStackServerApp();
-    const user = await stackServerApp.getUser();
-    
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // Skip authentication in development or if Stack Auth is not configured
+    if (process.env.NODE_ENV === 'production') {
+      const stackServerApp = await getStackServerApp();
+      if (stackServerApp) {
+        const user = await stackServerApp.getUser();
+
+        if (!user) {
+          return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+      }
     }
 
     // Ensure DATABASE_URL is present for write operations

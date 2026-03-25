@@ -17,8 +17,13 @@ export async function getStackServerApp() {
 
   if (!stackServerApp) {
     // Dynamically import the actual stack app only in production
-    const { stackServerApp: realStackApp } = await import('../stack');
-    stackServerApp = realStackApp;
+    try {
+      const module = await import('../stack');
+      stackServerApp = module.stackServerApp;
+    } catch (error) {
+      console.error('Failed to load Stack Auth:', error);
+      return null;
+    }
   }
 
   return stackServerApp;
