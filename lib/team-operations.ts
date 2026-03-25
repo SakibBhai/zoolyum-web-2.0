@@ -44,7 +44,7 @@ export async function getAllTeamMembers(): Promise<TeamMemberWithStatus[]> {
       ]
     });
 
-    return teamMembers.map(member => ({
+    const result = teamMembers.map(member => ({
       id: member.id,
       name: member.name,
       position: member.role, // Map role to position
@@ -62,6 +62,9 @@ export async function getAllTeamMembers(): Promise<TeamMemberWithStatus[]> {
       updatedAt: member.updatedAt || new Date(),
       statusDisplay: member.is_active ? 'Active' : 'Inactive'
     }));
+
+    console.log('Team members from DB:', result.map(m => ({ name: m.name, featured: m.featured, status: m.status })));
+    return result;
   } catch (error) {
     console.error('Error fetching team members:', error);
     throw new Error('Failed to fetch team members');
@@ -149,6 +152,8 @@ export async function createTeamMember(data: TeamMemberData) {
 // Update team member
 export async function updateTeamMember(id: string, data: Partial<TeamMemberData>) {
   try {
+    console.log('Updating team member with data:', { id, featured: data.featured, order: data.order, status: data.status });
+
     const teamMember = await prisma.teamMember.update({
       where: { id },
       data: {
@@ -166,6 +171,7 @@ export async function updateTeamMember(id: string, data: Partial<TeamMemberData>
       }
     });
 
+    console.log('Updated team member result:', { id: teamMember.id, featured: teamMember.featured, order: teamMember.order, is_active: teamMember.is_active });
     return teamMember;
   } catch (error) {
     console.error('Error updating team member:', error);
