@@ -11,8 +11,44 @@ import { PageHeadline } from "@/components/page-headline"
 import { TeamMemberCard } from "@/components/team-member-card"
 import { ImageReveal } from "@/components/scroll-animations/image-reveal"
 import { TextReveal } from "@/components/scroll-animations/text-reveal"
+import { useState, useEffect } from "react"
+
+interface TeamMember {
+  id: string
+  name: string
+  designation: string | null
+  bio: string | null
+  imageUrl: string | null
+  email: string | null
+  linkedin: string | null
+  twitter: string | null
+  featured: boolean
+  status: string
+}
 
 export default function TeamPage() {
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/team')
+      .then(res => res.json())
+      .then(data => {
+        console.log('Team members fetched:', data)
+        if (Array.isArray(data)) {
+          setTeamMembers(data.filter(member => member.status === 'ACTIVE'))
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching team members:', error)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }, [])
+
+  const featuredMembers = teamMembers.filter(member => member.featured)
+  const regularMembers = teamMembers.filter(member => !member.featured)
   return (
     <PageTransition>
       <div className="min-h-screen bg-[#161616] text-[#E9E7E2]">
@@ -57,39 +93,26 @@ export default function TeamPage() {
                 mobileStaggerDelay={0.05}
                 mobileAnimation="fade"
               >
-                <TeamMemberCard
-                  name="Sakib Chowdhury"
-                  role="Founder & Creative Director"
-                  image="/placeholder.svg?height=400&width=300"
-                  bio="Sakib brings over 15 years of experience in brand strategy and creative direction, having worked with global brands across diverse industries."
-                  social={{
-                    linkedin: "https://linkedin.com",
-                    twitter: "https://twitter.com",
-                  }}
-                  featured={true}
-                />
-                <TeamMemberCard
-                  name="Emma Rodriguez"
-                  role="Brand Strategy Director"
-                  image="/placeholder.svg?height=400&width=300"
-                  bio="Emma specializes in developing comprehensive brand strategies that position businesses for success in competitive markets."
-                  social={{
-                    linkedin: "https://linkedin.com",
-                    twitter: "https://twitter.com",
-                  }}
-                  featured={true}
-                />
-                <TeamMemberCard
-                  name="David Chen"
-                  role="Digital Director"
-                  image="/placeholder.svg?height=400&width=300"
-                  bio="David leads our digital transformation initiatives, creating innovative digital ecosystems that amplify brand presence."
-                  social={{
-                    linkedin: "https://linkedin.com",
-                    twitter: "https://twitter.com",
-                  }}
-                  featured={true}
-                />
+                {loading ? (
+                  <p className="text-[#E9E7E2]/70">Loading team members...</p>
+                ) : featuredMembers.length > 0 ? (
+                  featuredMembers.map((member) => (
+                    <TeamMemberCard
+                      key={member.id}
+                      name={member.name}
+                      role={member.designation || "Team Member"}
+                      image={member.imageUrl || "/placeholder.svg?height=400&width=300"}
+                      bio={member.bio || ""}
+                      social={{
+                        linkedin: member.linkedin || "",
+                        twitter: member.twitter || "",
+                      }}
+                      featured={true}
+                    />
+                  ))
+                ) : (
+                  <p className="text-[#E9E7E2]/70">No featured team members found.</p>
+                )}
               </StaggerReveal>
             </div>
           </section>
@@ -110,54 +133,25 @@ export default function TeamPage() {
                 mobileStaggerDelay={0.05}
                 mobileAnimation="fade"
               >
-                <TeamMemberCard
-                  name="Sarah Johnson"
-                  role="Client Relations"
-                  image="/placeholder.svg?height=400&width=300"
-                  bio="Sarah ensures our client partnerships thrive through exceptional communication and project management."
-                />
-                <TeamMemberCard
-                  name="Michael Torres"
-                  role="Design Lead"
-                  image="/placeholder.svg?height=400&width=300"
-                  bio="Michael crafts distinctive visual identities that express brand personalities across all touchpoints."
-                />
-                <TeamMemberCard
-                  name="Aisha Patel"
-                  role="Content Strategist"
-                  image="/placeholder.svg?height=400&width=300"
-                  bio="Aisha develops strategic content frameworks that tell compelling brand stories and engage target audiences."
-                />
-                <TeamMemberCard
-                  name="James Wilson"
-                  role="UX Director"
-                  image="/placeholder.svg?height=400&width=300"
-                  bio="James creates intuitive digital experiences that balance user needs with business objectives."
-                />
-                <TeamMemberCard
-                  name="Olivia Kim"
-                  role="Market Researcher"
-                  image="/placeholder.svg?height=400&width=300"
-                  bio="Olivia uncovers insights that inform strategic decision-making and positioning through in-depth research."
-                />
-                <TeamMemberCard
-                  name="Thomas Garcia"
-                  role="Social Media Strategist"
-                  image="/placeholder.svg?height=400&width=300"
-                  bio="Thomas builds strategic social media approaches that build community and drive engagement."
-                />
-                <TeamMemberCard
-                  name="Sophia Lee"
-                  role="Project Manager"
-                  image="/placeholder.svg?height=400&width=300"
-                  bio="Sophia ensures projects are delivered on time, on budget, and to the highest quality standards."
-                />
-                <TeamMemberCard
-                  name="Robert Johnson"
-                  role="Development Lead"
-                  image="/placeholder.svg?height=400&width=300"
-                  bio="Robert leads our development team, bringing digital experiences to life with technical excellence."
-                />
+                {loading ? (
+                  <p className="text-[#E9E7E2]/70">Loading team members...</p>
+                ) : regularMembers.length > 0 ? (
+                  regularMembers.map((member) => (
+                    <TeamMemberCard
+                      key={member.id}
+                      name={member.name}
+                      role={member.designation || "Team Member"}
+                      image={member.imageUrl || "/placeholder.svg?height=400&width=300"}
+                      bio={member.bio || ""}
+                      social={{
+                        linkedin: member.linkedin || "",
+                        twitter: member.twitter || "",
+                      }}
+                    />
+                  ))
+                ) : (
+                  <p className="text-[#E9E7E2]/70">No team members found.</p>
+                )}
               </StaggerReveal>
             </div>
           </section>

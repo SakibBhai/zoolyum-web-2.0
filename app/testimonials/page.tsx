@@ -12,8 +12,43 @@ import { StaggerReveal } from "@/components/scroll-animations/stagger-reveal"
 import { ImageReveal } from "@/components/scroll-animations/image-reveal"
 import { CounterAnimation } from "@/components/scroll-animations/counter-animation"
 import { PageHeadline } from "@/components/page-headline"
+import { useState, useEffect } from "react"
+
+interface Testimonial {
+  id: string
+  name: string
+  position: string | null
+  company: string | null
+  content: string
+  rating: number
+  imageUrl: string | null
+  featured: boolean
+  approved: boolean
+}
 
 export default function TestimonialsPage() {
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/testimonials')
+      .then(res => res.json())
+      .then(data => {
+        console.log('Testimonials fetched:', data)
+        if (Array.isArray(data)) {
+          setTestimonials(data.filter(t => t.approved))
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching testimonials:', error)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }, [])
+
+  const featuredTestimonial = testimonials.find(t => t.featured) || testimonials[0]
+  const regularTestimonials = testimonials.filter(t => t.id !== featuredTestimonial?.id)
   return (
     <PageTransition>
       <div className="min-h-screen bg-[#161616] text-[#E9E7E2]">
@@ -28,78 +63,102 @@ export default function TestimonialsPage() {
             />
 
             {/* Featured Testimonial */}
-            <ScrollReveal className="mb-16" delay={0.2}>
-              <div className="bg-[#1A1A1A] p-8 md:p-12 rounded-2xl border border-[#333333]">
-                <div className="grid md:grid-cols-2 gap-12 items-center">
-                  <div>
-                    <div className="text-[#FF5001] mb-6">
-                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                          d="M10 11L8 17H5L7 11H5V5H11V11H10ZM18 11L16 17H13L15 11H13V5H19V11H18Z"
-                          fill="currentColor"
-                        />
-                      </svg>
-                    </div>
-                    <p className="text-xl md:text-2xl mb-8 italic">
-                      "The rebrand has been <span className="text-[#FF5001]">transformative</span> for our business. Not
-                      only do we have a visual identity that truly represents our vision, but the strategic foundation
-                      has aligned our entire organization and clarified our market position. Since launching, we've seen
-                      tangible business results and received overwhelmingly positive feedback from clients and
-                      partners."
-                    </p>
-                    <div className="flex items-center">
-                      <div className="w-16 h-16 rounded-full bg-[#333333] mr-4 overflow-hidden">
-                        <Image
-                          src="/placeholder.svg?height=64&width=64"
-                          alt="Sarah Johnson"
-                          width={64}
-                          height={64}
-                          className="w-full h-full object-cover"
-                        />
+            {!loading && featuredTestimonial && (
+              <ScrollReveal className="mb-16" delay={0.2}>
+                <div className="bg-[#1A1A1A] p-8 md:p-12 rounded-2xl border border-[#333333]">
+                  <div className="grid md:grid-cols-2 gap-12 items-center">
+                    <div>
+                      <div className="text-[#FF5001] mb-6">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path
+                            d="M10 11L8 17H5L7 11H5V5H11V11H10ZM18 11L16 17H13L15 11H13V5H19V11H18Z"
+                            fill="currentColor"
+                          />
+                        </svg>
                       </div>
-                      <div>
-                        <h4 className="font-bold text-lg">Sarah Johnson</h4>
-                        <p className="text-[#E9E7E2]/70">CEO, Nexus Technologies</p>
+                      <p className="text-xl md:text-2xl mb-8 italic">
+                        "{featuredTestimonial.content}"
+                      </p>
+                      <div className="flex items-center">
+                        {featuredTestimonial.imageUrl ? (
+                          <div className="w-16 h-16 rounded-full bg-[#333333] mr-4 overflow-hidden">
+                            <Image
+                              src={featuredTestimonial.imageUrl}
+                              alt={featuredTestimonial.name}
+                              width={64}
+                              height={64}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : null}
+                        <div>
+                          <h4 className="font-bold text-lg">{featuredTestimonial.name}</h4>
+                          <p className="text-[#E9E7E2]/70">
+                            {featuredTestimonial.position}{featuredTestimonial.position && featuredTestimonial.company ? ", " : ""}{featuredTestimonial.company}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="hidden md:block">
-                    <div className="relative h-full min-h-[300px] rounded-xl overflow-hidden">
-                      <ImageReveal
-                        src="/placeholder.svg?height=600&width=500"
-                        alt="Nexus Technologies Project"
-                        width={500}
-                        height={600}
-                        direction="right"
-                      />
-                    </div>
+                    {featuredTestimonial.imageUrl && (
+                      <div className="hidden md:block">
+                        <div className="relative h-full min-h-[300px] rounded-xl overflow-hidden">
+                          <ImageReveal
+                            src={featuredTestimonial.imageUrl}
+                            alt={`${featuredTestimonial.name} - ${featuredTestimonial.company}`}
+                            width={500}
+                            height={600}
+                            direction="right"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
-            </ScrollReveal>
+              </ScrollReveal>
+            )}
 
             {/* Client Testimonials Grid */}
             <StaggerReveal className="grid md:grid-cols-2 gap-8 mb-16">
-              {testimonials.map((testimonial, index) => (
-                <Card key={index} className="h-full bg-[#1A1A1A] border-[#333333] hover:border-[#FF5001]/30 transition-all duration-300">
-                  <CardContent className="p-6">
-                    <blockquote className="text-lg text-[#E9E7E2]/90 mb-6 leading-relaxed">
-                      "{testimonial.quote}"
-                    </blockquote>
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-[#FF5001]/20 rounded-full flex items-center justify-center">
-                        <span className="text-[#FF5001] font-bold text-lg">
-                          {testimonial.author.split(' ').map(name => name[0]).join('')}
-                        </span>
+              {loading ? (
+                <p className="text-[#E9E7E2]/70">Loading testimonials...</p>
+              ) : regularTestimonials.length > 0 ? (
+                regularTestimonials.map((testimonial) => (
+                  <Card key={testimonial.id} className="h-full bg-[#1A1A1A] border-[#333333] hover:border-[#FF5001]/30 transition-all duration-300">
+                    <CardContent className="p-6">
+                      <blockquote className="text-lg text-[#E9E7E2]/90 mb-6 leading-relaxed">
+                        "{testimonial.content}"
+                      </blockquote>
+                      <div className="flex items-center gap-3">
+                        {testimonial.imageUrl ? (
+                          <div className="w-12 h-12 rounded-full overflow-hidden">
+                            <Image
+                              src={testimonial.imageUrl}
+                              alt={testimonial.name}
+                              width={48}
+                              height={48}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-12 h-12 bg-[#FF5001]/20 rounded-full flex items-center justify-center">
+                            <span className="text-[#FF5001] font-bold text-lg">
+                              {testimonial.name.split(' ').map(name => name[0]).join('')}
+                            </span>
+                          </div>
+                        )}
+                        <div>
+                          <p className="font-semibold text-[#E9E7E2]">{testimonial.name}</p>
+                          <p className="text-sm text-[#E9E7E2]/70">
+                            {testimonial.position}{testimonial.position && testimonial.company ? ", " : ""}{testimonial.company}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-semibold text-[#E9E7E2]">{testimonial.author}</p>
-                        <p className="text-sm text-[#E9E7E2]/70">{testimonial.company}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <p className="text-[#E9E7E2]/70">No testimonials found.</p>
+              )}
             </StaggerReveal>
 
             {/* Stats Section */}
@@ -166,45 +225,6 @@ function StatCard({ stat }: StatCardProps) {
     </div>
   )
 }
-
-const testimonials = [
-  {
-    quote:
-      "Working with Zoolyum was a game-changer for our digital presence. The strategic vision and creative execution exceeded our expectations at every turn.",
-    author: "Michael Chen",
-    company: "Marketing Director, Elevate",
-  },
-  {
-    quote:
-      "Sakib has an incredible ability to identify the essence of a brand and translate it into powerful market positioning. His work was instrumental to our success.",
-    author: "Jessica Williams",
-    company: "Founder, Horizon",
-  },
-  {
-    quote:
-      "The depth of strategic thinking combined with creative excellence makes Zoolyum truly unique. Our brand transformation has driven measurable business results.",
-    author: "David Rodriguez",
-    company: "COO, Pulse",
-  },
-  {
-    quote:
-      "Our new brand identity perfectly captures the essence of our practice and has elevated our presence in the industry. Since launching, we've seen tangible benefits in terms of client engagement.",
-    author: "Alexandra Torres",
-    company: "Principal, Vertex Architecture",
-  },
-  {
-    quote:
-      "The positioning work gave us the strategic clarity we needed to revitalize our business in a challenging market. It has united our organization around a compelling vision.",
-    author: "Robert Chen",
-    company: "CEO, Quantum Financial",
-  },
-  {
-    quote:
-      "Sakib's approach to digital transformation went far beyond aesthetics. He helped us reimagine our entire customer journey, resulting in significant improvements in engagement and conversion.",
-    author: "Emma Thompson",
-    company: "Digital Director, Fusion Retail",
-  },
-]
 
 const stats = [
   {
