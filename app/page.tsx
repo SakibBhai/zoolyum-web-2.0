@@ -68,10 +68,11 @@ export default function Home() {
     fetch('/api/admin/about-page')
       .then(res => res.json())
       .then(data => {
-        if (data.hero_image_url) {
+        console.log('About page data fetched:', data);
+        if (data.hero_image_url || data.story_image_url) {
           setAboutData({
-            hero_image_url: data.hero_image_url,
-            story_image_url: data.story_image_url || "/placeholder.svg?height=600&width=500"
+            hero_image_url: data.hero_image_url || "/placeholder.svg?height=600&width=500",
+            story_image_url: data.story_image_url || data.hero_image_url || "/placeholder.svg?height=600&width=500"
           });
         }
       })
@@ -222,7 +223,7 @@ export default function Home() {
                   <div className="relative">
                     <div className="relative z-10 rounded-2xl overflow-hidden">
                       <ImageReveal
-                        src={aboutData.story_image_url}
+                        src={aboutData.hero_image_url}
                         alt="Zoolyum Agency"
                         width={500}
                         height={600}
