@@ -566,3 +566,31 @@ model about_page {
 
   @@map("about_page")
 }
+
+model team_page {
+  id                      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  hero_eyebrow            String?  @map("hero_eyebrow") @db.VarChar(100)
+  hero_title              String   @map("hero_title") @db.VarChar(255)
+  hero_description        String?  @map("hero_description")
+  leadership_eyebrow      String?  @map("leadership_eyebrow") @db.VarChar(100)
+  leadership_title        String   @map("leadership_title") @db.VarChar(255)
+  leadership_description  String?  @map("leadership_description")
+  team_eyebrow            String?  @map("team_eyebrow") @db.VarChar(100)
+  team_title              String   @map("team_title") @db.VarChar(255)
+  team_description        String?  @map("team_description")
+  culture_title           String   @map("culture_title") @db.VarChar(255)
+  culture_paragraph_1     String?  @map("culture_paragraph_1")
+  culture_paragraph_2     String?  @map("culture_paragraph_2")
+  culture_paragraph_3     String?  @map("culture_paragraph_3")
+  cta_title               String   @map("cta_title") @db.VarChar(255)
+  cta_description         String?  @map("cta_description")
+  cta_primary_text        String?  @map("cta_primary_text") @db.VarChar(100)
+  cta_primary_url         String?  @map("cta_primary_url") @db.VarChar(500)
+  cta_secondary_text      String?  @map("cta_secondary_text") @db.VarChar(100)
+  cta_secondary_url       String?  @map("cta_secondary_url") @db.VarChar(500)
+  is_active               Boolean  @default(true)
+  created_at              DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updated_at              DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("team_page")
+}

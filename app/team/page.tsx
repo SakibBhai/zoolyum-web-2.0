@@ -26,11 +26,57 @@ interface TeamMember {
   status: string
 }
 
+interface TeamPageConfig {
+  hero_eyebrow: string
+  hero_title: string
+  hero_description: string
+  leadership_eyebrow: string
+  leadership_title: string
+  leadership_description: string
+  team_eyebrow: string
+  team_title: string
+  team_description: string
+  culture_title: string
+  culture_paragraph_1: string
+  culture_paragraph_2: string
+  culture_paragraph_3: string
+  cta_title: string
+  cta_description: string
+  cta_primary_text: string
+  cta_primary_url: string
+  cta_secondary_text: string
+  cta_secondary_url: string
+}
+
+const defaultConfig: TeamPageConfig = {
+  hero_eyebrow: "Our Team",
+  hero_title: "Meet the Strategists & Creatives",
+  hero_description: "Our diverse team of experts brings together strategic thinking and creative excellence to deliver exceptional results for our clients.",
+  leadership_eyebrow: "Leadership",
+  leadership_title: "Our Leadership Team",
+  leadership_description: "Meet the visionaries guiding our agency's strategic direction and creative excellence.",
+  team_eyebrow: "Our Experts",
+  team_title: "The Full Zoolyum Team",
+  team_description: "Our talented team of strategists, designers, and digital experts work collaboratively to deliver exceptional results.",
+  culture_title: "Collaborative Innovation",
+  culture_paragraph_1: "At Zoolyum, we foster a culture of collaborative innovation where diverse perspectives come together to create exceptional work.",
+  culture_paragraph_2: "Our team is united by a passion for strategic thinking and creative excellence. We're curious, ambitious, and committed to continuous learning and growth.",
+  culture_paragraph_3: "We're always looking for talented individuals who share our values and passion for transforming brands.",
+  cta_title: "Ready to Transform Your Brand?",
+  cta_description: "Let's collaborate to create a strategic brand experience that resonates with your audience and drives meaningful results for your business.",
+  cta_primary_text: "Start Your Project",
+  cta_primary_url: "/contact",
+  cta_secondary_text: "View Our Portfolio",
+  cta_secondary_url: "/portfolio"
+}
+
 export default function TeamPage() {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+  const [pageConfig, setPageConfig] = useState<TeamPageConfig>(defaultConfig)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Fetch team members
     fetch('/api/team')
       .then(res => res.json())
       .then(data => {
@@ -41,6 +87,17 @@ export default function TeamPage() {
       })
       .catch(error => {
         console.error('Error fetching team members:', error)
+      })
+
+    // Fetch page configuration
+    fetch('/api/admin/team-page')
+      .then(res => res.json())
+      .then(config => {
+        console.log('Team page config fetched:', config)
+        setPageConfig(config)
+      })
+      .catch(error => {
+        console.error('Error fetching team page config:', error)
       })
       .finally(() => {
         setLoading(false)
@@ -58,9 +115,9 @@ export default function TeamPage() {
           {/* Hero Section */}
           <section className="container mx-auto px-4 py-12">
             <PageHeadline
-              eyebrow="Our Team"
-              title="Meet the Strategists & Creatives"
-              description="Our diverse team of experts brings together strategic thinking and creative excellence to deliver exceptional results for our clients."
+              eyebrow={pageConfig.hero_eyebrow}
+              title={pageConfig.hero_title}
+              description={pageConfig.hero_description}
               titleGradient={true}
             />
 
@@ -81,9 +138,9 @@ export default function TeamPage() {
           <section className="py-16 md:py-24 bg-[#1A1A1A]">
             <div className="container mx-auto px-4">
               <PageHeadline
-                eyebrow="Leadership"
-                title="Our Leadership Team"
-                description="Meet the visionaries guiding our agency's strategic direction and creative excellence."
+                eyebrow={pageConfig.leadership_eyebrow}
+                title={pageConfig.leadership_title}
+                description={pageConfig.leadership_description}
                 size="medium"
               />
 
@@ -121,9 +178,9 @@ export default function TeamPage() {
           <section className="py-16 md:py-24">
             <div className="container mx-auto px-4">
               <PageHeadline
-                eyebrow="Our Experts"
-                title="The Full Zoolyum Team"
-                description="Our talented team of strategists, designers, and digital experts work collaboratively to deliver exceptional results."
+                eyebrow={pageConfig.team_eyebrow}
+                title={pageConfig.team_title}
+                description={pageConfig.team_description}
                 size="medium"
               />
 
@@ -184,22 +241,16 @@ export default function TeamPage() {
                     mobileType="words"
                     mobileStaggerDelay={0.02}
                   >
-                    Collaborative <span className="headline-highlight">Innovation</span>
+                    {pageConfig.culture_title}
                   </TextReveal>
                   <p className="text-base md:text-lg text-[#E9E7E2]/80 mb-4">
-                    At Zoolyum, we foster a culture of collaborative innovation where diverse perspectives come together
-                    to create exceptional work. We believe that the best ideas emerge when talented individuals with
-                    different backgrounds and expertise collaborate toward a shared vision.
+                    {pageConfig.culture_paragraph_1}
                   </p>
                   <p className="text-base md:text-lg text-[#E9E7E2]/80 mb-4">
-                    Our team is united by a passion for strategic thinking and creative excellence. We're curious,
-                    ambitious, and committed to continuous learning and growth. We celebrate both individual
-                    contributions and collective achievements, recognizing that our strength lies in our diversity and
-                    collaborative spirit.
+                    {pageConfig.culture_paragraph_2}
                   </p>
                   <p className="text-base md:text-lg text-[#E9E7E2]/80">
-                    We're always looking for talented individuals who share our values and passion for transforming
-                    brands. If you're interested in joining our team, we'd love to hear from you.
+                    {pageConfig.culture_paragraph_3}
                   </p>
 
                   <div className="mt-8">
@@ -228,29 +279,28 @@ export default function TeamPage() {
                 <div className="relative z-10 text-center max-w-3xl mx-auto">
                   <span className="text-[#FF5001] text-sm uppercase tracking-widest font-medium">Work With Us</span>
                   <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mt-4 mb-6">
-                    Ready to Transform Your Brand?
+                    {pageConfig.cta_title}
                   </h2>
                   <p className="text-lg md:text-xl text-[#E9E7E2]/80 mb-8 md:mb-10">
-                    Let's collaborate to create a strategic brand experience that resonates with your audience and
-                    drives meaningful results for your business.
+                    {pageConfig.cta_description}
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <Link
-                      href="/contact"
+                      href={pageConfig.cta_primary_url}
                       className="px-6 py-3 md:px-8 md:py-4 bg-[#FF5001] text-[#161616] font-bold rounded-full hover:bg-[#FF5001]/90 transition-all duration-300 inline-flex items-center justify-center group"
                       data-cursor="button"
                       data-cursor-text="Contact"
                     >
-                      Start Your Project
+                      {pageConfig.cta_primary_text}
                       <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
                     </Link>
                     <Link
-                      href="/portfolio"
+                      href={pageConfig.cta_secondary_url}
                       className="px-6 py-3 md:px-8 md:py-4 border border-[#FF5001] text-[#FF5001] font-bold rounded-full hover:bg-[#FF5001]/10 transition-all duration-300 inline-flex items-center justify-center group"
                       data-cursor="button"
                       data-cursor-text="Portfolio"
                     >
-                      View Our Portfolio
+                      {pageConfig.cta_secondary_text}
                       <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
                     </Link>
                   </div>
