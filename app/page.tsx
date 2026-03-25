@@ -28,6 +28,11 @@ interface Statistic {
   order: number;
 }
 
+interface AboutPageData {
+  hero_image_url: string;
+  story_image_url: string;
+}
+
 export default function Home() {
   const isMobile = useMediaQuery("(max-width: 768px)");
   const isTablet = useMediaQuery("(max-width: 1024px)");
@@ -38,6 +43,10 @@ export default function Home() {
     { label: "Happy Clients", value: "5", suffix: "+", order: 3 },
     { label: "Industry Awards", value: "5", suffix: "", order: 4 }
   ]);
+  const [aboutData, setAboutData] = useState<AboutPageData>({
+    hero_image_url: "/placeholder.svg?height=600&width=500",
+    story_image_url: "/placeholder.svg?height=600&width=500"
+  });
 
   // Fetch statistics from API
   useEffect(() => {
@@ -50,6 +59,24 @@ export default function Home() {
       })
       .catch(error => {
         console.error('Error fetching statistics:', error);
+        // Keep default values on error
+      });
+  }, []);
+
+  // Fetch about page data from API
+  useEffect(() => {
+    fetch('/api/admin/about-page')
+      .then(res => res.json())
+      .then(data => {
+        if (data.hero_image_url) {
+          setAboutData({
+            hero_image_url: data.hero_image_url,
+            story_image_url: data.story_image_url || "/placeholder.svg?height=600&width=500"
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching about page:', error);
         // Keep default values on error
       });
   }, []);
@@ -195,7 +222,7 @@ export default function Home() {
                   <div className="relative">
                     <div className="relative z-10 rounded-2xl overflow-hidden">
                       <ImageReveal
-                        src="/placeholder.svg?height=600&width=500"
+                        src={aboutData.story_image_url}
                         alt="Zoolyum Agency"
                         width={500}
                         height={600}
