@@ -125,7 +125,37 @@ export default function AboutPageAdmin() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to save about page')
+        const errorData = await response.json()
+        console.error('Save error details:', errorData)
+
+        // If table doesn't exist, try to initialize database
+        if (errorData.details && errorData.details.includes('does not exist')) {
+          toast.info('Initializing database...')
+
+          const initResponse = await fetch('/api/init-db', {
+            method: 'POST'
+          })
+
+          if (initResponse.ok) {
+            // Try saving again after initialization
+            const retryResponse = await fetch(url, {
+              method,
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data)
+            })
+
+            if (!retryResponse.ok) {
+              throw new Error('Failed to save about page after database initialization')
+            }
+
+            const result = await retryResponse.json()
+            setData(prev => ({ ...prev, id: result.aboutPage.id }))
+            toast.success('About page saved successfully!')
+            return
+          }
+        }
+
+        throw new Error(errorData.error || 'Failed to save about page')
       }
 
       const result = await response.json()
@@ -133,7 +163,7 @@ export default function AboutPageAdmin() {
       toast.success('About page saved successfully!')
     } catch (error) {
       console.error('Error saving about page:', error)
-      toast.error('Failed to save about page')
+      toast.error(error instanceof Error ? error.message : 'Failed to save about page')
     } finally {
       setSaving(false)
     }

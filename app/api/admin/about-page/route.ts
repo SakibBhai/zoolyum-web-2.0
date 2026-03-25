@@ -90,6 +90,12 @@ export async function POST(request: NextRequest) {
 
     const data = await request.json()
 
+    // Log incoming data for debugging
+    console.log('Creating about page with data:', JSON.stringify(data, null, 2))
+
+    // Remove id and timestamp fields from incoming data
+    const { id, created_at, updated_at, ...cleanData } = data
+
     // Deactivate all existing about pages
     await prisma.about_page.updateMany({
       where: { is_active: true },
@@ -99,7 +105,7 @@ export async function POST(request: NextRequest) {
     // Create new about page
     const aboutPage = await prisma.about_page.create({
       data: {
-        ...data,
+        ...cleanData,
         is_active: true
       }
     })
@@ -115,8 +121,15 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Error creating about page:', error)
+    console.error('Error details:', JSON.stringify(error, null, 2))
+
+    // Return more detailed error for debugging
     return NextResponse.json(
-      { error: 'Failed to create about page content' },
+      {
+        error: 'Failed to create about page content',
+        details: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      },
       { status: 500 }
     )
   }
@@ -135,7 +148,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const data = await request.json()
-    const { id, ...updateData } = data
+    const { id, created_at, updated_at, ...updateData } = data
 
     if (!id) {
       return NextResponse.json(
@@ -161,8 +174,12 @@ export async function PUT(request: NextRequest) {
 
   } catch (error) {
     console.error('Error updating about page:', error)
+    console.error('Error details:', JSON.stringify(error, null, 2))
     return NextResponse.json(
-      { error: 'Failed to update about page content' },
+      {
+        error: 'Failed to update about page content',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     )
   }
