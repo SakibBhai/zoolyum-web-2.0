@@ -33,6 +33,19 @@ interface AboutPageData {
   story_image_url: string;
 }
 
+interface TeamMember {
+  id: string;
+  name: string;
+  designation: string | null;
+  bio: string | null;
+  imageUrl: string | null;
+  email: string | null;
+  linkedin: string | null;
+  twitter: string | null;
+  featured: boolean;
+  status: string;
+}
+
 export default function Home() {
   const isMobile = useMediaQuery("(max-width: 768px)");
   const isTablet = useMediaQuery("(max-width: 1024px)");
@@ -47,6 +60,7 @@ export default function Home() {
     hero_image_url: "/placeholder.svg?height=600&width=500",
     story_image_url: "/placeholder.svg?height=600&width=500"
   });
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
 
   // Fetch statistics from API
   useEffect(() => {
@@ -79,6 +93,26 @@ export default function Home() {
       .catch(error => {
         console.error('Error fetching about page:', error);
         // Keep default values on error
+      });
+  }, []);
+
+  // Fetch team members from API
+  useEffect(() => {
+    fetch('/api/team')
+      .then(res => res.json())
+      .then(data => {
+        console.log('Team members fetched:', data);
+        if (Array.isArray(data)) {
+          // Filter for featured and active members, limit to 4
+          const featuredMembers = data
+            .filter((member: TeamMember) => member.featured && member.status === 'ACTIVE')
+            .slice(0, 4);
+          setTeamMembers(featuredMembers);
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching team members:', error);
+        // Keep empty array on error
       });
   }, []);
 
@@ -328,26 +362,46 @@ export default function Home() {
                 mobileStaggerDelay={0.05}
                 mobileAnimation="fade"
               >
-                <TeamMemberCard
-                  name="Sakib Chowdhury"
-                  role="Founder & Creative Director"
-                  image="/placeholder.svg?height=400&width=300"
-                />
-                <TeamMemberCard
-                  name="Emma Rodriguez"
-                  role="Brand Strategist"
-                  image="/placeholder.svg?height=400&width=300"
-                />
-                <TeamMemberCard
-                  name="David Chen"
-                  role="Digital Director"
-                  image="/placeholder.svg?height=400&width=300"
-                />
-                <TeamMemberCard
-                  name="Sarah Johnson"
-                  role="Client Relations"
-                  image="/placeholder.svg?height=400&width=300"
-                />
+                {teamMembers.length > 0 ? (
+                  teamMembers.map((member) => (
+                    <TeamMemberCard
+                      key={member.id}
+                      name={member.name}
+                      role={member.designation || "Team Member"}
+                      image={member.imageUrl || "/placeholder.svg?height=400&width=300"}
+                      bio={member.bio || ""}
+                      social={{
+                        linkedin: member.linkedin || "",
+                        twitter: member.twitter || "",
+                      }}
+                      featured={member.featured}
+                    />
+                  ))
+                ) : (
+                  // Fallback to placeholder members if no featured members exist
+                  <>
+                    <TeamMemberCard
+                      name="Sakib Chowdhury"
+                      role="Founder & Creative Director"
+                      image="/placeholder.svg?height=400&width=300"
+                    />
+                    <TeamMemberCard
+                      name="Emma Rodriguez"
+                      role="Brand Strategist"
+                      image="/placeholder.svg?height=400&width=300"
+                    />
+                    <TeamMemberCard
+                      name="David Chen"
+                      role="Digital Director"
+                      image="/placeholder.svg?height=400&width=300"
+                    />
+                    <TeamMemberCard
+                      name="Sarah Johnson"
+                      role="Client Relations"
+                      image="/placeholder.svg?height=400&width=300"
+                    />
+                  </>
+                )}
               </StaggerReveal>
 
               <ScrollReveal
