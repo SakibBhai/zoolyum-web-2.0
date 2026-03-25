@@ -115,9 +115,9 @@ model TeamMember {
   phone                                                       String?              @db.VarChar(50)
   role                                                        String               @db.VarChar(255)
   skills                                                      Json?                @default("[]")
+  id                                                          String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   featured                                                    Boolean?             @default(false)
   order                                                       Int?                 @default(0)
-  id                                                          String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   content_calendar_content_calendar_approved_byToteam_members content_calendar[]   @relation("content_calendar_approved_byToteam_members")
   content_calendar_content_calendar_assigned_toToteam_members content_calendar[]   @relation("content_calendar_assigned_toToteam_members")
   invoices                                                    invoices[]
@@ -537,44 +537,32 @@ model jobApplication {
 }
 
 model about_page {
-  id                        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  // Hero Section
-  hero_eyebrow              String?  @map("hero_eyebrow") @db.VarChar(100)
-  hero_title                String   @map("hero_title") @db.VarChar(255)
-  hero_description          String?  @map("hero_description")
-  hero_image_url            String?  @map("hero_image_url") @db.VarChar(500)
-
-  // Story Section
-  story_title               String   @map("story_title") @db.VarChar(255)
-  story_paragraph_1         String?  @map("story_paragraph_1")
-  story_paragraph_2         String?  @map("story_paragraph_2")
-  story_paragraph_3         String?  @map("story_paragraph_3")
-  story_image_url           String?  @map("story_image_url") @db.VarChar(500)
-
-  // Mission Section
-  mission_title             String   @map("mission_title") @db.VarChar(255)
-  mission_content           String?  @map("mission_content")
-
-  // Values Section (JSON array)
-  values                    Json     @default("[]")
-
-  // Team Section
-  team_eyebrow              String?  @map("team_eyebrow") @db.VarChar(100)
-  team_title                String   @map("team_title") @db.VarChar(255)
-  team_description          String?  @map("team_description")
-
-  // CTA Section
-  cta_eyebrow               String?  @map("cta_eyebrow") @db.VarChar(100)
-  cta_title                 String   @map("cta_title") @db.VarChar(255)
-  cta_description           String?  @map("cta_description")
-  cta_primary_text          String?  @map("cta_primary_text") @db.VarChar(100)
-  cta_primary_url           String?  @map("cta_primary_url") @db.VarChar(500)
-  cta_secondary_text        String?  @map("cta_secondary_text") @db.VarChar(100)
-  cta_secondary_url         String?  @map("cta_secondary_url") @db.VarChar(500)
-
-  is_active                 Boolean  @default(true)
-  created_at                DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updated_at                DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  hero_eyebrow       String?  @map("hero_eyebrow") @db.VarChar(100)
+  hero_title         String   @map("hero_title") @db.VarChar(255)
+  hero_description   String?  @map("hero_description")
+  hero_image_url     String?  @map("hero_image_url") @db.VarChar(500)
+  story_title        String   @map("story_title") @db.VarChar(255)
+  story_paragraph_1  String?  @map("story_paragraph_1")
+  story_paragraph_2  String?  @map("story_paragraph_2")
+  story_paragraph_3  String?  @map("story_paragraph_3")
+  story_image_url    String?  @map("story_image_url") @db.VarChar(500)
+  mission_title      String   @map("mission_title") @db.VarChar(255)
+  mission_content    String?  @map("mission_content")
+  values             Json     @default("[]")
+  team_eyebrow       String?  @map("team_eyebrow") @db.VarChar(100)
+  team_title         String   @map("team_title") @db.VarChar(255)
+  team_description   String?  @map("team_description")
+  cta_eyebrow        String?  @map("cta_eyebrow") @db.VarChar(100)
+  cta_title          String   @map("cta_title") @db.VarChar(255)
+  cta_description    String?  @map("cta_description")
+  cta_primary_text   String?  @map("cta_primary_text") @db.VarChar(100)
+  cta_primary_url    String?  @map("cta_primary_url") @db.VarChar(500)
+  cta_secondary_text String?  @map("cta_secondary_text") @db.VarChar(100)
+  cta_secondary_url  String?  @map("cta_secondary_url") @db.VarChar(500)
+  is_active          Boolean  @default(true)
+  created_at         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updated_at         DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@map("about_page")
 }
