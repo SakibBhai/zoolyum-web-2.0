@@ -5,6 +5,7 @@ import {
   deleteTeamMember,
 } from "@/lib/team-operations";
 import { getCurrentUser } from "@/lib/next-auth";
+import { revalidatePath } from "next/cache";
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -51,6 +52,10 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       featured: body.featured,
     });
 
+    // Revalidate the team page to show updated data immediately
+    revalidatePath('/team');
+    revalidatePath('/admin/team');
+
     return NextResponse.json(teamMember);
   } catch (error) {
     console.error("Error in PUT /api/team/[id]:", error);
@@ -71,6 +76,11 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
 
     const { id } = await context.params;
     await deleteTeamMember(id);
+
+    // Revalidate the team page to show updated data immediately
+    revalidatePath('/team');
+    revalidatePath('/admin/team');
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error in DELETE /api/team/[id]:", error);

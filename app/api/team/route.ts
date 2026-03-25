@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createTeamMember, getAllTeamMembers } from "@/lib/team-operations";
 import { auth } from "@/lib/next-auth";
+import { revalidatePath } from "next/cache";
 
 interface ApiError {
   message: string;
@@ -105,6 +106,11 @@ export async function POST(request: NextRequest) {
     };
 
     const createdMember = await createTeamMember(newTeamMember);
+
+    // Revalidate the team page to show updated data immediately
+    revalidatePath('/team');
+    revalidatePath('/admin/team');
+
     return NextResponse.json(createdMember, { status: 201 });
   } catch (error) {
     return handleApiError(error);
