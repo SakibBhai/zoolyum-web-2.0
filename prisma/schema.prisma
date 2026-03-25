@@ -115,6 +115,8 @@ model TeamMember {
   phone                                                       String?              @db.VarChar(50)
   role                                                        String               @db.VarChar(255)
   skills                                                      Json?                @default("[]")
+  featured                                                    Boolean?             @default(false)
+  order                                                       Int?                 @default(0)
   id                                                          String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   content_calendar_content_calendar_approved_byToteam_members content_calendar[]   @relation("content_calendar_approved_byToteam_members")
   content_calendar_content_calendar_assigned_toToteam_members content_calendar[]   @relation("content_calendar_assigned_toToteam_members")

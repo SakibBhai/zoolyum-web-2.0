@@ -56,8 +56,8 @@ export async function getAllTeamMembers(): Promise<TeamMemberWithStatus[]> {
       linkedin: null, // Not available in current schema
       twitter: null, // Not available in current schema
       status: member.is_active ? 'ACTIVE' : 'INACTIVE',
-      order: 0, // Default value since not in schema
-      featured: false, // Default value since not in schema
+      order: member.order || 0,
+      featured: member.featured || false,
       createdAt: member.createdAt || new Date(),
       updatedAt: member.updatedAt || new Date(),
       statusDisplay: member.is_active ? 'Active' : 'Inactive'
@@ -84,6 +84,8 @@ export async function getTeamMemberById(id: string) {
         phone: true,
         employee_id: true,
         is_active: true,
+        featured: true,
+        order: true,
         createdAt: true,
         updatedAt: true
       }
@@ -106,8 +108,8 @@ export async function getTeamMemberById(id: string) {
       linkedin: null, // Not available in current schema
       twitter: null, // Not available in current schema
       status: teamMember.is_active ? 'ACTIVE' : 'INACTIVE',
-      order: 0, // Default value since not in schema
-      featured: false, // Default value since not in schema
+      order: teamMember.order || 0,
+      featured: teamMember.featured || false,
       createdAt: teamMember.createdAt || new Date(), // Ensure non-null Date
       updatedAt: teamMember.updatedAt || new Date() // Ensure non-null Date
     };
@@ -130,8 +132,10 @@ export async function createTeamMember(data: TeamMemberData) {
         avatar: data.imageUrl, // Map imageUrl to avatar
         email: data.email || '',
         phone: null, // Not provided in interface
-        is_active: data.status ? data.status === 'ACTIVE' : true // Map status to is_active boolean
-        // linkedin, twitter, order, featured are not available in current schema
+        is_active: data.status ? data.status === 'ACTIVE' : true, // Map status to is_active boolean
+        featured: data.featured || false,
+        order: data.order || 0
+        // linkedin, twitter are not available in current schema
       }
     });
 
@@ -156,8 +160,9 @@ export async function updateTeamMember(id: string, data: Partial<TeamMemberData>
         ...(data.imageUrl !== undefined && { avatar: data.imageUrl }), // Map imageUrl to avatar
         ...(data.email !== undefined && { email: data.email }),
         // linkedin and twitter are not available in current schema
-        ...(data.status && { is_active: data.status === 'ACTIVE' }) // Map ACTIVE to is_active boolean
-        // order and featured are not available in current schema
+        ...(data.status && { is_active: data.status === 'ACTIVE' }), // Map ACTIVE to is_active boolean
+        ...(data.featured !== undefined && { featured: data.featured }),
+        ...(data.order !== undefined && { order: data.order })
       }
     });
 
@@ -206,10 +211,11 @@ export async function getFeaturedTeamMembers() {
   try {
     const teamMembers = await prisma.teamMember.findMany({
       where: {
-        is_active: true
-        // featured field is not available in current schema, so returning all active members
+        is_active: true,
+        featured: true
       },
       orderBy: [
+        { order: 'asc' },
         { createdAt: 'desc' }
       ]
     });
