@@ -30,6 +30,7 @@ interface TeamPageConfig {
   hero_eyebrow: string
   hero_title: string
   hero_description: string
+  hero_image_url: string
   leadership_eyebrow: string
   leadership_title: string
   leadership_description: string
@@ -40,6 +41,7 @@ interface TeamPageConfig {
   culture_paragraph_1: string
   culture_paragraph_2: string
   culture_paragraph_3: string
+  culture_image_url: string
   cta_title: string
   cta_description: string
   cta_primary_text: string
@@ -52,6 +54,7 @@ const defaultConfig: TeamPageConfig = {
   hero_eyebrow: "Our Team",
   hero_title: "Meet the Strategists & Creatives",
   hero_description: "Our diverse team of experts brings together strategic thinking and creative excellence to deliver exceptional results for our clients.",
+  hero_image_url: "/placeholder.svg?height=600&width=1200",
   leadership_eyebrow: "Leadership",
   leadership_title: "Our Leadership Team",
   leadership_description: "Meet the visionaries guiding our agency's strategic direction and creative excellence.",
@@ -62,6 +65,7 @@ const defaultConfig: TeamPageConfig = {
   culture_paragraph_1: "At Zoolyum, we foster a culture of collaborative innovation where diverse perspectives come together to create exceptional work.",
   culture_paragraph_2: "Our team is united by a passion for strategic thinking and creative excellence. We're curious, ambitious, and committed to continuous learning and growth.",
   culture_paragraph_3: "We're always looking for talented individuals who share our values and passion for transforming brands.",
+  culture_image_url: "/placeholder.svg?height=600&width=500",
   cta_title: "Ready to Transform Your Brand?",
   cta_description: "Let's collaborate to create a strategic brand experience that resonates with your audience and drives meaningful results for your business.",
   cta_primary_text: "Start Your Project",
@@ -124,7 +128,7 @@ export default function TeamPage() {
             <div className="mt-12 md:mt-16">
               <div className="relative rounded-2xl overflow-hidden">
                 <ImageReveal
-                  src="/placeholder.svg?height=600&width=1200"
+                  src={pageConfig.hero_image_url}
                   alt="Zoolyum Agency Team"
                   width={1200}
                   height={600}
@@ -221,7 +225,7 @@ export default function TeamPage() {
                   <div className="relative">
                     <div className="relative z-10 rounded-2xl overflow-hidden">
                       <ImageReveal
-                        src="/placeholder.svg?height=600&width=500"
+                        src={pageConfig.culture_image_url}
                         alt="Zoolyum Agency Culture"
                         width={500}
                         height={600}

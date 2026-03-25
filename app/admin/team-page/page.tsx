@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { ImageUpload } from '@/components/ui/image-upload'
 import { Save, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
@@ -14,6 +15,7 @@ interface TeamPageData {
   hero_eyebrow: string
   hero_title: string
   hero_description: string
+  hero_image_url: string
   leadership_eyebrow: string
   leadership_title: string
   leadership_description: string
@@ -24,6 +26,7 @@ interface TeamPageData {
   culture_paragraph_1: string
   culture_paragraph_2: string
   culture_paragraph_3: string
+  culture_image_url: string
   cta_title: string
   cta_description: string
   cta_primary_text: string
@@ -36,6 +39,7 @@ const defaultData: TeamPageData = {
   hero_eyebrow: 'Our Team',
   hero_title: 'Meet the Strategists & Creatives',
   hero_description: 'Our diverse team of experts brings together strategic thinking and creative excellence to deliver exceptional results for our clients.',
+  hero_image_url: '/placeholder.svg?height=600&width=1200',
   leadership_eyebrow: 'Leadership',
   leadership_title: 'Our Leadership Team',
   leadership_description: "Meet the visionaries guiding our agency's strategic direction and creative excellence.",
@@ -46,6 +50,7 @@ const defaultData: TeamPageData = {
   culture_paragraph_1: 'At Zoolyum, we foster a culture of collaborative innovation where diverse perspectives come together to create exceptional work.',
   culture_paragraph_2: "Our team is united by a passion for strategic thinking and creative excellence. We're curious, ambitious, and committed to continuous learning and growth.",
   culture_paragraph_3: "We're always looking for talented individuals who share our values and passion for transforming brands.",
+  culture_image_url: '/placeholder.svg?height=600&width=500',
   cta_title: 'Ready to Transform Your Brand?',
   cta_description: "Let's collaborate to create a strategic brand experience that resonates with your audience and drives meaningful results for your business.",
   cta_primary_text: 'Start Your Project',
@@ -148,6 +153,26 @@ export default function TeamPageAdmin() {
                 onChange={(e) => handleChange('hero_description', e.target.value)}
                 rows={3}
               />
+            </div>
+            <div>
+              <Label>Hero Image</Label>
+              <div className="mt-2">
+                <ImageUpload
+                  onUploadComplete={(url) => handleChange('hero_image_url', url)}
+                  folder="team-page"
+                  accept="image/jpeg,image/jpg,image/png,image/webp"
+                />
+                {data.hero_image_url && (
+                  <div className="mt-4">
+                    <p className="text-sm text-muted-foreground mb-2">Current image:</p>
+                    <img
+                      src={data.hero_image_url}
+                      alt="Hero preview"
+                      className="max-w-xs rounded-lg border border-border"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -263,6 +288,26 @@ export default function TeamPageAdmin() {
                 onChange={(e) => handleChange('culture_paragraph_3', e.target.value)}
                 rows={3}
               />
+            </div>
+            <div>
+              <Label>Culture Image</Label>
+              <div className="mt-2">
+                <ImageUpload
+                  onUploadComplete={(url) => handleChange('culture_image_url', url)}
+                  folder="team-page"
+                  accept="image/jpeg,image/jpg,image/png,image/webp"
+                />
+                {data.culture_image_url && (
+                  <div className="mt-4">
+                    <p className="text-sm text-muted-foreground mb-2">Current image:</p>
+                    <img
+                      src={data.culture_image_url}
+                      alt="Culture preview"
+                      className="max-w-xs rounded-lg border border-border"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
