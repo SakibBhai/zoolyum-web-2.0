@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { fetchContactSettings, updateContactSettings } from '@/lib/contact-operations'
-import { getCurrentUser } from '@/lib/stack-auth'
+import { getCurrentUser } from '@/lib/next-auth'
 
 // GET /api/contacts/settings - Get contact settings (Admin only)
 export async function GET() {

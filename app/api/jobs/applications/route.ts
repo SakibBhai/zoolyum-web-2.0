@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { getCurrentUser, isAdmin } from "@/lib/stack-auth"
+import { getCurrentUser, isAdmin } from "@/lib/next-auth"
 import { z } from "zod"
 
 export async function GET(request: NextRequest) {

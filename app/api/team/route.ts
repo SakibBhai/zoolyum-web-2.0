@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createTeamMember, getAllTeamMembers } from "@/lib/team-operations";
-import { getStackServerApp } from "@/lib/stack-server";
+import { auth } from "@/lib/next-auth";
 
 interface ApiError {
   message: string;
@@ -71,16 +71,13 @@ export async function GET() {
 // POST /api/team - Create new team member
 export async function POST(request: NextRequest) {
   try {
-    // Skip authentication in development or if Stack Auth is not configured
-    if (process.env.NODE_ENV === 'production') {
-      const stackServerApp = await getStackServerApp();
-      if (stackServerApp) {
-        const user = await stackServerApp.getUser();
+    // Check authentication using NextAuth
+    const session = await auth();
 
-        if (!user) {
-          return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-      }
+    // In development, allow requests
+    // In production, require authentication
+    if (process.env.NODE_ENV === 'production' && !session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Ensure DATABASE_URL is present for write operations

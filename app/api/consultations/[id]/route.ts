@@ -5,7 +5,7 @@ import {
   deleteConsultation,
   validateConsultationData 
 } from '@/lib/consultation-operations'
-import { getCurrentUser } from '@/lib/stack-auth'
+import { getCurrentUser } from '@/lib/next-auth'
 
 interface RouteParams {
   params: Promise<{

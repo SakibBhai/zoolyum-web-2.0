@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCurrentUser } from '@/lib/stack-auth';
+import { getCurrentUser } from '@/lib/next-auth';
 import { prisma } from '@/lib/prisma';
 import { createId } from '@paralleldrive/cuid2';
 import { createCorsResponse, createCorsErrorResponse, handleCorsOptions } from '@/lib/cors';

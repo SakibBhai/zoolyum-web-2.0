@@ -4,7 +4,7 @@ import type React from "react";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useConditionalUser } from "@/hooks/use-conditional-user";
+import { useSession } from "next-auth/react";
 import { createBlogPost } from "../../../../../lib/blog-operations";
 import { PageTransition } from "@/components/page-transition";
 import { Save, X, InfoIcon, Loader2 } from "lucide-react";
@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function NewBlogPostPage() {
-  const user = useConditionalUser();
+  const { data: session } = useSession();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -31,12 +31,12 @@ export default function NewBlogPostPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user) {
+    if (!session) {
       router.push("/admin/login");
     }
-  }, [user, router]);
+  }, [session, router]);
 
-  if (!user) {
+  if (!session) {
     return null;
   }
 
@@ -93,7 +93,7 @@ export default function NewBlogPostPage() {
     setError(null);
 
     try {
-      if (!user) {
+      if (!session) {
         throw new Error("You must be logged in to create a post");
       }
 

@@ -4,7 +4,7 @@ import type React from "react";
 
 import { useState, useEffect, useActionState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useConditionalUser } from "@/hooks/use-conditional-user";
+import { useSession } from "next-auth/react";
 import { getBlogPostBySlug } from "@/lib/blog-operations";
 import { updateBlogPostAction, redirectToBlogDashboard } from "@/app/actions/blog-actions";
 import { PageTransition } from "@/components/page-transition";
@@ -18,7 +18,7 @@ export default function EditBlogPostPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const user = useConditionalUser();
+  const { data: session } = useSession();
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     id: "", // Change id to string
@@ -136,7 +136,7 @@ export default function EditBlogPostPage({
     e.preventDefault();
     setError(null);
 
-    if (!user) {
+    if (!session) {
       setError("You must be logged in to update a post");
       toast({
         title: "Error",

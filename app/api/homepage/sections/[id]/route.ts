@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCurrentUser } from '@/lib/stack-auth';
+import { getCurrentUser } from '@/lib/next-auth';
 import { prisma } from '@/lib/prisma';
 
 // GET /api/homepage/sections/[id] - Get a specific section

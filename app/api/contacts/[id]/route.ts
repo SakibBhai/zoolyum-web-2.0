@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { fetchContact, updateContact, deleteContact } from '@/lib/contact-operations'
-import { getCurrentUser } from '@/lib/stack-auth'
+import { getCurrentUser } from '@/lib/next-auth'
 
 interface RouteParams {
   params: Promise<{

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/stack-auth";
+import { getCurrentUser } from "@/lib/next-auth";
 
 // GET /api/settings - Get all settings
 export async function GET(request: NextRequest) {

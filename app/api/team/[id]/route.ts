@@ -4,7 +4,7 @@ import {
   updateTeamMember,
   deleteTeamMember,
 } from "@/lib/team-operations";
-import { getCurrentUser } from "@/lib/stack-auth";
+import { getCurrentUser } from "@/lib/next-auth";
 
 interface RouteContext {
   params: Promise<{ id: string }>;

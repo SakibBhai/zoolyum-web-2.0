@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getConsultationStats } from '@/lib/consultation-operations'
-import { getCurrentUser } from '@/lib/stack-auth'
+import { getCurrentUser } from '@/lib/next-auth'
 
 // GET /api/consultations/stats - Get consultation statistics (Admin only)
 export async function GET() {

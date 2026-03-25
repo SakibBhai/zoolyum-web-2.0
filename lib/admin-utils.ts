@@ -4,7 +4,7 @@
  * Helper functions for admin user management and authentication.
  */
 
-import { getCurrentUser } from './stack-auth'
+import { getCurrentUser } from './next-auth'
 
 /**
  * Admin email whitelist
@@ -42,10 +42,8 @@ export async function isAdmin(): Promise<boolean> {
       return false
     }
 
-    // Get user email (Stack Auth uses different properties)
-    const userEmail = user.primaryEmail ||
-                      (user as any).email ||
-                      user.account?.primaryEmail
+    // Get user email from NextAuth
+    const userEmail = user.email
 
     if (!userEmail) {
       console.log('Admin check: User has no email')

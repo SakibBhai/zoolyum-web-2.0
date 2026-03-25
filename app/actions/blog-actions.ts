@@ -3,7 +3,7 @@
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { PrismaClient } from '@prisma/client';
-import { getCurrentUser } from '@/lib/stack-auth';
+import { getCurrentUser } from '@/lib/next-auth';
 
 const prisma = new PrismaClient();
 

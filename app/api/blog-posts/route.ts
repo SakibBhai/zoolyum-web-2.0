@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCurrentUser } from '@/lib/stack-auth';
+import { getCurrentUser } from '@/lib/next-auth';
 import { prisma } from '@/lib/prisma';
 
 interface BlogPost {
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
         imageUrl: imageUrl || null,
         published: published || false,
         tags: tags || [],
-        authorId: user.primaryEmail || user.id
+        authorId: user.email || user.id
       }
     });
     
