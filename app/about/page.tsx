@@ -21,6 +21,81 @@ interface Statistic {
   order: number;
 }
 
+interface AboutPageData {
+  hero_eyebrow: string;
+  hero_title: string;
+  hero_description: string;
+  hero_image_url: string;
+  story_title: string;
+  story_paragraph_1: string;
+  story_paragraph_2: string;
+  story_paragraph_3: string;
+  story_image_url: string;
+  mission_title: string;
+  mission_content: string;
+  values: Array<{
+    number: string;
+    title: string;
+    description: string;
+  }>;
+  team_eyebrow: string;
+  team_title: string;
+  team_description: string;
+  cta_eyebrow: string;
+  cta_title: string;
+  cta_description: string;
+  cta_primary_text: string;
+  cta_primary_url: string;
+  cta_secondary_text: string;
+  cta_secondary_url: string;
+}
+
+const defaultAboutData: AboutPageData = {
+  hero_eyebrow: "About Us",
+  hero_title: "Strategic Brand Alchemy for Modern Businesses",
+  hero_description: "Zoolyum is a full-service brand strategy agency dedicated to transforming businesses into powerful market forces through strategic thinking and creative excellence.",
+  hero_image_url: "/placeholder.svg?height=600&width=1200",
+  story_title: "From Vision to Reality",
+  story_paragraph_1: "Founded in 2013 by Sakib Chowdhury, Zoolyum began with a simple yet powerful vision: to help brands unlock their full potential through strategic thinking and creative excellence.",
+  story_paragraph_2: "What started as a one-person consultancy has grown into a diverse team of strategists, designers, and digital experts united by a passion for transforming brands. Over the years, we've evolved our approach and expanded our capabilities, but our core mission remains unchanged.",
+  story_paragraph_3: "Today, Zoolyum works with ambitious businesses across industries, from emerging startups to established enterprises, helping them navigate complex market challenges and seize new opportunities for growth.",
+  story_image_url: "/placeholder.svg?height=600&width=500",
+  mission_title: "Our Mission",
+  mission_content: "To transform brands through strategic thinking and creative excellence, creating meaningful connections between businesses and their audiences that drive sustainable growth.",
+  values: [
+    {
+      number: "01",
+      title: "Strategic Excellence",
+      description: "We believe in the power of strategic thinking to solve complex brand challenges and create meaningful impact."
+    },
+    {
+      number: "02",
+      title: "Creative Courage",
+      description: "We embrace bold ideas and innovative approaches that help brands stand out in crowded markets."
+    },
+    {
+      number: "03",
+      title: "Collaborative Partnership",
+      description: "We work as an extension of our clients' teams, fostering open communication and shared success."
+    },
+    {
+      number: "04",
+      title: "Measurable Impact",
+      description: "We focus on creating work that delivers tangible results and drives business growth."
+    }
+  ],
+  team_eyebrow: "Our Team",
+  team_title: "Meet the Strategists & Creatives",
+  team_description: "Our diverse team of experts brings together strategic thinking and creative excellence to deliver exceptional results for our clients.",
+  cta_eyebrow: "Work With Us",
+  cta_title: "Ready to Transform Your Brand?",
+  cta_description: "Let's collaborate to create a strategic brand experience that resonates with your audience and drives meaningful results for your business.",
+  cta_primary_text: "Start Your Project",
+  cta_primary_url: "/contact",
+  cta_secondary_text: "Explore Our Services",
+  cta_secondary_url: "/services"
+}
+
 export default function AboutPage() {
   const [statistics, setStatistics] = useState<Statistic[]>([
     { label: "Years Experience", value: "50", suffix: "+", order: 1 },
@@ -28,6 +103,8 @@ export default function AboutPage() {
     { label: "Happy Clients", value: "5", suffix: "+", order: 3 },
     { label: "Industry Awards", value: "5", suffix: "", order: 4 }
   ]);
+
+  const [aboutData, setAboutData] = useState<AboutPageData>(defaultAboutData);
 
   // Fetch statistics from API
   useEffect(() => {
@@ -43,6 +120,21 @@ export default function AboutPage() {
         // Keep default values on error
       });
   }, []);
+
+  // Fetch about page data from API
+  useEffect(() => {
+    fetch('/api/admin/about-page')
+      .then(res => res.json())
+      .then(data => {
+        if (data.hero_title) {
+          setAboutData(data);
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching about page:', error);
+        // Keep default values on error
+      });
+  }, []);
   return (
     <PageTransition>
       <div className="min-h-screen bg-[#161616] text-[#E9E7E2]">
@@ -52,16 +144,16 @@ export default function AboutPage() {
           {/* Hero Section */}
           <section className="container mx-auto px-4 py-12">
             <PageHeadline
-              eyebrow="About Us"
-              title="Strategic Brand Alchemy for Modern Businesses"
-              description="Zoolyum is a full-service brand strategy agency dedicated to transforming businesses into powerful market forces through strategic thinking and creative excellence."
+              eyebrow={aboutData.hero_eyebrow}
+              title={aboutData.hero_title}
+              description={aboutData.hero_description}
               titleGradient={true}
             />
 
             <div className="mt-12 md:mt-16">
               <div className="relative rounded-2xl overflow-hidden">
                 <ImageReveal
-                  src="/placeholder.svg?height=600&width=1200"
+                  src={aboutData.hero_image_url}
                   alt="Zoolyum Agency Team"
                   width={1200}
                   height={600}
@@ -78,7 +170,7 @@ export default function AboutPage() {
                 <div className="relative">
                   <div className="relative z-10 rounded-2xl overflow-hidden">
                     <ImageReveal
-                      src="/placeholder.svg?height=600&width=500"
+                      src={aboutData.story_image_url}
                       alt="Zoolyum Agency Office"
                       width={500}
                       height={600}
@@ -98,21 +190,16 @@ export default function AboutPage() {
                   mobileType="words"
                   mobileStaggerDelay={0.02}
                 >
-                  From Vision to <span className="headline-highlight">Reality</span>
+                  {aboutData.story_title}
                 </TextReveal>
                 <p className="text-base md:text-lg text-[#E9E7E2]/80 mb-4">
-                  Founded in 2013 by Sakib Chowdhury, Zoolyum began with a simple yet powerful vision: to help brands
-                  unlock their full potential through strategic thinking and creative excellence.
+                  {aboutData.story_paragraph_1}
                 </p>
                 <p className="text-base md:text-lg text-[#E9E7E2]/80 mb-4">
-                  What started as a one-person consultancy has grown into a diverse team of strategists, designers, and
-                  digital experts united by a passion for transforming brands. Over the years, we've evolved our
-                  approach and expanded our capabilities, but our core mission remains unchanged.
+                  {aboutData.story_paragraph_2}
                 </p>
                 <p className="text-base md:text-lg text-[#E9E7E2]/80">
-                  Today, Zoolyum works with ambitious businesses across industries, from emerging startups to
-                  established enterprises, helping them navigate complex market challenges and seize new opportunities
-                  for growth.
+                  {aboutData.story_paragraph_3}
                 </p>
               </ScrollReveal>
             </div>
@@ -131,15 +218,9 @@ export default function AboutPage() {
               <div className="grid md:grid-cols-2 gap-12 mt-12 md:mt-16">
                 <ScrollReveal animation="fade-slide" direction="right" mobileAnimation="fade">
                   <div className="bg-[#212121] p-8 rounded-2xl h-full">
-                    <h3 className="text-2xl font-bold mb-4">Our Mission</h3>
-                    <p className="text-[#E9E7E2]/80 mb-6">
-                      To transform brands through strategic thinking and creative excellence, creating meaningful
-                      connections between businesses and their audiences that drive sustainable growth.
-                    </p>
-                    <p className="text-[#E9E7E2]/80">
-                      We believe that exceptional brands are built on strategic foundations and brought to life through
-                      compelling storytelling and innovative design. Our mission is to help businesses harness the power
-                      of strategic brand development to achieve their goals and make a lasting impact in their markets.
+                    <h3 className="text-2xl font-bold mb-4">{aboutData.mission_title}</h3>
+                    <p className="text-[#E9E7E2]/80 whitespace-pre-line">
+                      {aboutData.mission_content}
                     </p>
                   </div>
                 </ScrollReveal>
@@ -148,45 +229,17 @@ export default function AboutPage() {
                   <div className="bg-[#212121] p-8 rounded-2xl h-full">
                     <h3 className="text-2xl font-bold mb-4">Our Values</h3>
                     <ul className="space-y-4">
-                      <li className="flex">
-                        <span className="text-[#FF5001] mr-3 font-bold">01.</span>
-                        <div>
-                          <h4 className="font-bold mb-1">Strategic Excellence</h4>
-                          <p className="text-[#E9E7E2]/80">
-                            We believe in the power of strategic thinking to solve complex brand challenges and create
-                            meaningful impact.
-                          </p>
-                        </div>
-                      </li>
-                      <li className="flex">
-                        <span className="text-[#FF5001] mr-3 font-bold">02.</span>
-                        <div>
-                          <h4 className="font-bold mb-1">Creative Courage</h4>
-                          <p className="text-[#E9E7E2]/80">
-                            We embrace bold ideas and innovative approaches that help brands stand out in crowded
-                            markets.
-                          </p>
-                        </div>
-                      </li>
-                      <li className="flex">
-                        <span className="text-[#FF5001] mr-3 font-bold">03.</span>
-                        <div>
-                          <h4 className="font-bold mb-1">Collaborative Partnership</h4>
-                          <p className="text-[#E9E7E2]/80">
-                            We work as an extension of our clients' teams, fostering open communication and shared
-                            success.
-                          </p>
-                        </div>
-                      </li>
-                      <li className="flex">
-                        <span className="text-[#FF5001] mr-3 font-bold">04.</span>
-                        <div>
-                          <h4 className="font-bold mb-1">Measurable Impact</h4>
-                          <p className="text-[#E9E7E2]/80">
-                            We focus on creating work that delivers tangible results and drives business growth.
-                          </p>
-                        </div>
-                      </li>
+                      {aboutData.values.map((value, index) => (
+                        <li key={index} className="flex">
+                          <span className="text-[#FF5001] mr-3 font-bold">{value.number}.</span>
+                          <div>
+                            <h4 className="font-bold mb-1">{value.title}</h4>
+                            <p className="text-[#E9E7E2]/80">
+                              {value.description}
+                            </p>
+                          </div>
+                        </li>
+                      ))}
                     </ul>
                   </div>
                 </ScrollReveal>
@@ -219,9 +272,9 @@ export default function AboutPage() {
           <section className="py-16 md:py-24 bg-[#1A1A1A]">
             <div className="container mx-auto px-4">
               <PageHeadline
-                eyebrow="Our Team"
-                title="Meet the Strategists & Creatives"
-                description="Our diverse team of experts brings together strategic thinking and creative excellence to deliver exceptional results for our clients."
+                eyebrow={aboutData.team_eyebrow}
+                title={aboutData.team_title}
+                description={aboutData.team_description}
               />
 
               <StaggerReveal
@@ -290,31 +343,30 @@ export default function AboutPage() {
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#FF5001]/5 rounded-full filter blur-3xl"></div>
 
                 <div className="relative z-10 text-center max-w-3xl mx-auto">
-                  <span className="text-[#FF5001] text-sm uppercase tracking-widest font-medium">Work With Us</span>
+                  <span className="text-[#FF5001] text-sm uppercase tracking-widest font-medium">{aboutData.cta_eyebrow}</span>
                   <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mt-4 mb-6">
-                    Ready to Transform Your Brand?
+                    {aboutData.cta_title}
                   </h2>
                   <p className="text-lg md:text-xl text-[#E9E7E2]/80 mb-8 md:mb-10">
-                    Let's collaborate to create a strategic brand experience that resonates with your audience and
-                    drives meaningful results for your business.
+                    {aboutData.cta_description}
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <Link
-                      href="/contact"
+                      href={aboutData.cta_primary_url}
                       className="px-6 py-3 md:px-8 md:py-4 bg-[#FF5001] text-[#161616] font-bold rounded-full hover:bg-[#FF5001]/90 transition-all duration-300 inline-flex items-center justify-center group"
                       data-cursor="button"
                       data-cursor-text="Contact"
                     >
-                      Start Your Project
+                      {aboutData.cta_primary_text}
                       <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
                     </Link>
                     <Link
-                      href="/services"
+                      href={aboutData.cta_secondary_url}
                       className="px-6 py-3 md:px-8 md:py-4 border border-[#FF5001] text-[#FF5001] font-bold rounded-full hover:bg-[#FF5001]/10 transition-all duration-300 inline-flex items-center justify-center group"
                       data-cursor="button"
                       data-cursor-text="Services"
                     >
-                      Explore Our Services
+                      {aboutData.cta_secondary_text}
                       <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
                     </Link>
                   </div>

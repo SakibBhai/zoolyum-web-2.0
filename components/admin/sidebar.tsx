@@ -14,7 +14,8 @@ import {
   Megaphone,
   Mail,
   UserCheck,
-  TrendingUp
+  TrendingUp,
+  Info
 } from "lucide-react"
 
 interface AdminSidebarProps {
@@ -75,6 +76,11 @@ export function AdminSidebar({ isMobileMenuOpen = false, setIsMobileMenuOpen }: 
       name: "Campaigns",
       href: "/admin/campaigns",
       icon: <Megaphone className="h-5 w-5" />
+    },
+    {
+      name: "About Page",
+      href: "/admin/about-page",
+      icon: <Info className="h-5 w-5" />
     },
     {
       name: "Settings",
