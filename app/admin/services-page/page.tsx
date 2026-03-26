@@ -99,7 +99,9 @@ export default function ServicesPageAdmin() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to save services page configuration')
+        const errorData = await response.json()
+        console.error('Save failed:', errorData)
+        throw new Error(errorData.details || errorData.error || 'Failed to save services page configuration')
       }
 
       const result = await response.json()
@@ -111,7 +113,8 @@ export default function ServicesPageAdmin() {
       router.refresh()
     } catch (error) {
       console.error('Error saving services page:', error)
-      toast.error('Failed to save services page configuration')
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save services page configuration'
+      toast.error(errorMessage)
     } finally {
       setSaving(false)
     }
