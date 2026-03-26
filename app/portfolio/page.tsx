@@ -88,7 +88,6 @@ export default function PortfolioPage({ searchParams }: PortfolioPageProps) {
       setCurrentCategory(params.category || "all")
     })
   }, [searchParams])
-  }, [searchParams])
 
   return (
     <div className="min-h-screen bg-[#161616] text-[#E9E7E2]">
