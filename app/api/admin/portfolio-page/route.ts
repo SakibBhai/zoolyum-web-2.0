@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/lib/next-auth";
 
 // GET /api/admin/portfolio-page - Get portfolio page configuration
 export async function GET() {
@@ -42,12 +41,6 @@ export async function GET() {
 // POST /api/admin/portfolio-page - Create portfolio page configuration
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
-
-    if (process.env.NODE_ENV === "production" && !session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const data = await request.json();
 
     // Deactivate all existing portfolio pages
@@ -91,12 +84,6 @@ export async function POST(request: NextRequest) {
 // PUT /api/admin/portfolio-page - Update portfolio page configuration
 export async function PUT(request: NextRequest) {
   try {
-    const session = await auth();
-
-    if (process.env.NODE_ENV === "production" && !session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const data = await request.json();
     const { id, created_at, updated_at, ...updateData } = data;
 

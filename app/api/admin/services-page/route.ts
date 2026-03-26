@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/lib/next-auth";
 
 // GET /api/admin/services-page - Get services page configuration
 export async function GET() {
@@ -43,12 +42,6 @@ export async function GET() {
 // POST /api/admin/services-page - Create services page configuration
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
-
-    if (process.env.NODE_ENV === "production" && !session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const data = await request.json();
 
     // Deactivate all existing services pages
@@ -93,12 +86,6 @@ export async function POST(request: NextRequest) {
 // PUT /api/admin/services-page - Update services page configuration
 export async function PUT(request: NextRequest) {
   try {
-    const session = await auth();
-
-    if (process.env.NODE_ENV === "production" && !session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const data = await request.json();
     const { id, created_at, updated_at, ...updateData } = data;
 
