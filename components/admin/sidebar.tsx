@@ -16,8 +16,7 @@ import {
   UserCheck,
   TrendingUp,
   Info,
-  Crown,
-  Settings
+  Crown
 } from "lucide-react"
 
 interface AdminSidebarProps {
