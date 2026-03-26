@@ -3,22 +3,48 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
+    console.log('Fetching services from database...');
     const services = await prisma.services.findMany({
       orderBy: [{ order: 'asc' }, { created_at: 'desc' }]
     });
 
+    console.log('Found services:', services.length);
+
     // Transform dates to ISO strings for JSON serialization
     const transformedServices = services.map(service => ({
-      ...service,
+      id: service.id,
+      title: service.title,
+      slug: service.slug,
+      description: service.description,
+      content: service.content,
+      imageUrl: service.imageUrl,
+      icon: service.icon,
+      featured: service.featured,
+      order: service.order,
       createdAt: service.created_at.toISOString(),
       updatedAt: service.updated_at.toISOString()
     }));
 
+    console.log('Returning services:', transformedServices.length);
     return NextResponse.json(transformedServices);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching services:', error);
+    console.error('Error code:', error.code);
+    console.error('Error message:', error.message);
 
-    // Return empty array on error to keep page working
+    // Check if table doesn't exist
+    if (error.message?.includes('does not exist')) {
+      console.error('Services table does not exist in database');
+      return NextResponse.json([], {
+        status: 200,
+        headers: {
+          'X-Database-Error': 'true',
+          'X-Error-Message': 'Services table not found - run prisma db push'
+        }
+      });
+    }
+
+    // Return empty array on any error to keep page working
     return NextResponse.json([], {
       status: 200,
       headers: {
