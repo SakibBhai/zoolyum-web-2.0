@@ -79,6 +79,10 @@ export default function TeamPage() {
   const [pageConfig, setPageConfig] = useState<TeamPageConfig>(defaultConfig)
   const [loading, setLoading] = useState(true)
 
+  // Separate featured members for Leadership section
+  const featuredMembers = teamMembers.filter(member => member.featured)
+  const regularMembers = teamMembers.filter(member => !member.featured)
+
   useEffect(() => {
     // Fetch team members
     console.log('=== FETCHING TEAM MEMBERS ===')
@@ -111,11 +115,21 @@ export default function TeamPage() {
           const activeMembers = data.filter(member => member.status === 'ACTIVE')
           console.log('Active members found:', activeMembers.length)
           console.log('Active members:', activeMembers.map(m => ({ name: m.name, designation: m.designation, featured: m.featured })))
+
+          const featuredMembers = activeMembers.filter(member => member.featured)
+          console.log('Featured members found:', featuredMembers.length)
+          console.log('Featured members for Leadership Section:', featuredMembers.map(m => ({ name: m.name, designation: m.designation, featured: m.featured })))
+
           setTeamMembers(activeMembers)
 
           if (activeMembers.length === 0) {
             console.warn('⚠️ No active team members found!')
             console.log('All members status:', data.map(m => ({ name: m.name, status: m.status })))
+          }
+
+          if (featuredMembers.length === 0) {
+            console.warn('⚠️ No featured team members found for Leadership Section!')
+            console.log('💡 Go to /admin/team/leadership to feature team members')
           }
         } else {
           console.error('Expected array but got:', typeof data)
@@ -204,11 +218,24 @@ export default function TeamPage() {
                     />
                   ))
                 ) : (
-                  <div className="col-span-full text-center py-12">
-                    <p className="text-[#E9E7E2]/70 mb-2">No featured team members found.</p>
-                    <p className="text-[#E9E7E2]/50 text-sm">
-                      Mark team members as "featured" in the admin panel to display them here.
-                    </p>
+                  <div className="col-span-full text-center py-12 px-4">
+                    <div className="max-w-md mx-auto">
+                      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#FF5001]/10 flex items-center justify-center">
+                        <svg className="w-8 h-8 text-[#FF5001]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 01-5.356-1.857M17 20H7m10 5v-5a3 3 0 015.356-1.857m.75 15a3 3 0 01-5.356 1.857M12 21v-5m0 0a3 3 0 01-5.356 1.857m.75 15a3 3 0 01-5.356 1.857" />
+                        </svg>
+                      </div>
+                      <h3 className="text-xl font-semibold mb-2 text-[#E9E7E7E2]">No Featured Team Members</h3>
+                      <p className="text-[#E9E7E2]/70 mb-6">
+                        Team members marked as "featured" will appear in the Leadership section.
+                      </p>
+                      <Link
+                        href="/admin/team/leadership"
+                        className="inline-flex items-center px-6 py-3 bg-[#FF5001] text-[#161616] font-bold rounded-full hover:bg-[#FF5001]/90 transition-all duration-300"
+                      >
+                        Configure Leadership Team
+                      </Link>
+                    </div>
                   </div>
                 )}
               </StaggerReveal>
