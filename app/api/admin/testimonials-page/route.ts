@@ -1,6 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+// Default configuration for fallback
+const defaultConfig = {
+  hero_eyebrow: "Client Stories",
+  hero_title: "Transformative Success Stories",
+  hero_description: "Hear from the brands and businesses that have experienced the transformative power of our strategic approach and creative excellence.",
+  stats_eyebrow: "Results",
+  stats_title: "Measurable Business Impact",
+  stats_description: "Our strategic approach delivers tangible results for our clients across various metrics.",
+  cta_title: "Ready to Join Our Success Stories?",
+  cta_description: "Let's collaborate to create a strategic brand experience that resonates with your audience and drives results.",
+  cta_primary_text: "Start Your Project",
+  cta_primary_url: "/contact",
+  is_active: true
+};
+
 // GET /api/admin/testimonials-page - Get testimonials page configuration
 // Public endpoint - no authentication required for read access
 export async function GET() {
@@ -11,29 +26,20 @@ export async function GET() {
     });
 
     if (!testimonialsPage) {
-      // Return default configuration if none exists
-      return NextResponse.json({
-        hero_eyebrow: "Client Stories",
-        hero_title: "Transformative Success Stories",
-        hero_description: "Hear from the brands and businesses that have experienced the transformative power of our strategic approach and creative excellence.",
-        stats_eyebrow: "Results",
-        stats_title: "Measurable Business Impact",
-        stats_description: "Our strategic approach delivers tangible results for our clients across various metrics.",
-        cta_title: "Ready to Join Our Success Stories?",
-        cta_description: "Let's collaborate to create a strategic brand experience that resonates with your audience and drives results.",
-        cta_primary_text: "Start Your Project",
-        cta_primary_url: "/contact",
-        is_active: true
-      });
+      return NextResponse.json(defaultConfig);
     }
 
     return NextResponse.json(testimonialsPage);
   } catch (error) {
     console.error("Error fetching testimonials page:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch testimonials page configuration" },
-      { status: 500 }
-    );
+    // Return default config instead of 500 error to keep the page working
+    return NextResponse.json(defaultConfig, {
+      status: 200,
+      headers: {
+        'X-Database-Error': 'true',
+        'X-Error-Message': error instanceof Error ? error.message : 'Unknown error'
+      }
+    });
   }
 }
 

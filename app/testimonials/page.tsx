@@ -76,12 +76,21 @@ export default function TestimonialsPage() {
 
     // Fetch page configuration
     fetch('/api/admin/testimonials-page')
-      .then(res => res.json())
+      .then(async res => {
+        const hasDbError = res.headers.get('X-Database-Error') === 'true'
+        if (hasDbError) {
+          console.warn('Testimonials page: Using default config due to database error')
+        }
+        return res.json()
+      })
       .then(config => {
-        setPageConfig(config)
+        if (config && config.hero_title) {
+          setPageConfig(config)
+        }
       })
       .catch(error => {
         console.error('Error fetching testimonials page config:', error)
+        setPageConfig(defaultConfig)
       })
   }, [])
 

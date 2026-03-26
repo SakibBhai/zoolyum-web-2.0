@@ -45,7 +45,17 @@ export default function TestimonialsPageAdmin() {
 
   useEffect(() => {
     fetch('/api/admin/testimonials-page')
-      .then(res => res.json())
+      .then(async res => {
+        const hasDbError = res.headers.get('X-Database-Error') === 'true'
+        if (hasDbError) {
+          console.warn('Admin testimonials page: Database error detected')
+        }
+        const data = await res.json()
+        if (data.error && data.hero_title) {
+          console.warn('Admin testimonials page: Using fallback data')
+        }
+        return data
+      })
       .then(responseData => {
         if (responseData.id) {
           setData(responseData)

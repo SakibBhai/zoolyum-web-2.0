@@ -49,7 +49,17 @@ export default function PortfolioPageAdmin() {
 
   useEffect(() => {
     fetch('/api/admin/portfolio-page')
-      .then(res => res.json())
+      .then(async res => {
+        const hasDbError = res.headers.get('X-Database-Error') === 'true'
+        if (hasDbError) {
+          console.warn('Admin portfolio page: Database error detected')
+        }
+        const data = await res.json()
+        if (data.error && data.hero_title) {
+          console.warn('Admin portfolio page: Using fallback data')
+        }
+        return data
+      })
       .then(responseData => {
         if (responseData.id) {
           setData(responseData)

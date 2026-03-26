@@ -1,6 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+// Default configuration for fallback
+const defaultConfig = {
+  hero_eyebrow: "Our Portfolio",
+  hero_title: "Strategic Brand Transformations",
+  hero_description: "Explore our portfolio of brand evolution projects that have helped businesses achieve remarkable growth and market presence.",
+  featured_eyebrow: "Featured Project",
+  featured_title: "Featured Work",
+  featured_description: "Highlighting our most impactful work that showcases our expertise and creativity.",
+  cta_title: "Ready to Transform Your Brand?",
+  cta_description: "Let's collaborate to create a strategic brand experience that resonates with your audience and drives meaningful results for your business.",
+  cta_primary_text: "Start Your Project",
+  cta_primary_url: "/contact",
+  cta_secondary_text: "Explore Our Services",
+  cta_secondary_url: "/services",
+  is_active: true
+};
+
 // GET /api/admin/portfolio-page - Get portfolio page configuration
 // Public endpoint - no authentication required for read access
 export async function GET() {
@@ -11,31 +28,20 @@ export async function GET() {
     });
 
     if (!portfolioPage) {
-      // Return default configuration if none exists
-      return NextResponse.json({
-        hero_eyebrow: "Our Portfolio",
-        hero_title: "Strategic Brand Transformations",
-        hero_description: "Explore our portfolio of brand evolution projects that have helped businesses achieve remarkable growth and market presence.",
-        featured_eyebrow: "Featured Project",
-        featured_title: "Featured Work",
-        featured_description: "Highlighting our most impactful work that showcases our expertise and creativity.",
-        cta_title: "Ready to Transform Your Brand?",
-        cta_description: "Let's collaborate to create a strategic brand experience that resonates with your audience and drives meaningful results for your business.",
-        cta_primary_text: "Start Your Project",
-        cta_primary_url: "/contact",
-        cta_secondary_text: "Explore Our Services",
-        cta_secondary_url: "/services",
-        is_active: true
-      });
+      return NextResponse.json(defaultConfig);
     }
 
     return NextResponse.json(portfolioPage);
   } catch (error) {
     console.error("Error fetching portfolio page:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch portfolio page configuration" },
-      { status: 500 }
-    );
+    // Return default config instead of 500 error to keep the page working
+    return NextResponse.json(defaultConfig, {
+      status: 200,
+      headers: {
+        'X-Database-Error': 'true',
+        'X-Error-Message': error instanceof Error ? error.message : 'Unknown error'
+      }
+    });
   }
 }
 

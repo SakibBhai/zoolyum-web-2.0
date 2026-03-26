@@ -60,13 +60,22 @@ export default function PortfolioPage({ searchParams }: PortfolioPageProps) {
   useEffect(() => {
     // Fetch page configuration
     fetch('/api/admin/portfolio-page')
-      .then(res => res.json())
+      .then(async res => {
+        const hasDbError = res.headers.get('X-Database-Error') === 'true'
+        if (hasDbError) {
+          console.warn('Portfolio page: Using default config due to database error')
+        }
+        return res.json()
+      })
       .then(config => {
-        setPageConfig(config)
+        if (config && config.hero_title) {
+          setPageConfig(config)
+        }
         setLoading(false)
       })
       .catch(error => {
         console.error('Error fetching portfolio page config:', error)
+        setPageConfig(defaultConfig)
         setLoading(false)
       })
 
@@ -78,6 +87,7 @@ export default function PortfolioPage({ searchParams }: PortfolioPageProps) {
       setResolvedSearchParams(params)
       setCurrentCategory(params.category || "all")
     })
+  }, [searchParams])
   }, [searchParams])
 
   return (
