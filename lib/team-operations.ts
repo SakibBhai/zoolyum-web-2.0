@@ -125,15 +125,24 @@ export async function getTeamMemberById(id: string) {
 // Create new team member
 export async function createTeamMember(data: TeamMemberData) {
   try {
+    console.log('createTeamMember called with data:', JSON.stringify(data, null, 2));
+
+    // Handle email - if not provided or empty, generate a unique one
+    const memberEmail = data.email?.trim()
+      ? data.email.trim()
+      : `${data.name.trim().toLowerCase().replace(/\s+/g, '.')}@${Date.now()}@zoolyum.internal`;
+
+    console.log('Using email:', memberEmail);
+
     const teamMember = await prisma.teamMember.create({
       data: {
         name: data.name,
         role: data.position || 'Team Member', // Map position to role
         department: data.designation || 'General', // Map designation to department
         employee_id: data.websiteTag || createId(), // Map websiteTag to employee_id
-        bio: data.bio,
-        avatar: data.imageUrl, // Map imageUrl to avatar
-        email: data.email || '',
+        bio: data.bio || '',
+        avatar: data.imageUrl || '/placeholder-user.jpg', // Map imageUrl to avatar
+        email: memberEmail, // Use the generated/provided email
         phone: null, // Not provided in interface
         is_active: data.status ? data.status === 'ACTIVE' : true, // Map status to is_active boolean
         featured: data.featured || false,
@@ -142,9 +151,15 @@ export async function createTeamMember(data: TeamMemberData) {
       }
     });
 
+    console.log('Team member created successfully:', teamMember.id);
+
     return teamMember;
   } catch (error) {
     console.error('Error creating team member:', error);
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
     throw new Error('Failed to create team member');
   }
 }

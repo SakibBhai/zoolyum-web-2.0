@@ -101,31 +101,46 @@ export async function POST(request: NextRequest) {
 
     const data = (await request.json()) as Partial<TeamMemberData>;
 
+    console.log('POST /api/team - Received data:', JSON.stringify(data, null, 2));
+
     // Validate required fields
     if (!data.name?.trim()) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
 
+    // Generate unique email if not provided (database requires unique email)
+    const uniqueEmail = data.email?.trim() || `${data.name.trim().toLowerCase().replace(/\s+/g, '.')}@${Date.now()}@zoolyum.internal`;
+
     const newTeamMember: TeamMemberData = {
       name: data.name.trim(),
-      role: data.role?.trim() || "",
+      position: data.position?.trim() || "Team Member",
+      designation: data.designation?.trim() || "General",
+      websiteTag: data.websiteTag?.trim() || `${Date.now()}`,
       bio: data.bio?.trim() || "",
-      image: data.image?.trim() || "",
-      social: {
-        twitter: data.social?.twitter?.trim() || "",
-        linkedin: data.social?.linkedin?.trim() || "",
-        github: data.social?.github?.trim() || "",
-      },
+      imageUrl: data.imageUrl?.trim() || "/placeholder-user.jpg",
+      email: uniqueEmail,
+      linkedin: data.linkedin?.trim() || "",
+      twitter: data.twitter?.trim() || "",
+      status: data.status || "ACTIVE",
+      featured: data.featured || false,
+      order: data.order || 0
     };
+
+    console.log('Creating team member with data:', JSON.stringify(newTeamMember, null, 2));
 
     const createdMember = await createTeamMember(newTeamMember);
 
     // Revalidate the team page to show updated data immediately
     revalidatePath('/team');
     revalidatePath('/admin/team');
+    revalidatePath('/'); // Home page
 
     return NextResponse.json(createdMember, { status: 201 });
   } catch (error) {
-    return handleApiError(error);
+    console.error("Error in POST /api/team:", error);
+    return NextResponse.json(
+      { error: "Failed to create team member", details: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
   }
 }
