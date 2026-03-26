@@ -81,12 +81,22 @@ export default function TeamPage() {
 
   useEffect(() => {
     // Fetch team members
+    console.log('=== FETCHING TEAM MEMBERS ===')
     fetch('/api/team')
       .then(res => res.json())
       .then(data => {
-        console.log('Team members fetched:', data)
+        console.log('Raw team data received:', data)
+        console.log('Data type:', typeof data)
+        console.log('Is array:', Array.isArray(data))
+        console.log('Data length:', Array.isArray(data) ? data.length : 'N/A')
+
         if (Array.isArray(data)) {
-          setTeamMembers(data.filter(member => member.status === 'ACTIVE'))
+          const activeMembers = data.filter(member => member.status === 'ACTIVE')
+          console.log('Active members found:', activeMembers.length)
+          console.log('Active members:', activeMembers.map(m => ({ name: m.name, designation: m.designation, featured: m.featured })))
+          setTeamMembers(activeMembers)
+        } else {
+          console.error('Expected array but got:', typeof data)
         }
       })
       .catch(error => {

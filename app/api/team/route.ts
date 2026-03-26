@@ -56,15 +56,28 @@ function handleApiError(error: unknown): NextResponse {
 // GET /api/team - Get all team members
 export async function GET() {
   try {
+    console.log('=== TEAM API CALLED ===');
+
     // Check if DATABASE_URL is available during build
     if (!process.env.DATABASE_URL) {
       console.warn("DATABASE_URL not available, returning empty team members array");
       return NextResponse.json([]);
     }
-    
+
+    console.log('Fetching team members from database...');
     const teamMembers = await getAllTeamMembers();
+    console.log(`Team members fetched: ${teamMembers.length} total`);
+    console.log('Active members:', teamMembers.filter(m => m.status === 'ACTIVE').length);
+    console.log('Featured members:', teamMembers.filter(m => m.featured).length);
+
+    // Log each member for debugging
+    teamMembers.forEach(member => {
+      console.log(`- ${member.name}: status=${member.status}, featured=${member.featured}, designation=${member.designation}`);
+    });
+
     return NextResponse.json(teamMembers);
   } catch (error) {
+    console.error('Team API Error:', error);
     return handleApiError(error);
   }
 }
