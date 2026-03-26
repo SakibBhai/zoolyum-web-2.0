@@ -130,16 +130,19 @@ export default function Home() {
         <Header />
 
         <main>
-          {/* Hero Section - Optimized for all screen sizes */}
-          <section className="min-h-screen flex items-center justify-center relative overflow-hidden pt-16 sm:pt-20 md:pt-24">
-            <div className="container mx-auto px-4 py-12 md:py-20 flex flex-col items-center text-center z-10">
+          {/* Hero Section - Fixed layout and responsiveness */}
+          <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+            {/* Fixed spacing to account for header */}
+            <div className="absolute top-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-b from-[#161616] to-transparent z-10"></div>
+
+            <div className="container mx-auto px-4 py-12 sm:py-16 md:py-20 lg:py-24 flex flex-col items-center text-center z-20">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 1 }}
-                className="mb-4 md:mb-6"
+                className="mb-6 md:mb-8"
               >
-                <span className="text-[#FF5001] text-base md:text-lg uppercase tracking-widest font-medium">
+                <span className="text-[#FF5001] text-sm sm:text-base md:text-lg uppercase tracking-widest font-medium block">
                   Brand Strategy & Digital Innovation
                 </span>
               </motion.div>
@@ -150,7 +153,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: isMobile ? 2.5 : 3.5, duration: 0.8 }}
-                className="mt-6 md:mt-8 text-lg md:text-xl lg:text-2xl max-w-2xl mx-auto text-[#E9E7E2]/80"
+                className="mt-6 md:mt-8 text-base sm:text-lg md:text-xl lg:text-2xl max-w-2xl mx-auto px-4 text-[#E9E7E2]/80 leading-relaxed"
               >
                 We transform brands through strategic thinking and creative
                 excellence, crafting digital experiences that resonate and
@@ -161,11 +164,11 @@ export default function Home() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: isMobile ? 3 : 4, duration: 0.8 }}
-                className="mt-8 md:mt-12 flex flex-col sm:flex-row gap-4 justify-center"
+                className="mt-8 md:mt-12 flex flex-col sm:flex-row gap-4 justify-center px-4 w-full"
               >
                 <Link
                   href="/contact"
-                  className="px-6 py-3 md:px-8 md:py-4 bg-[#FF5001] text-[#161616] font-bold rounded-full hover:bg-[#FF5001]/90 transition-all duration-300 inline-flex items-center justify-center group"
+                  className="px-6 py-3 md:px-8 md:py-4 bg-[#FF5001] text-[#161616] font-bold rounded-full hover:bg-[#FF5001]/90 transition-all duration-300 inline-flex items-center justify-center group text-sm sm:text-base"
                   data-cursor="button"
                   data-cursor-text="Connect"
                 >
@@ -174,7 +177,7 @@ export default function Home() {
                 </Link>
                 <Link
                   href="/portfolio"
-                  className="px-6 py-3 md:px-8 md:py-4 border border-[#FF5001] text-[#FF5001] font-bold rounded-full hover:bg-[#FF5001]/10 transition-all duration-300 inline-flex items-center justify-center group"
+                  className="px-6 py-3 md:px-8 md:py-4 border border-[#FF5001] text-[#FF5001] font-bold rounded-full hover:bg-[#FF5001]/10 transition-all duration-300 inline-flex items-center justify-center group text-sm sm:text-base"
                   data-cursor="button"
                   data-cursor-text="Portfolio"
                 >
@@ -184,10 +187,10 @@ export default function Home() {
               </motion.div>
             </div>
 
-            {/* Background elements */}
+            {/* Fixed background elements for better mobile display */}
             <div className="absolute inset-0 z-0">
-              <div className="absolute top-1/4 left-1/4 w-40 md:w-64 h-40 md:h-64 bg-[#FF5001]/10 rounded-full filter blur-3xl"></div>
-              <div className="absolute bottom-1/4 right-1/4 w-64 md:w-96 h-64 md:h-96 bg-[#FF5001]/5 rounded-full filter blur-3xl"></div>
+              <div className="absolute top-1/4 left-1/4 w-32 sm:w-40 md:w-64 h-32 sm:h-40 md:h-64 bg-[#FF5001]/10 rounded-full filter blur-3xl"></div>
+              <div className="absolute bottom-1/4 right-1/4 w-48 sm:w-64 md:w-96 h-48 sm:h-64 md:h-96 bg-[#FF5001]/5 rounded-full filter blur-3xl"></div>
             </div>
           </section>
 
@@ -491,7 +494,7 @@ export default function Home() {
   );
 }
 
-// Agency Name Animation Component
+// Agency Name Animation Component - Fixed for mobile responsiveness
 function AgencyNameAnimation() {
   const isMobile = useMediaQuery("(max-width: 768px)");
 
@@ -500,8 +503,8 @@ function AgencyNameAnimation() {
   const sparkleDelay = isMobile ? 1.5 : 2;
 
   return (
-    <div className="relative">
-      <motion.h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-[#E9E7E2] relative z-10">
+    <div className="relative px-4 sm:px-0">
+      <motion.h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-bold text-[#E9E7E2] relative z-10 leading-tight">
         <motion.span
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -578,7 +581,7 @@ function AgencyNameAnimation() {
         className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none"
       >
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-full h-full bg-gradient-to-r from-[#FF5001]/0 via-[#FF5001]/30 to-[#FF5001]/0 blur-xl"></div>
+          <div className="w-3/4 h-3/4 sm:w-full sm:h-full bg-gradient-to-r from-[#FF5001]/0 via-[#FF5001]/30 to-[#FF5001]/0 blur-xl"></div>
         </div>
       </motion.div>
 
@@ -587,7 +590,7 @@ function AgencyNameAnimation() {
         initial={{ opacity: 1 }}
         animate={{ opacity: 0 }}
         transition={{ delay: sparkleDelay, duration: 0.3 }}
-        className="absolute bottom-0 right-0 w-1 h-12 md:h-16 bg-[#FF5001] translate-x-2"
+        className="absolute bottom-0 right-0 w-1 h-10 sm:h-12 md:h-16 bg-[#FF5001] translate-x-2"
       ></motion.div>
     </div>
   );
