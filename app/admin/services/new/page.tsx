@@ -79,17 +79,19 @@ export default function NewServicePage() {
   const onSubmit = async (data: ServiceFormValues) => {
     setIsSubmitting(true);
     try {
-      await createService(data);
+      const result = await createService(data);
+      console.log("Service created successfully:", result);
       toast({
         title: "Success",
         description: "Service created successfully.",
       });
       router.push("/admin/services");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating service:", error);
+      const errorMessage = error?.message || "Failed to create service. Please try again.";
       toast({
         title: "Error",
-        description: "Failed to create service. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

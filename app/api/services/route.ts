@@ -32,6 +32,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    console.log('Creating service with data:', JSON.stringify(body, null, 2));
 
     // Validate required fields
     if (!body.title || !body.slug) {
@@ -54,13 +55,39 @@ export async function POST(request: NextRequest) {
       }
     });
 
+    console.log('Service created successfully:', service);
+
     return NextResponse.json({
       ...service,
       createdAt: service.createdAt.toISOString(),
       updatedAt: service.updatedAt.toISOString()
     }, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating service:', error);
+    console.error('Error details:', JSON.stringify(error, null, 2));
+
+    // Check for unique constraint violation
+    if (error.code === 'P2002') {
+      return NextResponse.json(
+        {
+          error: 'A service with this slug already exists',
+          details: 'Please use a different slug'
+        },
+        { status: 409 }
+      );
+    }
+
+    // Check for table not exists error
+    if (error.message?.includes('does not exist')) {
+      return NextResponse.json(
+        {
+          error: 'Database table not found',
+          details: 'The services table has not been created yet. Please contact administrator.'
+        },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
       {
         error: 'Failed to create service',
