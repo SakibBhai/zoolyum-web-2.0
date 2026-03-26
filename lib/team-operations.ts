@@ -14,6 +14,12 @@ export interface TeamMemberData {
   status?: string;
   order?: number;
   featured?: boolean;
+  social?: {
+    linkedin?: string;
+    twitter?: string;
+    instagram?: string;
+    behance?: string;
+  };
 }
 
 export interface TeamMemberWithStatus {

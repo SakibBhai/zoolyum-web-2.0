@@ -119,11 +119,12 @@ export async function POST(request: NextRequest) {
       bio: data.bio?.trim() || "",
       imageUrl: data.imageUrl?.trim() || "/placeholder-user.jpg",
       email: uniqueEmail,
-      linkedin: data.linkedin?.trim() || "",
-      twitter: data.twitter?.trim() || "",
+      linkedin: data.linkedin?.trim() || data.social?.linkedin?.trim() || "",
+      twitter: data.twitter?.trim() || data.social?.twitter?.trim() || "",
       status: data.status || "ACTIVE",
       featured: data.featured || false,
-      order: data.order || 0
+      order: data.order || 0,
+      social: data.social || {}
     };
 
     console.log('Creating team member with data:', JSON.stringify(newTeamMember, null, 2));
