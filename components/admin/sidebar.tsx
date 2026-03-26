@@ -15,7 +15,9 @@ import {
   Mail,
   UserCheck,
   TrendingUp,
-  Info
+  Info,
+  Crown,
+  Settings
 } from "lucide-react"
 
 interface AdminSidebarProps {
@@ -56,6 +58,16 @@ export function AdminSidebar({ isMobileMenuOpen = false, setIsMobileMenuOpen }: 
       name: "Team Members",
       href: "/admin/team",
       icon: <Users className="h-5 w-5" />
+    },
+    {
+      name: "Leadership Team",
+      href: "/admin/team/leadership",
+      icon: <Crown className="h-5 w-5" />
+    },
+    {
+      name: "Team Page",
+      href: "/admin/team-page",
+      icon: <Settings className="h-5 w-5" />
     },
     {
       name: "Testimonials",

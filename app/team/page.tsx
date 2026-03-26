@@ -83,7 +83,11 @@ export default function TeamPage() {
     // Fetch team members
     console.log('=== FETCHING TEAM MEMBERS ===')
     fetch('/api/team')
-      .then(res => res.json())
+      .then(res => {
+        console.log('Response status:', res.status)
+        console.log('Response ok:', res.ok)
+        return res.json()
+      })
       .then(data => {
         console.log('Raw team data received:', data)
         console.log('Data type:', typeof data)
@@ -91,10 +95,28 @@ export default function TeamPage() {
         console.log('Data length:', Array.isArray(data) ? data.length : 'N/A')
 
         if (Array.isArray(data)) {
+          console.log('Processing array data...')
+          data.forEach((member, index) => {
+            console.log(`Member ${index}:`, {
+              id: member.id,
+              name: member.name,
+              designation: member.designation,
+              position: member.position,
+              imageUrl: member.imageUrl,
+              status: member.status,
+              featured: member.featured
+            })
+          })
+
           const activeMembers = data.filter(member => member.status === 'ACTIVE')
           console.log('Active members found:', activeMembers.length)
           console.log('Active members:', activeMembers.map(m => ({ name: m.name, designation: m.designation, featured: m.featured })))
           setTeamMembers(activeMembers)
+
+          if (activeMembers.length === 0) {
+            console.warn('⚠️ No active team members found!')
+            console.log('All members status:', data.map(m => ({ name: m.name, status: m.status })))
+          }
         } else {
           console.error('Expected array but got:', typeof data)
         }
