@@ -69,6 +69,8 @@ export default function TeamPageAdmin() {
     fetch('/api/admin/team-page')
       .then(res => res.json())
       .then(teamPageData => {
+        console.log('Team page data fetched:', teamPageData)
+        console.log('Culture image URL:', teamPageData.culture_image_url)
         setData(teamPageData)
         setLoading(false)
       })
@@ -92,6 +94,11 @@ export default function TeamPageAdmin() {
         throw new Error('Failed to save team page configuration')
       }
 
+      const result = await response.json()
+
+      // Update local state with the saved data from server
+      setData(result)
+
       toast.success('Team page configuration saved successfully')
       router.refresh()
     } catch (error) {
@@ -103,6 +110,7 @@ export default function TeamPageAdmin() {
   }
 
   const handleChange = (field: keyof TeamPageData, value: string) => {
+    console.log(`Updating ${field}:`, value)
     setData(prev => ({ ...prev, [field]: value }))
   }
 
@@ -293,7 +301,10 @@ export default function TeamPageAdmin() {
               <Label>Culture Image</Label>
               <div className="mt-2">
                 <ImageUpload
-                  onUploadComplete={(url) => handleChange('culture_image_url', url)}
+                  onUploadComplete={(url) => {
+                    console.log('Culture image uploaded:', url)
+                    handleChange('culture_image_url', url)
+                  }}
                   folder="team-page"
                   accept="image/jpeg,image/jpg,image/png,image/webp"
                 />
@@ -305,6 +316,7 @@ export default function TeamPageAdmin() {
                       alt="Culture preview"
                       className="max-w-xs rounded-lg border border-border"
                     />
+                    <p className="text-xs text-muted-foreground mt-2">URL: {data.culture_image_url}</p>
                   </div>
                 )}
               </div>
