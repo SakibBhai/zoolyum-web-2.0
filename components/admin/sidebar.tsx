@@ -94,6 +94,21 @@ export function AdminSidebar({ isMobileMenuOpen = false, setIsMobileMenuOpen }: 
       icon: <Info className="h-5 w-5" />
     },
     {
+      name: "Services Page",
+      href: "/admin/services-page",
+      icon: <Settings className="h-5 w-5" />
+    },
+    {
+      name: "Portfolio Page",
+      href: "/admin/portfolio-page",
+      icon: <Briefcase className="h-5 w-5" />
+    },
+    {
+      name: "Testimonials Page",
+      href: "/admin/testimonials-page",
+      icon: <MessageSquare className="h-5 w-5" />
+    },
+    {
       name: "Settings",
       href: "/admin/settings",
       icon: <Settings className="h-5 w-5" />
