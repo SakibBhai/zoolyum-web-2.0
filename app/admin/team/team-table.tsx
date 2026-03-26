@@ -145,6 +145,7 @@ export function TeamTable({ teamMembers }: TeamTableProps) {
         cell: ({ row }) => {
           const member = row.original;
           const [isPending, startTransition] = useTransition();
+          const router = useRouter();
 
           const toggleFeatured = async () => {
             startTransition(async () => {
