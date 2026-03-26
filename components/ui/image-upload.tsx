@@ -66,6 +66,9 @@ export function ImageUpload({
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Upload failed'
+      console.error('=== IMAGE UPLOAD ERROR ===')
+      console.error('Error:', errorMessage)
+      console.error('Full error:', error)
       onError?.(errorMessage)
     } finally {
       setIsUploading(false)

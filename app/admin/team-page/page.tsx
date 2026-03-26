@@ -64,6 +64,7 @@ export default function TeamPageAdmin() {
   const [data, setData] = useState<TeamPageData>(defaultData)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/admin/team-page')
@@ -338,8 +339,10 @@ export default function TeamPageAdmin() {
                     console.log('Upload complete, URL:', url)
                     console.log('URL type:', typeof url)
                     console.log('URL length:', url?.length)
+                    setUploadError(null) // Clear any previous errors
                     if (!url || typeof url !== 'string' || url.length === 0) {
                       console.error('INVALID URL RECEIVED:', url)
+                      setUploadError('Invalid URL received from upload')
                       return
                     }
                     handleChange('culture_image_url', url)
@@ -347,10 +350,22 @@ export default function TeamPageAdmin() {
                   onError={(error) => {
                     console.error('=== IMAGE UPLOAD ERROR ===')
                     console.error('Error:', error)
+                    setUploadError(error)
+                    // Clear error after 5 seconds
+                    setTimeout(() => setUploadError(null), 5000)
                   }}
                   folder="team-page"
                   accept="image/jpeg,image/jpg,image/png,image/webp"
                 />
+
+                {/* Error Display */}
+                {uploadError && (
+                  <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                    <p className="text-sm font-semibold text-red-800 dark:text-red-200">Upload Error:</p>
+                    <p className="text-sm text-red-600 dark:text-red-300 mt-1">{uploadError}</p>
+                    <p className="text-xs text-red-500 dark:text-red-400 mt-2">Please check if you're logged in or try again.</p>
+                  </div>
+                )}
                 {data.culture_image_url && (
                   <div className="mt-4">
                     <p className="text-sm text-muted-foreground mb-2">Current image:</p>
