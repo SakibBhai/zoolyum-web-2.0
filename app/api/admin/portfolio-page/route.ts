@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 // GET /api/admin/portfolio-page - Get portfolio page configuration
+// Public endpoint - no authentication required for read access
 export async function GET() {
   try {
     const portfolioPage = await prisma.portfolio_page.findFirst({

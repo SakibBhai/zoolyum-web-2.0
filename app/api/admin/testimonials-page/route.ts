@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 // GET /api/admin/testimonials-page - Get testimonials page configuration
+// Public endpoint - no authentication required for read access
 export async function GET() {
   try {
     const testimonialsPage = await prisma.testimonials_page.findFirst({
