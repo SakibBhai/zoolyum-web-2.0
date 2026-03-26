@@ -22,8 +22,56 @@ import { StaggerReveal } from "@/components/scroll-animations/stagger-reveal"
 import { PageHeadline } from "@/components/page-headline"
 import { TextReveal } from "@/components/scroll-animations/text-reveal"
 import { ImageReveal } from "@/components/scroll-animations/image-reveal"
+import { useState, useEffect } from "react"
+
+interface ServicesPageConfig {
+  hero_eyebrow: string
+  hero_title: string
+  hero_description: string
+  hero_image_url: string
+  services_eyebrow: string
+  services_title: string
+  services_description: string
+  cta_title: string
+  cta_description: string
+  cta_primary_text: string
+  cta_primary_url: string
+  cta_secondary_text: string
+  cta_secondary_url: string
+}
+
+const defaultConfig: ServicesPageConfig = {
+  hero_eyebrow: "Our Services",
+  hero_title: "Strategic Brand & Digital Solutions",
+  hero_description: "We offer comprehensive services to elevate your brand and drive business growth through strategic thinking and creative excellence.",
+  hero_image_url: "/placeholder.svg?height=600&width=1200",
+  services_eyebrow: "Our Expertise",
+  services_title: "Detailed Service Offerings",
+  services_description: "Explore our core service areas in depth to understand how we can help transform your brand.",
+  cta_title: "Ready to Transform Your Brand?",
+  cta_description: "Let's collaborate to create a strategic brand experience that resonates with your audience and drives meaningful results for your business.",
+  cta_primary_text: "Start Your Project",
+  cta_primary_url: "/contact",
+  cta_secondary_text: "View Our Portfolio",
+  cta_secondary_url: "/portfolio"
+}
 
 export default function ServicesPage() {
+  const [pageConfig, setPageConfig] = useState<ServicesPageConfig>(defaultConfig)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/admin/services-page')
+      .then(res => res.json())
+      .then(config => {
+        setPageConfig(config)
+        setLoading(false)
+      })
+      .catch(error => {
+        console.error('Error fetching services page config:', error)
+        setLoading(false)
+      })
+  }, [])
   return (
     <PageTransition>
       <div className="min-h-screen bg-[#161616] text-[#E9E7E2]">
@@ -33,9 +81,9 @@ export default function ServicesPage() {
           {/* Hero Section */}
           <section className="container mx-auto px-4 py-12">
             <PageHeadline
-              eyebrow="Our Services"
-              title="Strategic Brand & Digital Solutions"
-              description="We offer comprehensive services to elevate your brand and drive business growth through strategic thinking and creative excellence."
+              eyebrow={pageConfig.hero_eyebrow}
+              title={pageConfig.hero_title}
+              description={pageConfig.hero_description}
               titleGradient={true}
             />
 
@@ -107,9 +155,9 @@ export default function ServicesPage() {
           <section className="py-16 md:py-24 bg-[#1A1A1A]">
             <div className="container mx-auto px-4">
               <PageHeadline
-                eyebrow="Our Expertise"
-                title="Detailed Service Offerings"
-                description="Explore our core service areas in depth to understand how we can help transform your brand."
+                eyebrow={pageConfig.services_eyebrow}
+                title={pageConfig.services_title}
+                description={pageConfig.services_description}
                 size="medium"
               />
 
@@ -217,29 +265,28 @@ export default function ServicesPage() {
                 <div className="relative z-10 text-center max-w-3xl mx-auto">
                   <span className="text-[#FF5001] text-sm uppercase tracking-widest font-medium">Get Started</span>
                   <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mt-4 mb-6">
-                    Ready to Transform Your Brand?
+                    {pageConfig.cta_title}
                   </h2>
                   <p className="text-lg md:text-xl text-[#E9E7E2]/80 mb-8 md:mb-10">
-                    Let's collaborate to create a strategic brand experience that resonates with your audience and
-                    drives meaningful results for your business.
+                    {pageConfig.cta_description}
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <Link
-                      href="/contact"
+                      href={pageConfig.cta_primary_url}
                       className="px-6 py-3 md:px-8 md:py-4 bg-[#FF5001] text-[#161616] font-bold rounded-full hover:bg-[#FF5001]/90 transition-all duration-300 inline-flex items-center justify-center group"
                       data-cursor="button"
                       data-cursor-text="Contact"
                     >
-                      Start Your Project
+                      {pageConfig.cta_primary_text}
                       <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
                     </Link>
                     <Link
-                      href="/portfolio"
+                      href={pageConfig.cta_secondary_url}
                       className="px-6 py-3 md:px-8 md:py-4 border border-[#FF5001] text-[#FF5001] font-bold rounded-full hover:bg-[#FF5001]/10 transition-all duration-300 inline-flex items-center justify-center group"
                       data-cursor="button"
                       data-cursor-text="Portfolio"
                     >
-                      View Our Portfolio
+                      {pageConfig.cta_secondary_text}
                       <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
                     </Link>
                   </div>

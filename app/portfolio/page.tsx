@@ -1,4 +1,6 @@
-import { Suspense } from "react"
+"use client"
+
+import { Suspense, useState, useEffect } from "react"
 import { ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -12,16 +14,72 @@ import { Footer } from "@/components/footer"
 import { ScrollReveal } from "@/components/scroll-animations/scroll-reveal"
 import { PageHeadline } from "@/components/page-headline"
 
+interface PortfolioPageConfig {
+  hero_eyebrow: string
+  hero_title: string
+  hero_description: string
+  featured_eyebrow: string
+  featured_title: string
+  featured_description: string
+  cta_title: string
+  cta_description: string
+  cta_primary_text: string
+  cta_primary_url: string
+  cta_secondary_text: string
+  cta_secondary_url: string
+}
+
+const defaultConfig: PortfolioPageConfig = {
+  hero_eyebrow: "Our Portfolio",
+  hero_title: "Strategic Brand Transformations",
+  hero_description: "Explore our portfolio of brand evolution projects that have helped businesses achieve remarkable growth and market presence.",
+  featured_eyebrow: "Featured Project",
+  featured_title: "Featured Work",
+  featured_description: "Highlighting our most impactful work that showcases our expertise and creativity.",
+  cta_title: "Ready to Transform Your Brand?",
+  cta_description: "Let's collaborate to create a strategic brand experience that resonates with your audience and drives meaningful results for your business.",
+  cta_primary_text: "Start Your Project",
+  cta_primary_url: "/contact",
+  cta_secondary_text: "Explore Our Services",
+  cta_secondary_url: "/services"
+}
+
 interface PortfolioPageProps {
   searchParams: Promise<{
     category?: string
   }>
 }
 
-export default async function PortfolioPage({ searchParams }: PortfolioPageProps) {
-  const resolvedSearchParams = await searchParams
-  const currentCategory = resolvedSearchParams.category || "all"
-  const categories = await getProjectCategories()
+export default function PortfolioPage({ searchParams }: PortfolioPageProps) {
+  const [pageConfig, setPageConfig] = useState<PortfolioPageConfig>(defaultConfig)
+  const [loading, setLoading] = useState(true)
+  const [categories, setCategories] = useState<string[]>([])
+  const [currentCategory, setCurrentCategory] = useState<string>("all")
+  const [resolvedSearchParams, setResolvedSearchParams] = useState<{ category?: string }>({})
+
+  useEffect(() => {
+    // Fetch page configuration
+    fetch('/api/admin/portfolio-page')
+      .then(res => res.json())
+      .then(config => {
+        setPageConfig(config)
+        setLoading(false)
+      })
+      .catch(error => {
+        console.error('Error fetching portfolio page config:', error)
+        setLoading(false)
+      })
+
+    // Fetch categories
+    getProjectCategories().then(cats => setCategories(cats))
+
+    // Resolve search params
+    searchParams.then(params => {
+      setResolvedSearchParams(params)
+      setCurrentCategory(params.category || "all")
+    })
+  }, [searchParams])
+
   return (
     <div className="min-h-screen bg-[#161616] text-[#E9E7E2]">
       <Header />
@@ -31,9 +89,9 @@ export default async function PortfolioPage({ searchParams }: PortfolioPageProps
         <section className="pt-24 sm:pt-28 md:pt-32 lg:pt-40 pb-12 sm:pb-16 md:pb-20 lg:pb-24">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <PageHeadline
-              eyebrow="Our Portfolio"
-              title="Strategic Brand Transformations"
-              description="Explore our portfolio of brand evolution projects that have helped businesses achieve remarkable growth and market presence."
+              eyebrow={pageConfig.hero_eyebrow}
+              title={pageConfig.hero_title}
+              description={pageConfig.hero_description}
               titleGradient={true}
             />
 
@@ -58,9 +116,9 @@ export default async function PortfolioPage({ searchParams }: PortfolioPageProps
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-6xl mx-auto">
               <PageHeadline
-                eyebrow="Featured Project"
-                title="Featured Work"
-                description="Highlighting our most impactful work that showcases our expertise and creativity."
+                eyebrow={pageConfig.featured_eyebrow}
+                title={pageConfig.featured_title}
+                description={pageConfig.featured_description}
                 size="medium"
               />
 
@@ -101,29 +159,28 @@ export default async function PortfolioPage({ searchParams }: PortfolioPageProps
                   Start Your Project
                 </span>
                 <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mt-3 sm:mt-4 mb-4 sm:mb-6">
-                  Ready to Transform Your Brand?
+                  {pageConfig.cta_title}
                 </h2>
                 <p className="text-base sm:text-lg md:text-xl text-[#E9E7E2]/80 mb-6 sm:mb-8 md:mb-10">
-                  Let's collaborate to create a strategic brand experience that resonates with your audience and
-                  drives meaningful results for your business.
+                  {pageConfig.cta_description}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
                   <Link
-                    href="/contact"
+                    href={pageConfig.cta_primary_url}
                     className="px-6 py-3 md:px-8 md:py-4 bg-[#FF5001] text-[#161616] font-bold rounded-full hover:bg-[#FF5001]/90 transition-all duration-300 inline-flex items-center justify-center group text-sm sm:text-base"
                     data-cursor="button"
                     data-cursor-text="Contact"
                   >
-                    Start Your Project
+                    {pageConfig.cta_primary_text}
                     <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
                   </Link>
                   <Link
-                    href="/services"
+                    href={pageConfig.cta_secondary_url}
                     className="px-6 py-3 md:px-8 md:py-4 border border-[#FF5001] text-[#FF5001] font-bold rounded-full hover:bg-[#FF5001]/10 transition-all duration-300 inline-flex items-center justify-center group text-sm sm:text-base"
                     data-cursor="button"
                     data-cursor-text="Services"
                   >
-                    Explore Our Services
+                    {pageConfig.cta_secondary_text}
                     <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </div>

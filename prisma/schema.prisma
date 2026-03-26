@@ -596,3 +596,65 @@ model team_page {
 
   @@map("team_page")
 }
+
+model services_page {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  hero_eyebrow        String?  @map("hero_eyebrow") @db.VarChar(100)
+  hero_title          String   @map("hero_title") @db.VarChar(255)
+  hero_description    String?  @map("hero_description")
+  hero_image_url      String?  @map("hero_image_url") @db.VarChar(500)
+  services_eyebrow    String?  @map("services_eyebrow") @db.VarChar(100)
+  services_title      String   @map("services_title") @db.VarChar(255)
+  services_description String?  @map("services_description")
+  cta_title           String   @map("cta_title") @db.VarChar(255)
+  cta_description     String?  @map("cta_description")
+  cta_primary_text    String?  @map("cta_primary_text") @db.VarChar(100)
+  cta_primary_url     String?  @map("cta_primary_url") @db.VarChar(500)
+  cta_secondary_text  String?  @map("cta_secondary_text") @db.VarChar(100)
+  cta_secondary_url   String?  @map("cta_secondary_url") @db.VarChar(500)
+  is_active           Boolean  @default(true)
+  created_at          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updated_at          DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("services_page")
+}
+
+model portfolio_page {
+  id                     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  hero_eyebrow           String?  @map("hero_eyebrow") @db.VarChar(100)
+  hero_title             String   @map("hero_title") @db.VarChar(255)
+  hero_description       String?  @map("hero_description")
+  featured_eyebrow       String?  @map("featured_eyebrow") @db.VarChar(100)
+  featured_title         String   @map("featured_title") @db.VarChar(255)
+  featured_description   String?  @map("featured_description")
+  cta_title              String   @map("cta_title") @db.VarChar(255)
+  cta_description        String?  @map("cta_description")
+  cta_primary_text       String?  @map("cta_primary_text") @db.VarChar(100)
+  cta_primary_url        String?  @map("cta_primary_url") @db.VarChar(500)
+  cta_secondary_text     String?  @map("cta_secondary_text") @db.VarChar(100)
+  cta_secondary_url      String?  @map("cta_secondary_url") @db.VarChar(500)
+  is_active              Boolean  @default(true)
+  created_at             DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updated_at             DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("portfolio_page")
+}
+
+model testimonials_page {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  hero_eyebrow        String?  @map("hero_eyebrow") @db.VarChar(100)
+  hero_title          String   @map("hero_title") @db.VarChar(255)
+  hero_description    String?  @map("hero_description")
+  stats_eyebrow       String?  @map("stats_eyebrow") @db.VarChar(100)
+  stats_title         String   @map("stats_title") @db.VarChar(255)
+  stats_description   String?  @map("stats_description")
+  cta_title           String   @map("cta_title") @db.VarChar(255)
+  cta_description     String?  @map("cta_description")
+  cta_primary_text    String?  @map("cta_primary_text") @db.VarChar(100)
+  cta_primary_url     String?  @map("cta_primary_url") @db.VarChar(500)
+  is_active           Boolean  @default(true)
+  created_at          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updated_at          DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("testimonials_page")
+}

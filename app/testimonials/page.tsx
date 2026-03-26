@@ -26,11 +26,39 @@ interface Testimonial {
   approved: boolean
 }
 
+interface TestimonialsPageConfig {
+  hero_eyebrow: string
+  hero_title: string
+  hero_description: string
+  stats_eyebrow: string
+  stats_title: string
+  stats_description: string
+  cta_title: string
+  cta_description: string
+  cta_primary_text: string
+  cta_primary_url: string
+}
+
+const defaultConfig: TestimonialsPageConfig = {
+  hero_eyebrow: "Client Stories",
+  hero_title: "Transformative Success Stories",
+  hero_description: "Hear from the brands and businesses that have experienced the transformative power of our strategic approach and creative excellence.",
+  stats_eyebrow: "Results",
+  stats_title: "Measurable Business Impact",
+  stats_description: "Our strategic approach delivers tangible results for our clients across various metrics.",
+  cta_title: "Ready to Join Our Success Stories?",
+  cta_description: "Let's collaborate to create a strategic brand experience that resonates with your audience and drives results.",
+  cta_primary_text: "Start Your Project",
+  cta_primary_url: "/contact"
+}
+
 export default function TestimonialsPage() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([])
+  const [pageConfig, setPageConfig] = useState<TestimonialsPageConfig>(defaultConfig)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Fetch testimonials
     fetch('/api/testimonials')
       .then(res => res.json())
       .then(data => {
@@ -45,6 +73,16 @@ export default function TestimonialsPage() {
       .finally(() => {
         setLoading(false)
       })
+
+    // Fetch page configuration
+    fetch('/api/admin/testimonials-page')
+      .then(res => res.json())
+      .then(config => {
+        setPageConfig(config)
+      })
+      .catch(error => {
+        console.error('Error fetching testimonials page config:', error)
+      })
   }, [])
 
   const featuredTestimonial = testimonials.find(t => t.featured) || testimonials[0]
@@ -57,9 +95,9 @@ export default function TestimonialsPage() {
         <main className="pt-24">
           <section className="container mx-auto px-4 py-12">
             <PageHeadline
-              eyebrow="Client Stories"
-              title="Transformative Success Stories"
-              description="Hear from the brands and businesses that have experienced the transformative power of our strategic approach and creative excellence."
+              eyebrow={pageConfig.hero_eyebrow}
+              title={pageConfig.hero_title}
+              description={pageConfig.hero_description}
             />
 
             {/* Featured Testimonial */}
@@ -164,9 +202,9 @@ export default function TestimonialsPage() {
             {/* Stats Section */}
             <div className="py-16 border-t border-[#333333]">
               <PageHeadline
-                eyebrow="Results"
-                title="Measurable Business Impact"
-                description="Our strategic approach delivers tangible results for our clients across various metrics."
+                eyebrow={pageConfig.stats_eyebrow}
+                title={pageConfig.stats_title}
+                description={pageConfig.stats_description}
                 size="medium"
               />
 
@@ -180,16 +218,15 @@ export default function TestimonialsPage() {
             {/* CTA Section */}
             <ScrollReveal className="py-16 mt-16 bg-[#1A1A1A] rounded-2xl" delay={0.2}>
               <div className="text-center">
-                <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Join Our Success Stories?</h2>
+                <h2 className="text-3xl md:text-4xl font-bold mb-6">{pageConfig.cta_title}</h2>
                 <p className="text-lg text-[#E9E7E2]/80 max-w-2xl mx-auto mb-8">
-                  Let's collaborate to create a strategic brand experience that resonates with your audience and drives
-                  results.
+                  {pageConfig.cta_description}
                 </p>
                 <Link
-                  href="/contact"
+                  href={pageConfig.cta_primary_url}
                   className="px-8 py-4 bg-[#FF5001] text-[#161616] font-bold rounded-full hover:bg-[#FF5001]/90 transition-all duration-300 inline-flex items-center group"
                 >
-                  Start Your Project
+                  {pageConfig.cta_primary_text}
                   <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>

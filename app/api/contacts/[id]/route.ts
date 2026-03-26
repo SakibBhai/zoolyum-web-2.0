@@ -55,7 +55,7 @@ export async function PUT(
     const { id } = await params
     const body = await request.json()
     const { name, email, phone, subject, message, status } = body
-    
+
     // Prepare update data (only include provided fields)
     const updateData: any = {}
     if (name !== undefined) updateData.name = name.trim()
@@ -64,13 +64,15 @@ export async function PUT(
     if (subject !== undefined) updateData.subject = subject?.trim() || null
     if (message !== undefined) updateData.message = message.trim()
     if (status !== undefined) {
-      if (!['NEW', 'READ', 'REPLIED', 'ARCHIVED'].includes(status)) {
+      // Normalize status to uppercase and validate
+      const normalizedStatus = status.toUpperCase()
+      if (!['NEW', 'READ', 'REPLIED', 'ARCHIVED'].includes(normalizedStatus)) {
         return NextResponse.json(
           { error: 'Invalid status value' },
           { status: 400 }
         )
       }
-      updateData.status = status
+      updateData.status = normalizedStatus
     }
     
     const contact = await updateContact(id, updateData)

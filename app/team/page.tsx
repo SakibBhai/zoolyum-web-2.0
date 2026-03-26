@@ -154,8 +154,6 @@ export default function TeamPage() {
       })
   }, [])
 
-  const featuredMembers = teamMembers.filter(member => member.featured)
-  const regularMembers = teamMembers.filter(member => !member.featured)
   return (
     <PageTransition>
       <div className="min-h-screen bg-[#161616] text-[#E9E7E2]">
