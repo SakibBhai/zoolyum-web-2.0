@@ -80,6 +80,14 @@ export default function TeamPageAdmin() {
       })
   }, [])
 
+  // Debug: Monitor culture_image_url changes
+  useEffect(() => {
+    console.log('=== CULTURE IMAGE URL CHANGED ===')
+    console.log('Current value:', data.culture_image_url)
+    console.log('Is truthy:', !!data.culture_image_url)
+    console.log('Type:', typeof data.culture_image_url)
+  }, [data.culture_image_url])
+
   const handleSave = async () => {
     setSaving(true)
 
@@ -111,7 +119,12 @@ export default function TeamPageAdmin() {
 
   const handleChange = (field: keyof TeamPageData, value: string) => {
     console.log(`Updating ${field}:`, value)
-    setData(prev => ({ ...prev, [field]: value }))
+    console.log('Before update - current culture_image_url:', data.culture_image_url)
+    setData(prev => {
+      const newData = { ...prev, [field]: value }
+      console.log('After update - new culture_image_url:', newData.culture_image_url)
+      return newData
+    })
   }
 
   if (loading) {
@@ -300,10 +313,40 @@ export default function TeamPageAdmin() {
             <div>
               <Label>Culture Image</Label>
               <div className="mt-2">
+                {/* Debug Section */}
+                <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                  <p className="text-xs font-mono font-semibold mb-1">DEBUG INFO:</p>
+                  <p className="text-xs font-mono">culture_image_url value: <span className="font-bold">{data.culture_image_url || 'NOT SET'}</span></p>
+                  <p className="text-xs font-mono">Is truthy: {String(!!data.culture_image_url)}</p>
+                </div>
+
+                {/* Manual URL Input for Testing */}
+                <div className="mb-4">
+                  <Label htmlFor="manual_culture_url" className="text-xs">Or paste image URL directly:</Label>
+                  <Input
+                    id="manual_culture_url"
+                    value={data.culture_image_url || ''}
+                    onChange={(e) => handleChange('culture_image_url', e.target.value)}
+                    placeholder="https://example.com/image.jpg"
+                    className="mt-1"
+                  />
+                </div>
+
                 <ImageUpload
                   onUploadComplete={(url) => {
-                    console.log('Culture image uploaded:', url)
+                    console.log('=== CULTURE IMAGE UPLOAD CALLBACK ===')
+                    console.log('Upload complete, URL:', url)
+                    console.log('URL type:', typeof url)
+                    console.log('URL length:', url?.length)
+                    if (!url || typeof url !== 'string' || url.length === 0) {
+                      console.error('INVALID URL RECEIVED:', url)
+                      return
+                    }
                     handleChange('culture_image_url', url)
+                  }}
+                  onError={(error) => {
+                    console.error('=== IMAGE UPLOAD ERROR ===')
+                    console.error('Error:', error)
                   }}
                   folder="team-page"
                   accept="image/jpeg,image/jpg,image/png,image/webp"
@@ -315,8 +358,12 @@ export default function TeamPageAdmin() {
                       src={data.culture_image_url}
                       alt="Culture preview"
                       className="max-w-xs rounded-lg border border-border"
+                      onError={(e) => {
+                        console.error('Image failed to load:', data.culture_image_url)
+                        e.currentTarget.src = '/placeholder.svg?height=600&width=500'
+                      }}
                     />
-                    <p className="text-xs text-muted-foreground mt-2">URL: {data.culture_image_url}</p>
+                    <p className="text-xs text-muted-foreground mt-2 break-all">URL: {data.culture_image_url}</p>
                   </div>
                 )}
               </div>
