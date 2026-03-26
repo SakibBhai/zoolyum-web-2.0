@@ -16,6 +16,7 @@ import {
   Layout,
   Share2,
   Users,
+  Loader2
 } from "lucide-react"
 import { ScrollReveal } from "@/components/scroll-animations/scroll-reveal"
 import { StaggerReveal } from "@/components/scroll-animations/stagger-reveal"
@@ -40,6 +41,18 @@ interface ServicesPageConfig {
   cta_secondary_url: string
 }
 
+interface Service {
+  id: string
+  title: string
+  slug: string
+  description: string | null
+  content: string | null
+  imageUrl: string | null
+  icon: string | null
+  featured: boolean
+  order: number
+}
+
 const defaultConfig: ServicesPageConfig = {
   hero_eyebrow: "Our Services",
   hero_title: "Strategic Brand & Digital Solutions",
@@ -58,32 +71,49 @@ const defaultConfig: ServicesPageConfig = {
 
 export default function ServicesPage() {
   const [pageConfig, setPageConfig] = useState<ServicesPageConfig>(defaultConfig)
-  const [loading, setLoading] = useState(true)
+  const [services, setServices] = useState<Service[]>([])
+  const [configLoading, setConfigLoading] = useState(true)
+  const [servicesLoading, setServicesLoading] = useState(true)
 
   useEffect(() => {
+    // Fetch page configuration
     fetch('/api/admin/services-page')
       .then(async res => {
-        // Check if response has a database error header
         const hasDbError = res.headers.get('X-Database-Error') === 'true'
         if (hasDbError) {
           console.warn('Services page: Using default config due to database error')
         }
-
-        // Always try to parse JSON, even on error status
         if (!res.ok) {
           console.warn(`Services page API returned status: ${res.status}`)
         }
         return res.json()
       })
       .then(config => {
-        setPageConfig(config)
-        setLoading(false)
+        if (config && config.hero_title) {
+          setPageConfig(config)
+        }
+        setConfigLoading(false)
       })
       .catch(error => {
         console.error('Error fetching services page config:', error)
-        // Use default config on error
         setPageConfig(defaultConfig)
-        setLoading(false)
+        setConfigLoading(false)
+      })
+
+    // Fetch services from database
+    fetch('/api/services')
+      .then(async res => {
+        const data = await res.json()
+        return data
+      })
+      .then(data => {
+        setServices(Array.isArray(data) ? data : [])
+        setServicesLoading(false)
+      })
+      .catch(error => {
+        console.error('Error fetching services:', error)
+        setServices([])
+        setServicesLoading(false)
       })
   }, [])
   return (
@@ -108,60 +138,25 @@ export default function ServicesPage() {
               animation="fade-slide"
               mobileAnimation="fade"
             >
-              <ServiceCard
-                title="Brand Strategy"
-                description="Developing comprehensive brand strategies that position your business for success in competitive markets."
-                icon="strategy"
-                slug="brand-strategy"
-              />
-              <ServiceCard
-                title="Digital Transformation"
-                description="Creating digital ecosystems that amplify your brand's presence and engage audiences across platforms."
-                icon="globe"
-                slug="digital-transformation"
-              />
-              <ServiceCard
-                title="Creative Direction"
-                description="Providing expert guidance to navigate complex brand challenges and identify growth opportunities."
-                icon="compass"
-                slug="creative-direction"
-              />
-              <ServiceCard
-                title="Visual Identity"
-                description="Crafting distinctive visual systems that express your brand's personality and values across all touchpoints."
-                icon="palette"
-                slug="visual-identity"
-              />
-              <ServiceCard
-                title="Content Strategy"
-                description="Developing strategic content frameworks that tell your brand story and engage your target audience."
-                icon="file-text"
-                slug="content-strategy"
-              />
-              <ServiceCard
-                title="Market Research"
-                description="Conducting in-depth research to uncover insights that inform strategic decision-making and positioning."
-                icon="search"
-                slug="market-research"
-              />
-              <ServiceCard
-                title="UX/UI Design"
-                description="Creating intuitive digital experiences that balance user needs with business objectives."
-                icon="layout"
-                slug="ux-ui-design"
-              />
-              <ServiceCard
-                title="Social Media Strategy"
-                description="Building strategic social media approaches that build community and drive engagement."
-                icon="share-2"
-                slug="social-media-strategy"
-              />
-              <ServiceCard
-                title="Brand Workshops"
-                description="Facilitating collaborative sessions to align stakeholders and define brand direction."
-                icon="users"
-                slug="brand-workshops"
-              />
+              {servicesLoading ? (
+                <div className="col-span-full flex items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-[#FF5001]" />
+                </div>
+              ) : services.length === 0 ? (
+                <div className="col-span-full text-center py-12">
+                  <p className="text-[#E9E7E2]/60">No services available yet.</p>
+                </div>
+              ) : (
+                services.map((service) => (
+                  <ServiceCard
+                    key={service.id}
+                    title={service.title}
+                    description={service.description || ""}
+                    icon={service.icon || undefined}
+                    slug={service.slug}
+                  />
+                ))
+              )}
             </StaggerReveal>
           </section>
 
