@@ -12,6 +12,7 @@ import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 
 interface ServicesPageData {
+  id?: string
   hero_eyebrow: string
   hero_title: string
   hero_description: string
@@ -52,8 +53,10 @@ export default function ServicesPageAdmin() {
   useEffect(() => {
     fetch('/api/admin/services-page')
       .then(res => res.json())
-      .then(servicesData => {
-        setData(servicesData)
+      .then(responseData => {
+        if (responseData.id) {
+          setData(responseData)
+        }
         setLoading(false)
       })
       .catch(error => {
@@ -66,14 +69,22 @@ export default function ServicesPageAdmin() {
     setSaving(true)
 
     try {
-      const response = await fetch('/api/admin/services-page', {
-        method: 'PUT',
+      const url = '/api/admin/services-page'
+      const method = data.id ? 'PUT' : 'POST'
+
+      const response = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       })
 
       if (!response.ok) {
         throw new Error('Failed to save services page configuration')
+      }
+
+      const result = await response.json()
+      if (result.servicesPage || result.id) {
+        setData(prev => ({ ...prev, id: result.servicesPage?.id || result.id }))
       }
 
       toast.success('Services page configuration saved successfully')

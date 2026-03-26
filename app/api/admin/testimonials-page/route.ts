@@ -22,7 +22,8 @@ export async function GET() {
         cta_title: "Ready to Join Our Success Stories?",
         cta_description: "Let's collaborate to create a strategic brand experience that resonates with your audience and drives results.",
         cta_primary_text: "Start Your Project",
-        cta_primary_url: "/contact"
+        cta_primary_url: "/contact",
+        is_active: true
       });
     }
 
@@ -31,6 +32,53 @@ export async function GET() {
     console.error("Error fetching testimonials page:", error);
     return NextResponse.json(
       { error: "Failed to fetch testimonials page configuration" },
+      { status: 500 }
+    );
+  }
+}
+
+// POST /api/admin/testimonials-page - Create testimonials page configuration
+export async function POST(request: NextRequest) {
+  try {
+    const session = await auth();
+
+    if (process.env.NODE_ENV === "production" && !session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const data = await request.json();
+
+    // Deactivate all existing testimonials pages
+    await prisma.testimonials_page.updateMany({
+      where: { is_active: true },
+      data: { is_active: false }
+    });
+
+    // Create new testimonials page
+    const testimonialsPage = await prisma.testimonials_page.create({
+      data: {
+        hero_eyebrow: data.hero_eyebrow,
+        hero_title: data.hero_title,
+        hero_description: data.hero_description,
+        stats_eyebrow: data.stats_eyebrow,
+        stats_title: data.stats_title,
+        stats_description: data.stats_description,
+        cta_title: data.cta_title,
+        cta_description: data.cta_description,
+        cta_primary_text: data.cta_primary_text,
+        cta_primary_url: data.cta_primary_url,
+        is_active: true
+      }
+    });
+
+    return NextResponse.json({
+      message: "Testimonials page created successfully",
+      testimonialsPage
+    });
+  } catch (error) {
+    console.error("Error creating testimonials page:", error);
+    return NextResponse.json(
+      { error: "Failed to create testimonials page configuration" },
       { status: 500 }
     );
   }
@@ -46,50 +94,25 @@ export async function PUT(request: NextRequest) {
     }
 
     const data = await request.json();
+    const { id, created_at, updated_at, ...updateData } = data;
 
-    // Check if a testimonials page config exists
-    const existing = await prisma.testimonials_page.findFirst({
-      where: { is_active: true }
-    });
-
-    let testimonialsPage;
-
-    if (existing) {
-      // Update existing
-      testimonialsPage = await prisma.testimonials_page.update({
-        where: { id: existing.id },
-        data: {
-          hero_eyebrow: data.hero_eyebrow,
-          hero_title: data.hero_title,
-          hero_description: data.hero_description,
-          stats_eyebrow: data.stats_eyebrow,
-          stats_title: data.stats_title,
-          stats_description: data.stats_description,
-          cta_title: data.cta_title,
-          cta_description: data.cta_description,
-          cta_primary_text: data.cta_primary_text,
-          cta_primary_url: data.cta_primary_url,
-        }
-      });
-    } else {
-      // Create new
-      testimonialsPage = await prisma.testimonials_page.create({
-        data: {
-          hero_eyebrow: data.hero_eyebrow,
-          hero_title: data.hero_title,
-          hero_description: data.hero_description,
-          stats_eyebrow: data.stats_eyebrow,
-          stats_title: data.stats_title,
-          stats_description: data.stats_description,
-          cta_title: data.cta_title,
-          cta_description: data.cta_description,
-          cta_primary_text: data.cta_primary_text,
-          cta_primary_url: data.cta_primary_url,
-        }
-      });
+    if (!id) {
+      return NextResponse.json(
+        { error: "Testimonials page ID is required" },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json(testimonialsPage);
+    // Update testimonials page
+    const testimonialsPage = await prisma.testimonials_page.update({
+      where: { id },
+      data: updateData
+    });
+
+    return NextResponse.json({
+      message: "Testimonials page updated successfully",
+      testimonialsPage
+    });
   } catch (error) {
     console.error("Error updating testimonials page:", error);
     return NextResponse.json(

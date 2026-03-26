@@ -25,7 +25,8 @@ export async function GET() {
         cta_primary_text: "Start Your Project",
         cta_primary_url: "/contact",
         cta_secondary_text: "View Our Work",
-        cta_secondary_url: "/portfolio"
+        cta_secondary_url: "/portfolio",
+        is_active: true
       });
     }
 
@@ -34,6 +35,56 @@ export async function GET() {
     console.error("Error fetching services page:", error);
     return NextResponse.json(
       { error: "Failed to fetch services page configuration" },
+      { status: 500 }
+    );
+  }
+}
+
+// POST /api/admin/services-page - Create services page configuration
+export async function POST(request: NextRequest) {
+  try {
+    const session = await auth();
+
+    if (process.env.NODE_ENV === "production" && !session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const data = await request.json();
+
+    // Deactivate all existing services pages
+    await prisma.services_page.updateMany({
+      where: { is_active: true },
+      data: { is_active: false }
+    });
+
+    // Create new services page
+    const servicesPage = await prisma.services_page.create({
+      data: {
+        hero_eyebrow: data.hero_eyebrow,
+        hero_title: data.hero_title,
+        hero_description: data.hero_description,
+        hero_image_url: data.hero_image_url,
+        services_eyebrow: data.services_eyebrow,
+        services_title: data.services_title,
+        services_description: data.services_description,
+        cta_title: data.cta_title,
+        cta_description: data.cta_description,
+        cta_primary_text: data.cta_primary_text,
+        cta_primary_url: data.cta_primary_url,
+        cta_secondary_text: data.cta_secondary_text,
+        cta_secondary_url: data.cta_secondary_url,
+        is_active: true
+      }
+    });
+
+    return NextResponse.json({
+      message: "Services page created successfully",
+      servicesPage
+    });
+  } catch (error) {
+    console.error("Error creating services page:", error);
+    return NextResponse.json(
+      { error: "Failed to create services page configuration" },
       { status: 500 }
     );
   }
@@ -49,56 +100,25 @@ export async function PUT(request: NextRequest) {
     }
 
     const data = await request.json();
+    const { id, created_at, updated_at, ...updateData } = data;
 
-    // Check if a services page config exists
-    const existing = await prisma.services_page.findFirst({
-      where: { is_active: true }
-    });
-
-    let servicesPage;
-
-    if (existing) {
-      // Update existing
-      servicesPage = await prisma.services_page.update({
-        where: { id: existing.id },
-        data: {
-          hero_eyebrow: data.hero_eyebrow,
-          hero_title: data.hero_title,
-          hero_description: data.hero_description,
-          hero_image_url: data.hero_image_url,
-          services_eyebrow: data.services_eyebrow,
-          services_title: data.services_title,
-          services_description: data.services_description,
-          cta_title: data.cta_title,
-          cta_description: data.cta_description,
-          cta_primary_text: data.cta_primary_text,
-          cta_primary_url: data.cta_primary_url,
-          cta_secondary_text: data.cta_secondary_text,
-          cta_secondary_url: data.cta_secondary_url,
-        }
-      });
-    } else {
-      // Create new
-      servicesPage = await prisma.services_page.create({
-        data: {
-          hero_eyebrow: data.hero_eyebrow,
-          hero_title: data.hero_title,
-          hero_description: data.hero_description,
-          hero_image_url: data.hero_image_url,
-          services_eyebrow: data.services_eyebrow,
-          services_title: data.services_title,
-          services_description: data.services_description,
-          cta_title: data.cta_title,
-          cta_description: data.cta_description,
-          cta_primary_text: data.cta_primary_text,
-          cta_primary_url: data.cta_primary_url,
-          cta_secondary_text: data.cta_secondary_text,
-          cta_secondary_url: data.cta_secondary_url,
-        }
-      });
+    if (!id) {
+      return NextResponse.json(
+        { error: "Services page ID is required" },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json(servicesPage);
+    // Update services page
+    const servicesPage = await prisma.services_page.update({
+      where: { id },
+      data: updateData
+    });
+
+    return NextResponse.json({
+      message: "Services page updated successfully",
+      servicesPage
+    });
   } catch (error) {
     console.error("Error updating services page:", error);
     return NextResponse.json(

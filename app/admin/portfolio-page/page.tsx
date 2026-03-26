@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 
 interface PortfolioPageData {
+  id?: string
   hero_eyebrow: string
   hero_title: string
   hero_description: string
@@ -49,8 +50,10 @@ export default function PortfolioPageAdmin() {
   useEffect(() => {
     fetch('/api/admin/portfolio-page')
       .then(res => res.json())
-      .then(portfolioData => {
-        setData(portfolioData)
+      .then(responseData => {
+        if (responseData.id) {
+          setData(responseData)
+        }
         setLoading(false)
       })
       .catch(error => {
@@ -63,14 +66,22 @@ export default function PortfolioPageAdmin() {
     setSaving(true)
 
     try {
-      const response = await fetch('/api/admin/portfolio-page', {
-        method: 'PUT',
+      const url = '/api/admin/portfolio-page'
+      const method = data.id ? 'PUT' : 'POST'
+
+      const response = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       })
 
       if (!response.ok) {
         throw new Error('Failed to save portfolio page configuration')
+      }
+
+      const result = await response.json()
+      if (result.portfolioPage || result.id) {
+        setData(prev => ({ ...prev, id: result.portfolioPage?.id || result.id }))
       }
 
       toast.success('Portfolio page configuration saved successfully')

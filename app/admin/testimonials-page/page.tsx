@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 
 interface TestimonialsPageData {
+  id?: string
   hero_eyebrow: string
   hero_title: string
   hero_description: string
@@ -45,8 +46,10 @@ export default function TestimonialsPageAdmin() {
   useEffect(() => {
     fetch('/api/admin/testimonials-page')
       .then(res => res.json())
-      .then(testimonialsData => {
-        setData(testimonialsData)
+      .then(responseData => {
+        if (responseData.id) {
+          setData(responseData)
+        }
         setLoading(false)
       })
       .catch(error => {
@@ -59,14 +62,22 @@ export default function TestimonialsPageAdmin() {
     setSaving(true)
 
     try {
-      const response = await fetch('/api/admin/testimonials-page', {
-        method: 'PUT',
+      const url = '/api/admin/testimonials-page'
+      const method = data.id ? 'PUT' : 'POST'
+
+      const response = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       })
 
       if (!response.ok) {
         throw new Error('Failed to save testimonials page configuration')
+      }
+
+      const result = await response.json()
+      if (result.testimonialsPage || result.id) {
+        setData(prev => ({ ...prev, id: result.testimonialsPage?.id || result.id }))
       }
 
       toast.success('Testimonials page configuration saved successfully')
