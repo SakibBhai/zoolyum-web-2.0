@@ -171,69 +171,26 @@ export default function ServicesPage() {
               />
 
               <div className="mt-12 md:mt-16 space-y-16 md:space-y-24">
-                {/* Brand Strategy */}
-                <ServiceDetail
-                  title="Brand Strategy"
-                  description="We develop comprehensive brand strategies that position your business for success in competitive markets. Our strategic approach is rooted in deep market understanding and audience insights."
-                  features={[
-                    "Brand Positioning & Messaging",
-                    "Brand Architecture",
-                    "Competitive Analysis",
-                    "Audience Segmentation",
-                    "Brand Voice & Personality",
-                    "Value Proposition Development",
-                  ]}
-                  image="/placeholder.svg?height=400&width=600"
-                  reverse={false}
-                />
-
-                {/* Digital Transformation */}
-                <ServiceDetail
-                  title="Digital Transformation"
-                  description="We create digital ecosystems that amplify your brand's presence and engage audiences across platforms. Our digital strategies are designed to drive meaningful engagement and conversion."
-                  features={[
-                    "Digital Strategy Development",
-                    "Website & App Design",
-                    "E-commerce Solutions",
-                    "Digital Marketing Campaigns",
-                    "SEO & Content Strategy",
-                    "Analytics & Performance Tracking",
-                  ]}
-                  image="/placeholder.svg?height=400&width=600"
-                  reverse={true}
-                />
-
-                {/* Creative Direction */}
-                <ServiceDetail
-                  title="Creative Direction"
-                  description="We provide expert creative guidance to navigate complex brand challenges and identify growth opportunities. Our creative approach balances innovation with strategic objectives."
-                  features={[
-                    "Creative Strategy Development",
-                    "Campaign Conceptualization",
-                    "Visual Storytelling",
-                    "Art Direction",
-                    "Brand Expression Guidelines",
-                    "Creative Team Leadership",
-                  ]}
-                  image="/placeholder.svg?height=400&width=600"
-                  reverse={false}
-                />
-
-                {/* Visual Identity */}
-                <ServiceDetail
-                  title="Visual Identity"
-                  description="We craft distinctive visual systems that express your brand's personality and values across all touchpoints. Our visual identity work creates recognition and reinforces brand positioning."
-                  features={[
-                    "Logo & Identity Design",
-                    "Visual System Development",
-                    "Brand Guidelines",
-                    "Packaging Design",
-                    "Environmental Graphics",
-                    "Brand Collateral Design",
-                  ]}
-                  image="/placeholder.svg?height=400&width=600"
-                  reverse={true}
-                />
+                {servicesLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-[#FF5001]" />
+                  </div>
+                ) : services.length === 0 ? (
+                  <div className="text-center py-12">
+                    <p className="text-[#E9E7E2]/60">No services available yet.</p>
+                  </div>
+                ) : (
+                  services.map((service, index) => (
+                    <ServiceDetail
+                      key={service.id}
+                      title={service.title}
+                      description={service.content || service.description || ""}
+                      features={[]}
+                      image={service.imageUrl || "/placeholder.svg?height=400&width=600"}
+                      reverse={index % 2 === 1}
+                    />
+                  ))
+                )}
               </div>
             </div>
           </section>
