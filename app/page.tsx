@@ -350,8 +350,8 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Team Preview Section - Responsive spacing */}
-          <section id="team-preview">
+          {/* Team Preview Section - Grid Layout */}
+          <section id="team-preview" className="bg-[#1A1A1A]">
             <div className="container mx-auto px-4 py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32">
               <PageHeadline
                 eyebrow="Our Team"
@@ -359,53 +359,61 @@ export default function Home() {
                 description="Our diverse team of experts brings together strategic thinking and creative excellence to deliver exceptional results for our clients."
               />
 
-              <StaggerReveal
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8"
-                staggerDelay={0.1}
-                mobileStaggerDelay={0.05}
-                mobileAnimation="fade"
-              >
+              {/* Fixed Grid Layout */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8 mt-12 md:mt-16">
                 {teamMembers.length > 0 ? (
                   teamMembers.map((member) => (
-                    <TeamMemberCard
+                    <div
                       key={member.id}
-                      name={member.name}
-                      role={member.designation || "Team Member"}
-                      image={member.imageUrl || "/placeholder.svg?height=400&width=300"}
-                      bio={member.bio || ""}
-                      social={{
-                        linkedin: member.linkedin || "",
-                        twitter: member.twitter || "",
-                      }}
-                      featured={member.featured}
-                    />
+                      className="flex flex-col"
+                    >
+                      <TeamMemberCard
+                        name={member.name}
+                        role={member.designation || "Team Member"}
+                        image={member.imageUrl || "/placeholder.svg?height=400&width=300"}
+                        bio={member.bio || ""}
+                        social={{
+                          linkedin: member.linkedin || "",
+                          twitter: member.twitter || "",
+                        }}
+                        featured={member.featured}
+                      />
+                    </div>
                   ))
                 ) : (
                   // Fallback to placeholder members if no featured members exist
                   <>
-                    <TeamMemberCard
-                      name="Sakib Chowdhury"
-                      role="Founder & Creative Director"
-                      image="/placeholder.svg?height=400&width=300"
-                    />
-                    <TeamMemberCard
-                      name="Emma Rodriguez"
-                      role="Brand Strategist"
-                      image="/placeholder.svg?height=400&width=300"
-                    />
-                    <TeamMemberCard
-                      name="David Chen"
-                      role="Digital Director"
-                      image="/placeholder.svg?height=400&width=300"
-                    />
-                    <TeamMemberCard
-                      name="Sarah Johnson"
-                      role="Client Relations"
-                      image="/placeholder.svg?height=400&width=300"
-                    />
+                    <div className="flex flex-col">
+                      <TeamMemberCard
+                        name="Sakib Chowdhury"
+                        role="Founder & Creative Director"
+                        image="/placeholder.svg?height=400&width=300"
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <TeamMemberCard
+                        name="Emma Rodriguez"
+                        role="Brand Strategist"
+                        image="/placeholder.svg?height=400&width=300"
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <TeamMemberCard
+                        name="David Chen"
+                        role="Digital Director"
+                        image="/placeholder.svg?height=400&width=300"
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <TeamMemberCard
+                        name="Sarah Johnson"
+                        role="Client Relations"
+                        image="/placeholder.svg?height=400&width=300"
+                      />
+                    </div>
                   </>
                 )}
-              </StaggerReveal>
+              </div>
 
               <ScrollReveal
                 className="mt-10 md:mt-12 text-center"
