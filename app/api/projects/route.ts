@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     console.log('Received project data:', body);
-    
+
     // Handle both admin form structure and direct API calls
     const {
       title,
@@ -179,10 +179,37 @@ export async function POST(request: NextRequest) {
     console.log('Project created successfully:', project);
 
     return NextResponse.json(project, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating project:', error);
+    console.error('Error details:', JSON.stringify(error, null, 2));
+
+    // Check for table not exists error
+    if (error.message?.includes('does not exist')) {
+      return NextResponse.json(
+        {
+          error: 'Database table not found',
+          details: 'The project table has not been created yet. Please contact administrator.'
+        },
+        { status: 500 }
+      );
+    }
+
+    // Check for unique constraint violation
+    if (error.code === 'P2002') {
+      return NextResponse.json(
+        {
+          error: 'A project with this identifier already exists',
+          details: 'Please use a different identifier'
+        },
+        { status: 409 }
+      );
+    }
+
     return NextResponse.json(
-      { error: 'Failed to create project' },
+      {
+        error: 'Failed to create project',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }

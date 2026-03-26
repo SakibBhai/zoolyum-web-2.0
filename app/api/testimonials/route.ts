@@ -103,7 +103,9 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { name, position, company, content, rating, imageUrl } = body
-    
+
+    console.log('Creating testimonial with data:', { name, position, company, rating })
+
     // Validate required fields
     const testimonialData = {
       name: name?.trim(),
@@ -115,7 +117,7 @@ export async function POST(request: NextRequest) {
       featured: false, // New testimonials are not featured by default
       approved: false  // New testimonials need approval
     }
-    
+
     // Validate the testimonial data
     const validation = validateTestimonialData(testimonialData)
     if (!validation.isValid) {
@@ -124,23 +126,41 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-    
+
     // Create the testimonial
     const testimonial = await createTestimonial(testimonialData)
-    
+
+    console.log('Testimonial created successfully:', testimonial.id)
+
     // Return success response (don't expose internal data for public submissions)
     return NextResponse.json(
-      { 
+      {
         message: 'Testimonial submitted successfully',
         id: testimonial.id,
         submittedAt: testimonial.createdAt
       },
       { status: 201 }
     )
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating testimonial:', error)
+    console.error('Error details:', JSON.stringify(error, null, 2))
+
+    // Check for table not exists error
+    if (error.message?.includes('does not exist')) {
+      return NextResponse.json(
+        {
+          error: 'Database table not found',
+          details: 'The testimonial table has not been created yet. Please contact administrator.'
+        },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
-      { error: 'Failed to submit testimonial' },
+      {
+        error: 'Failed to submit testimonial',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     )
   }
