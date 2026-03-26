@@ -11,6 +11,7 @@ interface ImageUploadProps {
   maxSize?: number // in MB
   className?: string
   children?: React.ReactNode
+  id?: string // Add unique ID prop
 }
 
 export function ImageUpload({
@@ -20,10 +21,14 @@ export function ImageUpload({
   accept = 'image/jpeg,image/jpg,image/png,image/webp,image/gif',
   maxSize = 5,
   className = '',
-  children
+  children,
+  id: customId
 }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
+
+  // Generate unique ID if not provided
+  const uniqueId = customId || `file-upload-${folder}-${Math.random().toString(36).substr(2, 9)}`
 
   const handleFileSelect = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -80,14 +85,14 @@ export function ImageUpload({
     <div className={`image-upload ${className}`}>
       <input
         type="file"
-        id="file-upload"
+        id={uniqueId}
         accept={accept}
         onChange={handleFileSelect}
         disabled={isUploading}
         className="hidden"
       />
       <label
-        htmlFor="file-upload"
+        htmlFor={uniqueId}
         className={`
           flex flex-col items-center justify-center
           w-full h-32 sm:h-48 md:h-64

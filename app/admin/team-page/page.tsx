@@ -180,6 +180,7 @@ export default function TeamPageAdmin() {
               <Label>Hero Image</Label>
               <div className="mt-2">
                 <ImageUpload
+                  id="hero-image-upload"
                   onUploadComplete={(url) => handleChange('hero_image_url', url)}
                   folder="team-page"
                   accept="image/jpeg,image/jpg,image/png,image/webp"
@@ -334,6 +335,7 @@ export default function TeamPageAdmin() {
                 </div>
 
                 <ImageUpload
+                  id="culture-image-upload"
                   onUploadComplete={(url) => {
                     console.log('=== CULTURE IMAGE UPLOAD CALLBACK ===')
                     console.log('Upload complete, URL:', url)
