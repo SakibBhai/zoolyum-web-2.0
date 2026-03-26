@@ -53,6 +53,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
+    console.log('Creating services page with data:', JSON.stringify(data, null, 2));
 
     // Deactivate all existing services pages
     await prisma.services_page.updateMany({
@@ -86,8 +87,15 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error creating services page:", error);
+    console.error("Error details:", JSON.stringify(error, null, 2));
+
+    // Return detailed error for debugging
     return NextResponse.json(
-      { error: "Failed to create services page configuration" },
+      {
+        error: "Failed to create services page configuration",
+        details: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      },
       { status: 500 }
     );
   }
@@ -97,6 +105,8 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const data = await request.json();
+    console.log('Updating services page with data:', JSON.stringify(data, null, 2));
+
     const { id, created_at, updated_at, ...updateData } = data;
 
     if (!id) {
@@ -118,8 +128,15 @@ export async function PUT(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error updating services page:", error);
+    console.error("Error details:", JSON.stringify(error, null, 2));
+
+    // Return detailed error for debugging
     return NextResponse.json(
-      { error: "Failed to update services page configuration" },
+      {
+        error: "Failed to update services page configuration",
+        details: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      },
       { status: 500 }
     );
   }
