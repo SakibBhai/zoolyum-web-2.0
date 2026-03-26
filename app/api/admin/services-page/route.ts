@@ -1,6 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+// Default configuration for fallback
+const defaultConfig = {
+  hero_eyebrow: "Our Services",
+  hero_title: "Strategic Solutions for Modern Brands",
+  hero_description: "We offer comprehensive services to elevate your brand and drive business growth through strategic thinking and creative excellence.",
+  hero_image_url: "/placeholder.svg?height=600&width=1200",
+  services_eyebrow: "What We Do",
+  services_title: "Our Core Services",
+  services_description: "From brand strategy to digital transformation, we provide end-to-end solutions that deliver measurable results.",
+  cta_title: "Ready to Grow Your Business?",
+  cta_description: "Let's collaborate to create a tailored strategy that drives real results for your business.",
+  cta_primary_text: "Start Your Project",
+  cta_primary_url: "/contact",
+  cta_secondary_text: "View Our Work",
+  cta_secondary_url: "/portfolio",
+  is_active: true
+};
+
 // GET /api/admin/services-page - Get services page configuration
 // Public endpoint - no authentication required for read access
 export async function GET() {
@@ -12,31 +30,22 @@ export async function GET() {
 
     if (!servicesPage) {
       // Return default configuration if none exists
-      return NextResponse.json({
-        hero_eyebrow: "Our Services",
-        hero_title: "Strategic Solutions for Modern Brands",
-        hero_description: "We offer comprehensive services to elevate your brand and drive business growth through strategic thinking and creative excellence.",
-        hero_image_url: "/placeholder.svg?height=600&width=1200",
-        services_eyebrow: "What We Do",
-        services_title: "Our Core Services",
-        services_description: "From brand strategy to digital transformation, we provide end-to-end solutions that deliver measurable results.",
-        cta_title: "Ready to Grow Your Business?",
-        cta_description: "Let's collaborate to create a tailored strategy that drives real results for your business.",
-        cta_primary_text: "Start Your Project",
-        cta_primary_url: "/contact",
-        cta_secondary_text: "View Our Work",
-        cta_secondary_url: "/portfolio",
-        is_active: true
-      });
+      return NextResponse.json(defaultConfig);
     }
 
     return NextResponse.json(servicesPage);
   } catch (error) {
+    // Log error for debugging
     console.error("Error fetching services page:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch services page configuration" },
-      { status: 500 }
-    );
+
+    // Return default config instead of 500 error to keep the page working
+    return NextResponse.json(defaultConfig, {
+      status: 200,
+      headers: {
+        'X-Database-Error': 'true',
+        'X-Error-Message': error instanceof Error ? error.message : 'Unknown error'
+      }
+    });
   }
 }
 

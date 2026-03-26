@@ -52,15 +52,35 @@ export default function ServicesPageAdmin() {
 
   useEffect(() => {
     fetch('/api/admin/services-page')
-      .then(res => res.json())
+      .then(async res => {
+        // Check for database error header
+        const hasDbError = res.headers.get('X-Database-Error') === 'true'
+        if (hasDbError) {
+          console.warn('Admin services page: Database error detected, using default config')
+        }
+
+        // Even if there's an error, try to parse JSON for fallback
+        const data = await res.json()
+
+        // If we got an error response but have valid data, use it
+        if (data.error && data.hero_title) {
+          console.warn('Admin services page: Using fallback data due to error:', data.error)
+        }
+
+        return data
+      })
       .then(responseData => {
-        if (responseData.id) {
+        // Use the data if it has the expected fields
+        if (responseData && responseData.hero_title) {
+          setData(responseData)
+        } else if (responseData.id) {
           setData(responseData)
         }
         setLoading(false)
       })
       .catch(error => {
         console.error('Error fetching services page:', error)
+        // Keep default data on error
         setLoading(false)
       })
   }, [])

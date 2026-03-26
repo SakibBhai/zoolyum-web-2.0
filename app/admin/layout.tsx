@@ -13,6 +13,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const router = useRouter()
   const [isDevelopment, setIsDevelopment] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [sessionError, setSessionError] = useState(false)
 
   useEffect(() => {
     // Check if we're in development mode
@@ -33,17 +34,23 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       return
     }
 
-    // Still loading session
-    if (status === 'loading') return
+    // Handle session errors gracefully
+    try {
+      // Still loading session
+      if (status === 'loading') return
 
-    // Not authenticated
-    if (status === 'unauthenticated') {
-      router.push("/admin/login")
+      // Not authenticated
+      if (status === 'unauthenticated') {
+        router.push("/admin/login")
+      }
+    } catch (error) {
+      console.error('Session error in admin layout:', error)
+      setSessionError(true)
     }
   }, [session, status, router, isDevelopment])
 
   // Loading state
-  if (status === 'loading' && !isDevelopment) {
+  if (status === 'loading' && !isDevelopment && !sessionError) {
     return (
       <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
         <div className="text-[#E9E7E2]">Loading...</div>
@@ -51,7 +58,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     )
   }
 
-  // In development or authenticated, show admin interface
+  // In development, authenticated, or session error, show admin interface
   return (
     <div className="flex min-h-screen bg-[#121212]">
       {/* Mobile Menu Button */}

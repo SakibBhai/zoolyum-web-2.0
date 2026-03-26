@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from './lib/next-auth'
 import { corsHeaders } from './lib/cors'
 
 export async function middleware(request: NextRequest) {

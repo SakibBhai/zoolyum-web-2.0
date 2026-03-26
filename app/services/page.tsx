@@ -62,13 +62,27 @@ export default function ServicesPage() {
 
   useEffect(() => {
     fetch('/api/admin/services-page')
-      .then(res => res.json())
+      .then(async res => {
+        // Check if response has a database error header
+        const hasDbError = res.headers.get('X-Database-Error') === 'true'
+        if (hasDbError) {
+          console.warn('Services page: Using default config due to database error')
+        }
+
+        // Always try to parse JSON, even on error status
+        if (!res.ok) {
+          console.warn(`Services page API returned status: ${res.status}`)
+        }
+        return res.json()
+      })
       .then(config => {
         setPageConfig(config)
         setLoading(false)
       })
       .catch(error => {
         console.error('Error fetching services page config:', error)
+        // Use default config on error
+        setPageConfig(defaultConfig)
         setLoading(false)
       })
   }, [])
