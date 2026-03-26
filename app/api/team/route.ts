@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createTeamMember, getAllTeamMembers } from "@/lib/team-operations";
+import { createTeamMember, getAllTeamMembers, TeamMemberData } from "@/lib/team-operations";
 import { auth } from "@/lib/next-auth";
 import { revalidatePath } from "next/cache";
 
@@ -7,18 +7,6 @@ interface ApiError {
   message: string;
   code?: string;
   status: number;
-}
-
-interface TeamMemberData {
-  name: string;
-  role: string;
-  bio: string;
-  image: string;
-  social?: {
-    twitter?: string;
-    linkedin?: string;
-    github?: string;
-  };
 }
 
 // Error handler utility
