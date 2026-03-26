@@ -207,6 +207,25 @@ export default function TeamPageAdmin() {
             <CardDescription>Featured leadership team section</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Info Box */}
+            <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <p className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                💡 How to add team members to Leadership Section:
+              </p>
+              <ol className="text-sm text-blue-800 dark:text-blue-200 space-y-1 list-decimal list-inside">
+                <li>Go to <strong>Team Management</strong> page</li>
+                <li>Click the <strong>star icon</strong> next to team members to feature them</li>
+                <li>Featured members will automatically appear in this section</li>
+              </ol>
+              <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-700">
+                <a
+                  href="/admin/team"
+                  className="text-sm text-blue-600 dark:text-blue-300 hover:underline font-medium"
+                >
+                  → Go to Team Management
+                </a>
+              </div>
+            </div>
             <div>
               <Label htmlFor="leadership_eyebrow">Eyebrow Text</Label>
               <Input

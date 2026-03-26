@@ -30,7 +30,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
 export async function PUT(request: NextRequest, context: RouteContext) {
   try {
     const user = await getCurrentUser();
-    if (!user) {
+    if (process.env.NODE_ENV === 'production' && !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -61,6 +61,35 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     return NextResponse.json(teamMember);
   } catch (error) {
     console.error("Error in PUT /api/team/[id]:", error);
+    return NextResponse.json(
+      { error: "Failed to update team member" },
+      { status: 500 }
+    );
+  }
+}
+
+// PATCH /api/team/[id] - Partial update (for quick toggles like featured status)
+export async function PATCH(request: NextRequest, context: RouteContext) {
+  try {
+    const user = await getCurrentUser();
+    if (process.env.NODE_ENV === 'production' && !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id } = await context.params;
+    const body = await request.json();
+
+    console.log('PATCH /api/team/[id] - Received body:', JSON.stringify(body, null, 2));
+
+    const teamMember = await updateTeamMember(id, body);
+
+    // Revalidate the team page to show updated data immediately
+    revalidatePath('/team');
+    revalidatePath('/admin/team');
+
+    return NextResponse.json(teamMember);
+  } catch (error) {
+    console.error("Error in PATCH /api/team/[id]:", error);
     return NextResponse.json(
       { error: "Failed to update team member" },
       { status: 500 }

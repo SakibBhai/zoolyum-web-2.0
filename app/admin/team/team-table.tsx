@@ -144,14 +144,44 @@ export function TeamTable({ teamMembers }: TeamTableProps) {
         accessorKey: "featured",
         cell: ({ row }) => {
           const member = row.original;
+          const [isPending, startTransition] = useTransition();
+
+          const toggleFeatured = async () => {
+            startTransition(async () => {
+              try {
+                const response = await fetch(`/api/team/${member.id}`, {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    featured: !member.featured
+                  })
+                });
+
+                if (!response.ok) throw new Error("Failed to update");
+
+                toast.success(
+                  `Team member ${!member.featured ? "marked as featured" : "unfeatured"}`
+                );
+                router.refresh();
+              } catch (error) {
+                toast.error("Failed to update featured status");
+              }
+            });
+          };
+
           return (
             <div className="flex items-center gap-2">
-              {member.featured && (
-                <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-              )}
-              <span className="text-sm text-muted-foreground">
-                {member.featured ? "Yes" : "No"}
-              </span>
+              <button
+                onClick={toggleFeatured}
+                disabled={isPending}
+                className="flex items-center gap-2 hover:bg-muted p-1 rounded transition-colors"
+                title={member.featured ? "Click to unfeature" : "Click to feature"}
+              >
+                <Star className={`h-4 w-4 ${member.featured ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}`} />
+                <span className="text-sm">
+                  {member.featured ? "Featured" : "Regular"}
+                </span>
+              </button>
             </div>
           );
         },

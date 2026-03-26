@@ -182,7 +182,12 @@ export default function TeamPage() {
                     />
                   ))
                 ) : (
-                  <p className="text-[#E9E7E2]/70">No featured team members found.</p>
+                  <div className="col-span-full text-center py-12">
+                    <p className="text-[#E9E7E2]/70 mb-2">No featured team members found.</p>
+                    <p className="text-[#E9E7E2]/50 text-sm">
+                      Mark team members as "featured" in the admin panel to display them here.
+                    </p>
+                  </div>
                 )}
               </StaggerReveal>
             </div>
