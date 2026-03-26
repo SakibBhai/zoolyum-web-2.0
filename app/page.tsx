@@ -37,6 +37,7 @@ interface TeamMember {
   id: string;
   name: string;
   designation: string | null;
+  position: string | null;
   bio: string | null;
   imageUrl: string | null;
   email: string | null;
