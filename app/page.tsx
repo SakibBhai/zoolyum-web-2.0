@@ -96,22 +96,56 @@ export default function Home() {
       });
   }, []);
 
-  // Fetch team members from API
+  // Fetch team members from Admin Team section
   useEffect(() => {
+    console.log('=== HOME PAGE: Fetching team members from Admin Team ===');
     fetch('/api/team')
-      .then(res => res.json())
+      .then(res => {
+        console.log('API Response status:', res.status);
+        return res.json();
+      })
       .then(data => {
-        console.log('Team members fetched:', data);
+        console.log('Raw team data from API:', data);
+        console.log('Data type:', typeof data);
+        console.log('Is array:', Array.isArray(data));
+        console.log('Data length:', Array.isArray(data) ? data.length : 'N/A');
+
         if (Array.isArray(data)) {
-          // Filter for featured and active members, limit to 4
+          // Log each member for debugging
+          data.forEach((member, index) => {
+            console.log(`Member ${index}:`, {
+              name: member.name,
+              designation: member.designation,
+              position: member.position,
+              featured: member.featured,
+              status: member.status,
+              imageUrl: member.imageUrl
+            });
+          });
+
+          // Filter for featured and active members (these come from Admin Team section)
           const featuredMembers = data
-            .filter((member: TeamMember) => member.featured && member.status === 'ACTIVE')
+            .filter((member: TeamMember) => {
+              console.log(`Filtering ${member.name}: featured=${member.featured}, status=${member.status}`);
+              return member.featured && member.status === 'ACTIVE';
+            })
             .slice(0, 4);
+
+          console.log('Featured members after filtering:', featuredMembers.length);
+          console.log('Featured members:', featuredMembers.map(m => ({ name: m.name, designation: m.designation })));
+
           setTeamMembers(featuredMembers);
+
+          if (featuredMembers.length === 0) {
+            console.warn('⚠️ No featured/active team members found from Admin Team section');
+            console.log('💡 Go to /admin/team to add and feature team members');
+          }
+        } else {
+          console.error('Expected array but got:', typeof data);
         }
       })
       .catch(error => {
-        console.error('Error fetching team members:', error);
+        console.error('❌ Error fetching team members from Admin Team:', error);
         // Keep empty array on error
       });
   }, []);
@@ -359,7 +393,7 @@ export default function Home() {
                 description="Our diverse team of experts brings together strategic thinking and creative excellence to deliver exceptional results for our clients."
               />
 
-              {/* Fixed Grid Layout */}
+              {/* Fixed Grid Layout - Team Data from Admin Team Section */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8 mt-12 md:mt-16">
                 {teamMembers.length > 0 ? (
                   teamMembers.map((member) => (
@@ -369,7 +403,7 @@ export default function Home() {
                     >
                       <TeamMemberCard
                         name={member.name}
-                        role={member.designation || "Team Member"}
+                        role={member.designation || member.position || "Team Member"}
                         image={member.imageUrl || "/placeholder.svg?height=400&width=300"}
                         bio={member.bio || ""}
                         social={{
@@ -381,37 +415,31 @@ export default function Home() {
                     </div>
                   ))
                 ) : (
-                  // Fallback to placeholder members if no featured members exist
-                  <>
-                    <div className="flex flex-col">
-                      <TeamMemberCard
-                        name="Sakib Chowdhury"
-                        role="Founder & Creative Director"
-                        image="/placeholder.svg?height=400&width=300"
-                      />
+                  // No team members from Admin Team section
+                  <div className="col-span-full text-center py-16 px-4">
+                    <div className="max-w-md mx-auto">
+                      <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-[#FF5001]/10 flex items-center justify-center">
+                        <svg className="w-10 h-10 text-[#FF5001]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                      </div>
+                      <h3 className="text-xl font-semibold mb-2">No Team Members Found</h3>
+                      <p className="text-[#E9E7E2]/70 mb-6">
+                        Team members from the Admin Team section will appear here.
+                      </p>
+                      <div className="space-y-3">
+                        <Link
+                          href="/admin/team"
+                          className="inline-flex items-center px-6 py-3 bg-[#FF5001] text-[#161616] font-bold rounded-full hover:bg-[#FF5001]/90 transition-all duration-300"
+                        >
+                          Add Team Members
+                        </Link>
+                        <p className="text-sm text-[#E9E7E2]/50">
+                          Or go to <span className="text-[#FF5001]">/admin/team/leadership</span> to feature members
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex flex-col">
-                      <TeamMemberCard
-                        name="Emma Rodriguez"
-                        role="Brand Strategist"
-                        image="/placeholder.svg?height=400&width=300"
-                      />
-                    </div>
-                    <div className="flex flex-col">
-                      <TeamMemberCard
-                        name="David Chen"
-                        role="Digital Director"
-                        image="/placeholder.svg?height=400&width=300"
-                      />
-                    </div>
-                    <div className="flex flex-col">
-                      <TeamMemberCard
-                        name="Sarah Johnson"
-                        role="Client Relations"
-                        image="/placeholder.svg?height=400&width=300"
-                      />
-                    </div>
-                  </>
+                  </div>
                 )}
               </div>
 
