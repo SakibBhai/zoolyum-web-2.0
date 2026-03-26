@@ -21,8 +21,8 @@ export async function GET(
 
     return NextResponse.json({
       ...service,
-      createdAt: service.createdAt.toISOString(),
-      updatedAt: service.updatedAt.toISOString()
+      createdAt: service.created_at.toISOString(),
+      updatedAt: service.updated_at.toISOString()
     });
   } catch (error) {
     console.error('Error fetching service:', error);
@@ -57,8 +57,8 @@ export async function PUT(
 
     return NextResponse.json({
       ...service,
-      createdAt: service.createdAt.toISOString(),
-      updatedAt: service.updatedAt.toISOString()
+      createdAt: service.created_at.toISOString(),
+      updatedAt: service.updated_at.toISOString()
     });
   } catch (error) {
     console.error('Error updating service:', error);

@@ -4,14 +4,14 @@ import { prisma } from '@/lib/prisma';
 export async function GET(request: NextRequest) {
   try {
     const services = await prisma.services.findMany({
-      orderBy: [{ order: 'asc' }, { createdAt: 'desc' }]
+      orderBy: [{ order: 'asc' }, { created_at: 'desc' }]
     });
 
     // Transform dates to ISO strings for JSON serialization
     const transformedServices = services.map(service => ({
       ...service,
-      createdAt: service.createdAt.toISOString(),
-      updatedAt: service.updatedAt.toISOString()
+      createdAt: service.created_at.toISOString(),
+      updatedAt: service.updated_at.toISOString()
     }));
 
     return NextResponse.json(transformedServices);
@@ -59,8 +59,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       ...service,
-      createdAt: service.createdAt.toISOString(),
-      updatedAt: service.updatedAt.toISOString()
+      createdAt: service.created_at.toISOString(),
+      updatedAt: service.updated_at.toISOString()
     }, { status: 201 });
   } catch (error: any) {
     console.error('Error creating service:', error);
